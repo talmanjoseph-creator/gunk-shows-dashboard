@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Shows Dashboard — GUNK No. 39, October 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #ffffff;
+        --ink: #111111;
+        --ink-soft: #3d3d3d;
+        --muted: #6f6f6f;
+        --line: #111111;
+        --hair: #e2e2e2;
+        --accent: #d92323;
+        --accent-ink: #ffffff;
+        --chip-bg: #f4f4f4;
+        --chip-on: #111111;
+        --chip-on-ink: #ffffff;
+        --past-bg: #fafafa;
+        --tonight-bg: #fff5f5;
+        --shadow: none;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0d0d0d;
+          --ink: #f2f2f2;
+          --ink-soft: #c9c9c9;
+          --muted: #9a9a9a;
+          --line: #f2f2f2;
+          --hair: #2a2a2a;
+          --accent: #ff4d4d;
+          --accent-ink: #141414;
+          --chip-bg: #1c1c1c;
+          --chip-on: #f2f2f2;
+          --chip-on-ink: #111111;
+          --past-bg: #121212;
+          --tonight-bg: #1d1113;
+        }
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Archivo", system-ui, sans-serif;
+        line-height: 1.45;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px 64px; }
+
+      /* ---------- masthead ---------- */
+      header.mast {
+        border-bottom: 4px solid var(--line);
+        padding: 28px 0 18px;
+      }
+      .mast-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 20px; }
+      h1 {
+        font-size: clamp(34px, 6vw, 58px);
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        line-height: 0.95;
+        margin: 0;
+        text-transform: uppercase;
+      }
+      h1 .red { color: var(--accent); }
+      .mast-sub {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 13px;
+        color: var(--ink-soft);
+        max-width: 62ch;
+        margin: 10px 0 0;
+      }
+      .mast-sub a { color: var(--accent); text-underline-offset: 2px; }
+      .stats {
+        display: flex; flex-wrap: wrap; gap: 0;
+        margin-top: 18px;
+        border: 2px solid var(--line);
+      }
+      .stat {
+        padding: 10px 16px;
+        border-right: 2px solid var(--line);
+        min-width: 110px;
+      }
+      .stat:last-child { border-right: 0; }
+      .stat b { display: block; font-size: 26px; font-weight: 900; line-height: 1; }
+      .stat span {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+        color: var(--muted);
+      }
+
+      /* ---------- controls ---------- */
+      .controls {
+        position: sticky; top: 0; z-index: 20;
+        background: var(--bg);
+        border-bottom: 2px solid var(--line);
+        padding: 12px 0 10px;
+        margin-top: 0;
+      }
+      .ctl-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      .ctl-row + .ctl-row { margin-top: 8px; }
+      label.search { flex: 1 1 240px; display: flex; }
+      label.search input {
+        width: 100%;
+        font: 500 15px "IBM Plex Mono", monospace;
+        color: var(--ink);
+        background: var(--bg);
+        border: 2px solid var(--line);
+        padding: 9px 12px;
+      }
+      label.search input::placeholder { color: var(--muted); }
+      label.search input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+      .chip {
+        font: 600 12.5px "IBM Plex Mono", monospace;
+        border: 2px solid var(--line);
+        background: var(--chip-bg);
+        color: var(--ink);
+        padding: 7px 11px;
+        cursor: pointer;
+        border-radius: 999px;
+      }
+      .chip:hover { border-color: var(--accent); color: var(--accent); }
+      .chip[aria-pressed="true"] {
+        background: var(--chip-on); color: var(--chip-on-ink); border-color: var(--chip-on);
+      }
+      .chip.red[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+      .ctl-label {
+        font: 600 11px "IBM Plex Mono", monospace;
+        text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+        margin-right: 2px;
+      }
+      .clear-btn {
+        font: 600 12.5px "IBM Plex Mono", monospace;
+        background: none; border: 0; color: var(--accent);
+        cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+        padding: 7px 4px;
+      }
+      .result-line {
+        font: 500 12.5px "IBM Plex Mono", monospace;
+        color: var(--muted); padding: 10px 0 0;
+      }
+
+      /* ---------- layout ---------- */
+      .layout { display: block; }
+      @media (min-width: 960px) {
+        .layout { display: grid; grid-template-columns: 1fr 250px; gap: 36px; align-items: start; }
+        aside { position: sticky; top: 148px; }
+      }
+
+      /* ---------- day sections ---------- */
+      section.day { padding: 26px 0 6px; scroll-margin-top: 160px; }
+      section.day.past { background: var(--past-bg); }
+      .day-head {
+        display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px;
+        border-bottom: 3px solid var(--line);
+        padding-bottom: 6px;
+        scroll-margin-top: 150px;
+      }
+      .day-head h2 {
+        margin: 0; font-size: clamp(22px, 3.4vw, 30px); font-weight: 900;
+        text-transform: uppercase; letter-spacing: -0.01em;
+      }
+      .day-head .dnum {
+        font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--muted);
+      }
+      .day-head .count {
+        margin-left: auto;
+        font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--muted);
+      }
+      .tonight-tag {
+        font: 700 11px "IBM Plex Mono", monospace;
+        background: var(--accent); color: #fff;
+        padding: 3px 8px; text-transform: uppercase; letter-spacing: 0.08em;
+      }
+      section.day.tonight .day-head { border-bottom-color: var(--accent); }
+      .past-tag {
+        font: 600 11px "IBM Plex Mono", monospace;
+        color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em;
+      }
+      .no-shows {
+        font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--muted);
+        padding: 12px 0 4px;
+      }
+
+      .show {
+        display: grid;
+        grid-template-columns: 74px 1fr;
+        gap: 4px 14px;
+        padding: 11px 2px;
+        border-bottom: 1px solid var(--hair);
+      }
+      section.day.past .show { opacity: 0.55; }
+      .show .time {
+        font: 600 13px "IBM Plex Mono", monospace;
+        white-space: nowrap; padding-top: 2px;
+      }
+      .show .acts { font-size: 16.5px; font-weight: 700; line-height: 1.3; }
+      .show .acts .hl { color: var(--accent); }
+      .show .meta {
+        grid-column: 2;
+        display: flex; flex-wrap: wrap; align-items: center; gap: 5px 8px;
+        font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--ink-soft);
+      }
+      .venue-btn {
+        font: inherit; background: none; border: 0; padding: 0; cursor: pointer;
+        color: var(--ink); font-weight: 600; text-decoration: underline;
+        text-decoration-color: var(--hair); text-underline-offset: 3px;
+      }
+      .venue-btn:hover { color: var(--accent); }
+      .badge {
+        font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em;
+        border: 1.5px solid var(--line); padding: 1px 6px; border-radius: 999px;
+        text-transform: uppercase; white-space: nowrap;
+      }
+      .badge.age { background: var(--chip-bg); }
+      .badge.note { border-color: var(--accent); color: var(--accent); }
+      .badge.near { border-style: dashed; }
+      .show .note-text { color: var(--muted); }
+
+      /* ---------- sidebar ---------- */
+      aside h3 {
+        font-size: 15px; font-weight: 900; text-transform: uppercase;
+        border-bottom: 3px solid var(--line); padding-bottom: 6px; margin: 26px 0 10px;
+      }
+      .venue-list { list-style: none; margin: 0; padding: 0; }
+      .venue-list li { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; }
+      .venue-list button {
+        font: 500 13px "IBM Plex Mono", monospace;
+        background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink);
+        text-align: left;
+      }
+      .venue-list button:hover, .venue-list button.on { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+      .venue-list .n { font: 500 12px "IBM Plex Mono", monospace; color: var(--muted); }
+      .day-jump { display: flex; flex-wrap: wrap; gap: 4px; }
+      .day-jump a {
+        font: 600 11.5px "IBM Plex Mono", monospace;
+        border: 1.5px solid var(--line); color: var(--ink); text-decoration: none;
+        padding: 3px 7px; border-radius: 4px;
+      }
+      .day-jump a:hover { border-color: var(--accent); color: var(--accent); }
+      .day-jump a.today { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+      .empty {
+        border: 2px dashed var(--line); padding: 28px 18px; margin-top: 28px;
+        font-family: "IBM Plex Mono", monospace; font-size: 14px; color: var(--muted);
+        text-align: center;
+      }
+
+      /* ---------- footer notes ---------- */
+      .issue-notes { border-top: 4px solid var(--line); margin-top: 44px; padding-top: 18px; }
+      .issue-notes h3 { font-size: 17px; font-weight: 900; text-transform: uppercase; margin: 0 0 10px; }
+      .issue-notes ul { margin: 0; padding-left: 20px; color: var(--ink-soft); font-size: 14.5px; }
+      .issue-notes li { margin-bottom: 6px; }
+      footer.colophon {
+        margin-top: 34px; border-top: 2px solid var(--line); padding-top: 14px;
+        font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--muted);
+      }
+      footer.colophon a { color: var(--accent); }
+
+      @media (max-width: 560px) {
+        section.day { scroll-margin-top: 218px; }
+        .show { grid-template-columns: 62px 1fr; gap: 3px 10px; }
+        .show .acts { font-size: 15.5px; }
+        .stat { min-width: 84px; padding: 8px 12px; }
+        .stat b { font-size: 21px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="mast">
+        <div class="mast-row">
+          <h1>GUNK <span class="red">No. 39</span> — October Shows</h1>
+        </div>
+        <p class="mast-sub">
+          Every show listing from GUNK New York, Issue No. 39 (October 2026), the free monthly DIY/indie
+          show paper — transcribed October 2, 2026. All times PM. An asterisk (*) marks the headliner,
+          per the zine. Age badges are new this issue. Read the issue:
+          <a href="https://gunkyard.substack.com/p/october-gunk-gunk-no-39" target="_blank" rel="noopener">gunkyard.substack.com</a>
+        </p>
+        <div class="stats" id="stats" aria-label="Issue totals"></div>
+      </header>
+
+      <div class="controls" role="region" aria-label="Filters">
+        <div class="ctl-row">
+          <label class="search">
+            <input id="q" type="search" placeholder="Search acts or venues… (try: Palehound, TV Eye)" aria-label="Search acts or venues" />
+          </label>
+          <button class="chip red" id="nearBtn" aria-pressed="false" title="Venues in Bushwick, Ridgewood, Williamsburg &amp; Greenpoint">Close to home</button>
+          <button class="chip" id="releaseBtn" aria-pressed="false">Release shows only</button>
+          <button class="clear-btn" id="clearBtn" hidden>Clear all filters</button>
+        </div>
+        <div class="ctl-row" id="ageRow" role="group" aria-label="Age restriction filter">
+          <span class="ctl-label">Age</span>
+          <button class="chip" data-age="any" aria-pressed="true">Any</button>
+          <button class="chip" data-age="AA" aria-pressed="false">All Ages</button>
+          <button class="chip" data-age="16" aria-pressed="false">16+</button>
+          <button class="chip" data-age="18" aria-pressed="false">18+</button>
+          <button class="chip" data-age="21" aria-pressed="false">21+</button>
+          <button class="chip" data-age="none" aria-pressed="false">Not listed</button>
+        </div>
+        <p class="result-line" id="resultLine" aria-live="polite"></p>
+      </div>
+
+      <div class="layout">
+        <main id="days"></main>
+        <aside>
+          <h3>Jump to a day</h3>
+          <nav class="day-jump" id="dayJump" aria-label="Days"></nav>
+          <h3>Busiest venues</h3>
+          <ul class="venue-list" id="venueList"></ul>
+        </aside>
+      </div>
+
+      <section class="issue-notes">
+        <h3>Also in this issue</h3>
+        <ul>
+          <li><strong>GIRL NOISE festival</strong> — Sunday Oct 4 at Bowery Ballroom, headlined by girlpuppy with six local female artists (16+, benefit for The Brave House). Listed above under Oct 4.</li>
+          <li><strong>GUNK × Marshall “Dead Venue Sessions” zine</strong> — three bands play in dead venues.</li>
+          <li><strong>Missed connection:</strong> Nirosta Steel show at Night Club 101, Saturday night late show.</li>
+        </ul>
+      </section>
+
+      <footer class="colophon">
+        Source: GUNK New York, Issue No. 39, October 2026 —
+        <a href="https://gunkyard.substack.com/p/october-gunk-gunk-no-39" target="_blank" rel="noopener">gunkyard.substack.com/p/october-gunk-gunk-no-39</a>.
+        The transcribed list runs Oct 1–25; nothing is listed for Mon Oct 5, and the issue’s remaining days (Oct 26–31) aren’t in this transcription.
+        Listings can change — check the venue before you head out.
+      </footer>
+    </div>
+
+    <script>
+      "use strict";
+      /* [day, time, venue, acts, note, age] — age: "21" | "18" | "16" | "AA" | "" (not listed).
+         Acts keep the zine's "*" headliner marks and "♥"-free comma bills as printed. */
+      var SHOWS = [
+        [1,"8:30","Windjammer","Hello Choir, Max Steele & Anthony Thornton, X. Chuck Roth/Waterghost, Trick Tips","Footlight Underground presents","21"],
+        [1,"7:00","Elsewhere","Improvement Movement, The Point","","16"],
+        [1,"7:30","Cassette","Palehound & Friends: Franz Charcoal, Thanks for Coming, Beck Zegans","","21"],
+        [1,"8:00","Issue Project Room","Sergei Tcherepnin","","AA"],
+        [1,"8:00","Jalopy Theatre","Cricket Blue, Dustin Lowman, Caroline Kuhn","",""],
+        [1,"6:30","Night Club 101","Megasound, Judee","","21"],
+        [1,"9:30","Night Club 101","The Booyah! Kids","","21"],
+        [1,"7:00","Mama Tried","Sally Gates, Tim Berne, Kenny Grohowski, Miss Ambivalent","","21"],
+        [1,"7:00","Stone Circle Theatre","Sera Cahoone","LPR presents","AA"],
+        [1,"7:00","Public Records","Lambchop","","21"],
+        [1,"7:00","Sleepwalk","Mars Motel*, Whenwolves, Holly Overton","Album release","21"],
+        [1,"8:00","Purgatory","Coco Smith, Heaviness Fell, Too Many Horses, The Moderators","","21"],
+        [1,"6:30","The Living Gallery","Theatre of Divine Resonance*, Sprint Wireless, MSHR, Ka Baird, Chris Cochrane, Mike Pride Trio","Album release","AA"],
+        [1,"7:00","Union Pool","The Serfs, Cube, Content Blocks*","Record release","21"],
+        [1,"7:30","Greenpoint Comedy Club","Dakota Jones, Maria Decotis, Maude Ville, Zach Zimmerman, Juno Men, Will Santino","",""],
+        [1,"6:00","Bridge & Tunnel Brewery","Dammy, Little Cliff, Roacher, Marshy","",""],
+        [1,"9:00","Mercury Lounge","Dutch Kills, Darla Dean Lewis","",""],
+        [1,"8:00","Sugar Mouse","Sunskip, Golden Dimes, Your Friend Rachel, Vincent Randazzo","Tealeaf presents",""],
+        [1,"7:00","Light & Sound Design","Present Sounds","",""],
+        [2,"6:00","Alphaville","Bad Static, 3 The Hardway, T@b Grrrl, Brea Fournier and the Dream Ballet","","21"],
+        [2,"11:00","Market Hotel","Loukeman, Dyltwosix","Elsewhere and SD Music Group present","21"],
+        [2,"7:00","Hart Bar","Kitchenette, Axine M, Julia Santoli, Love Free Spirit","","21"],
+        [2,"8:00","Jalopy Theatre","Lesser Known Women, Niva","",""],
+        [2,"10:00","Night Club 101","Dark Dazey, Scared, DJ Female and Heinrich","","21"],
+        [2,"7:00","Public Records","Lambchop","","21"],
+        [2,"7:00","Sleepwalk","Seraphine's Cleaver*, Bellcave, Crab","Single release","21"],
+        [2,"7:00","Union Pool","Diva Bleach, Lolitslea, Few Faces","","21"],
+        [2,"7:00","The Broadway","Annie Collette, Alphabet City, Help Wanted","","21"],
+        [2,"8:00","Wonderville","Tripvillain, Wince, Contract, Comply","","21"],
+        [2,"7:30","B Scene","Coachee, Bikini Carwash, Monte","",""],
+        [2,"6:00","Mercury Lounge","Lady Heroine, Nectarine Girl, Fruit Punch","",""],
+        [2,"7:00","Sugar Mouse","Peri El, Melissa Wasserman, Sophia Eddis Wolf","Tealeaf presents",""],
+        [3,"8:00","Bar Freda","Anti-Folk Night: Out of System Transfer, Theylovethem, The Skirst","","21"],
+        [3,"7:00","Alphaville","Hipsy Gap, Wetsuit, Shaggo","","21"],
+        [3,"11:00","Market Hotel","Loukeman, Dyltwosix","Elsewhere and SD Music Group present","21"],
+        [3,"6:00","For the Record","Velvet, Moss Boy","","AA"],
+        [3,"6:30","Hart Bar","Parkies, Code of Conduct, Luana Sandoval & Friends, Elle Prado","NYC Femme Rock Fest","21"],
+        [3,"7:00","Light & Sound Design","Arto Lindsay, Dr. S+M, Beat Detectives, Exoplex, Stewey Decimal","","AA"],
+        [3,"7:00","Pioneer Works","Kelsey Lu","","AA"],
+        [3,"7:00","TV Eye","Gordi, Gracie and Rachel","","18"],
+        [3,"7:00","Union Pool","Liam Kazar, Núria Graham","","21"],
+        [3,"","The Record Shop","Evan Welsh guest curation","","AA"],
+        [4,"6:00","Bowery Ballroom","Girl Noise Music Festival: girlpuppy, Double Standard, Fessi K, Kid Lake, Sabrina Song, Screamer, Simone","Benefit for The Brave House","16"],
+        [4,"5:30","Alphaville","Al Daibes, Dale Hollow, Storey Littleton","","21"],
+        [4,"7:30","Windjammer","Charm, Henry Red Forty, Pebbles Inc","Footlight Underground presents","21"],
+        [4,"7:00","Elsewhere","Cootie Catcher, Tal Castle","","16"],
+        [4,"7:30","Cassette","Mallory Hawk, Avery Friedman, special guest","","21"],
+        [4,"6:30","Night Club 101","Pontiac Flare, Benny P, Funsucker","","21"],
+        [4,"7:00","Union Pool","Hélène Barbier, Lightheaded, Home Blitz","","21"],
+        [4,"7:00","Arlene's Grocery","Death by Comet, Clayton Hopkins","Tealeaf presents",""],
+        [6,"7:30","Hart Bar","Secaydia, Sybil Creek, Marina Buendia, John Grace","","21"],
+        [6,"7:30","Le Poisson Rouge","Angelo de Augustine, Erin Rae","","16"],
+        [6,"8:30","Pete's Candy Store","Saint Sulpice, The Aportnoy, Isabella Paris","Tealeaf presents",""],
+        [6,"7:00","Arlene's Grocery","Jill Rey, Jessi Wilkins, TBD","Tealeaf presents",""],
+        [7,"6:00","Property Is Theft","Morning Drifts, William Delee, Nathan O'Flynn-Pruitt","","AA"],
+        [7,"6:00","Berlin","Oskar & Julia, Howlin' Hurd","","21"],
+        [7,"6:30","Night Club 101","Revenge Wife, Quelle Rox","","21"],
+        [7,"7:00","Stone Circle Theatre","Joshua Burnside","Murmrr presents","AA"],
+        [7,"7:00","Public Records","Hana Stretton, Jana Horn","","18"],
+        [7,"7:00","Arlene's Grocery","Zaltys, Crow Magnum, Trash Romantics, Studio G","Tealeaf presents",""],
+        [7,"7:00","Light & Sound Design","Dance Dance","",""],
+        [8,"9:30","Baby's All Right","Six Foot Blonde","","21"],
+        [8,"6:00","Berlin","Connor Bracken & The Mother Leeds Band, Brian & The Parkway, Carissa Johnson & The Cure-Alls","","21"],
+        [8,"7:00","Alphaville","Josh Halper, Casters*, Lena Fjordtoft","Album release","21"],
+        [8,"7:30","Cassette","Lava Gulls, Jersey Star, Waterghost","","21"],
+        [8,"7:30","Hart Bar","Ciggy Bop, Cowboy Girl, Imaginary Tricks, John Kasper","","21"],
+        [8,"8:00","Jalopy Theatre","Matt Sucich, Katy Pinke","",""],
+        [8,"6:30","National Sawdust","Neko Case","","AA"],
+        [8,"6:30","Night Club 101","Jawdropped, The Heaven","","21"],
+        [8,"9:30","Night Club 101","Mal Sounds, Talia, Isa Reyes","","21"],
+        [8,"8:00","Purgatory","Peaer, Loadcard, Fraternal Twin","","21"],
+        [8,"7:00","Pioneer Works","Horse Lords, Jules Reidy, Silk Fence","","AA"],
+        [8,"7:00","Union Pool","Exploding in Sound 15th Anniversary: Washer, Or Best Offer, Bimbo, CS Cleaners","","21"],
+        [8,"7:00","The Broadway","Cor de Lux, Editrix, Yuvees, Big Girl","","21"],
+        [8,"9:00","Pete's Candy Store","Jordan Leanne, Hero Magnus, Jeff Petescia","Tealeaf presents",""],
+        [8,"7:00","Light & Sound Design","Present Sounds","",""],
+        [9,"7:00","Alphaville","Bummer Camp, The Jump Cuts, Book/Spirit","New Colossus presents","21"],
+        [9,"7:00","Gutter Bar","Skeeter de Milo, Visitor Center, The Resonaters, Chatterbox","Owl presents","21"],
+        [9,"7:00","Pianos","Rookie Mistake*, Your Favorite Person, Solomon Underwood","Album release","21"],
+        [9,"7:00","Purgatory","Hannah Sandoz, Mirror Fish, Jay Rosie, Untitled Freak","","21"],
+        [9,"7:00","Union Pool","Jenny Alien*, Blisspoint, Theophobia, Prairie Princess","Single release","21"],
+        [9,"7:00","Trans Pecos","Holidays in United States*, Aeiou, Liveyou, Glen Vine","Album release","AA"],
+        [9,"7:00","The Broadway","Desert Sharks, Nicole Yun, Van Chamberlain, Goodhue","","21"],
+        [9,"8:00","Wonderville","VGM Jazz Night","","21"],
+        [9,"7:00","Light & Sound Design","Inner Smile","",""],
+        [10,"8:00","Bowery Ballroom","Faux Real, Babe America, Bryce Xavier","",""],
+        [10,"7:00","Bowery Palace","Samsara, The Jump Cuts, Lollux","","21"],
+        [10,"7:00","Alphaville","Bones Forever, Flurry","","21"],
+        [10,"8:30","Windjammer","Benjamin Formerly, Cookie, special guest","Footlight Underground presents","21"],
+        [10,"7:00","Brothers Wash and Dry","Iamshe Duo ft. Amy Sheffer, Joseph Dee Bradshaw, Max Abner and Jana Horn, Katy Pinke, Celine Kang, Nathan Nakadegawa-Lee, Conner Simmons & Lee Hooper","","AA"],
+        [10,"8:00","Pete's Candy Store","Cara Lorraine, The Oxford Drive Band, Augurs, Dear June","","21"],
+        [10,"6:00","Sleepwalk","Cycles: Lily Talmers, Melanie Herrera, Emily Jeanne Brown, Anterra","Period Action Day: Music and Menstrual Health","21"],
+        [10,"7:00","TV Eye","Cutouts, Rare DM, Aidan Noell (DJ)","","21"],
+        [10,"6:00","Parkside Lounge","Blankette, Good Cry, Lunar Return, Phoebe Weyland","",""],
+        [11,"7:00","Bowery Ballroom","Robert Lester Folsom","","18"],
+        [11,"7:00","Alphaville","Koleżanka*","Album release","21"],
+        [11,"7:00","The Broadway","Axine M, Was, Psalter","","21"],
+        [11,"5:00","Mercury Lounge","Fifi Zhang, Swami Sound, Gum.mp3","","21"],
+        [12,"7:00","Bowery Ballroom","Wesley Joseph","",""],
+        [12,"7:00","Wonderville","Embina, Athena Complex, Maso, Simya","","21"],
+        [12,"6:00","Mercury Lounge","Brett Cameron Steinberg, Help Wanted, Kate Keller","","21"],
+        [12,"7:00","Arlene's Grocery","Nikki Sorrentino, David Unlayao, Alexa Tabbacchino","Tealeaf presents",""],
+        [13,"7:30","Cassette","Market, Moontype, Katie von Schleicher","","21"],
+        [13,"7:00","Union Pool","Ian Sweet, Meg Elsier","","21"],
+        [13,"7:00","Arlene's Grocery","Liz Asaro, Kacie Sky, Baby Spiders, Arya","Tealeaf presents",""],
+        [13,"7:00","Hart Bar","Cereal Monogamy, The Fictionals, A Billion Bugs","Tealeaf presents",""],
+        [13,"8:30","Pete's Candy Store","Mondo26: Chris Eichlin, Elis, Overnight Celebrity, Bade, Turbo Goth, Nuclear Cowboy","Tealeaf presents",""],
+        [14,"7:00","Bowery Ballroom","Tokyo Tea Room, Argonaut & Wasp","",""],
+        [14,"7:00","Elsewhere","Madi Diaz","","16"],
+        [14,"7:00","Knockdown Center","Chanel Beads, Horse Vision, Nirosta Steel, Car Culture","Elsewhere presents","18"],
+        [14,"6:30","Night Club 101","Paint, EZ Company","","21"],
+        [14,"9:30","Night Club 101","Jason Paynter","","21"],
+        [14,"7:00","Racket","Brennan Wedl, Sub*T, Oldstar","","18"],
+        [14,"7:00","Sleepwalk","Jake Manzi, Ellie MacPhee, Ambrose Getz","","21"],
+        [14,"9:00","Mercury Lounge","Buddha Trixie, Flight by Nothing, Pleaser","","21"],
+        [14,"7:00","Arlene's Grocery","Mondo26: Shower Beers, Stupid Lucky, Lora Mouna, The Buddy System Forever","Tealeaf presents",""],
+        [14,"7:30","Light & Sound Design","Dance Practice","",""],
+        [15,"7:00","Brooklyn Steel","Feeble Little Horse, Snuggle","","16"],
+        [15,"7:00","Webster Hall","Show Me the Body, Lip Critic, Crown of Thornz","","16"],
+        [15,"8:00","Bowery Ballroom","Dice, Fail Laci","","18"],
+        [15,"7:00","Alphaville","Miles Hewitt, Mol Sullivan, Anywhere","","21"],
+        [15,"7:30","Cassette","Palehound & Friends: Annie Dirusso, Hank Heaven, Oceanator","","21"],
+        [15,"7:00","Gutter Bar","Trashy Annie, EVG, Small Chucks, TBD","Owl presents","21"],
+        [15,"7:30","Hart Bar","The Nots, Kevin Wulf, Matthew Hannan, Lev Snowe","","21"],
+        [15,"6:30","Night Club 101","Brotherkenzie, Dirt Buyer","","21"],
+        [15,"9:30","Night Club 101","Vlad Holiday, Michael Ian Cummings","","21"],
+        [15,"6:00","Rough Trade","Bodega","","AA"],
+        [15,"7:00","Rubulad","DD Island, Babe Lewis, Cholé Ester, Surgeon General","","AA"],
+        [15,"7:00","TV Eye","Roger Clark Miller, Donna Allen, Jel","","21"],
+        [15,"7:00","Union Pool","Andy Boay*, PC Worship","Album release","21"],
+        [15,"7:00","The Broadway","Hannah Telle, Career Woman, Nina Fitzgerald","","21"],
+        [15,"8:00","Salon on Kingston","Mysa","",""],
+        [15,"6:00","Mercury Lounge","Dipsea Flower","","21"],
+        [15,"7:00","Light & Sound Design","Present Sounds","",""],
+        [16,"6:30","Alphaville","Half Step, Chris Lyons, Adam Amram, Underground River","","21"],
+        [16,"8:45","Windjammer","Lottie Malkmus, Michael Byrde","Footlight Underground presents","21"],
+        [16,"7:30","Cassette","Wsterlund, Hagen, Nuke Watch","","21"],
+        [16,"7:00","Night Club 101","Dogwood Tales, Mer Marcum","","21"],
+        [16,"6:30","Stone Circle Theatre","Luke Herbermann*, Big Chemical, Nor","Album release","AA"],
+        [16,"6:00","Bric House","Jazzfest","","AA"],
+        [16,"8:00","Roulette","Max ZT, Kunal Gunjal, Amit Kavthekar","","AA"],
+        [16,"7:00","TV Eye","K-Holes, Genre Is Death, Crush, DJ Jonathan Toubin","New York Night Train presents","21"],
+        [16,"7:00","Union Pool","Billboard Style*, Like a Doll, Many Shining Windows","Record release","21"],
+        [16,"7:00","Light & Sound Design","Moment Machine","",""],
+        [17,"7:00","Racket","Wishy, Youbet, Dead Sullivan","","18"],
+        [17,"7:00","Bowery Ballroom","Ecca Vandal","",""],
+        [17,"7:00","Alphaville","Current Blue, Makeout City, URL","","21"],
+        [17,"8:30","Windjammer","Laika Songs, Jacob Perez, Ava McCoy","Footlight Underground presents","21"],
+        [17,"8:00","Pete's Candy Store","Rachel Bard, Kid Midnight, Connor Clayton Melvin, Ana Romm and Thomas Andersen, Bradford Tom","","21"],
+        [17,"6:30","National Sawdust","June McDoom","","AA"],
+        [17,"7:00","Night Club 101","Baba Stilz*, Natasha Stagg (reading), Barrett Avner, Ana Roxanne","Album release","21"],
+        [17,"9:30","Night Club 101","The Rose Hips","","21"],
+        [17,"6:00","Bric House","Jazzfest","","AA"],
+        [17,"7:00","Public Records","Prymek & Sage, Loren Connors","","21"],
+        [17,"7:00","Union Pool","Duffy, Uhlmann","","21"],
+        [17,"9:00","Mercury Lounge","The Upsides, B.Miles","","21"],
+        [17,"6:00","Pioneer Works","Ragas Live Festival: 24 Hours of Music","","AA"],
+        [18,"7:00","Bowery Ballroom","Nick Cheo","",""],
+        [18,"7:00","Elsewhere","Ida, Garret Klahn","","16"],
+        [18,"7:00","Union Pool","Growing, Ryan Sawyer Shaker Ensemble","","21"],
+        [18,"8:30","Pete's Candy Store","Eros, Clorine, Boycott Daylight","Tealeaf presents",""],
+        [18,"7:00","Arlene's Grocery","Julia Raye, Cori & The Grass Fed Blues, Carmen Costello, Nathalie Miller","Tealeaf presents",""],
+        [19,"6:30","Night Club 101","Elanor Moss, Jana Horn","","21"],
+        [19,"8:00","Roulette","Marc Ribot Quartet*","Album release","AA"],
+        [20,"7:00","Sleepwalk","Alison Stiel, Maria Mirenz, The Level","","21"],
+        [20,"7:00","Arlene's Grocery","Retrosex, Cowboy Clean, Marlow Shields, Sophie Stewart","Tealeaf presents",""],
+        [20,"9:30","Baby's All Right","Worldpeace DMT","","21"],
+        [20,"7:00","Union Pool","The Courettes, The Dracu-Las, Todd-O-Phonic Todd","","21"],
+        [20,"7:30","Le Poisson Rouge","Juana Molina","","AA"],
+        [20,"8:00","Wonderville","Synthesethesia: Solemn Shapes, The Lonely Death, I, Synthesist, DJ Ian Ford","","21"],
+        [21,"9:30","Baby's All Right","Worldpeace DMT","","21"],
+        [21,"7:00","Bowery Ballroom","After","",""],
+        [21,"7:00","Cutelab","Jesse Scheinin, Raquel","",""],
+        [21,"7:30","Cassette","Qwam, Wild Lawn, Gold Roger, King Bug","Lobster Tooth Records presents","21"],
+        [21,"7:00","Jalopy Theatre","Sean Kiely*, Chris Morrissey, Jean Rohe","Album release",""],
+        [21,"6:30","Night Club 101","Georgia Gets By","","21"],
+        [21,"7:30","Scholes Street Studio","Rubin Kodheli, Miles Johnston","","AA"],
+        [21,"7:00","Rubulad","Halloween Lilith Fair benefit cover show","All proceeds to Families for Freedom",""],
+        [21,"7:00","TV Eye","Sungaze, Lavisher, Semaphore, Soft Spot","","21"],
+        [21,"7:30","Le Poisson Rouge","Juana Molina","","AA"],
+        [22,"6:30","Baby's All Right","Swapmeet, Baby Wave","","18"],
+        [22,"7:00","Bowery Ballroom","After","",""],
+        [22,"7:00","Bar Freda","Bunnysongs*, Goth Girlfriend, Mercy Wu, Drvnkcig, Katharsis","Release show · Heryn & Friends presents","21"],
+        [22,"7:30","Hart Bar","Rachel Angel, Low Groves, Jackson Harden, Line","","21"],
+        [22,"6:30","Night Club 101","Lamplight, Anna McClellan, Margaux","","21"],
+        [22,"7:00","Knockdown Center","Animal Collective performs Feels","","18"],
+        [22,"7:00","TV Eye","Asher White, Nara's Room, Retail Drugs","","21"],
+        [22,"7:00","Unruly Collective","St. Terrible, Maggie Monaghan, Jesse Blake Rundle, Molly Dore","","AA"],
+        [22,"7:00","Wonderville","Brooklyn Experimental Electronic Music Showcase","","21"],
+        [22,"7:00","Light & Sound Design","Present Sounds","",""],
+        [23,"7:00","Baby's All Right","Renny Conti, James Eichman","","18"],
+        [23,"7:00","Music Hall of Williamsburg","Friko, Nine Perfect Lives","","18"],
+        [23,"7:00","Bowery Ballroom","Telescreens","",""],
+        [23,"9:00","Cassette","Wwyrd, Small Pond, Bug Crush, Mope","","21"],
+        [23,"5:30","Hart Bar","Cellophane Kiss*, Fallow Days, Silvera, Dracula & His Band the Draculas","Album release","21"],
+        [23,"6:30","Night Club 101","Pardonner, Laughing Cocks, The Smarthearts","Album release","21"],
+        [23,"10:00","Night Club 101","Dogs on Shady Lane, Why Bonnie","","21"],
+        [23,"8:00","Roulette","Trouble, Diamond Terrifier","","AA"],
+        [23,"6:00","Mercury Lounge","Rachel Bochner, Janna Jamison","","21"],
+        [23,"9:00","Pete's Candy Store","Lessa, Foot Traffic, Lolly","Tealeaf presents",""],
+        [23,"7:00","Bar Freda","James MacPherson, Forrester Grey, Kristen Ingrid, Yaely","Tealeaf presents",""],
+        [24,"7:00","Music Hall of Williamsburg","Mac DeMarco","","16"],
+        [24,"7:00","Bowery Ballroom","Telescreens","",""],
+        [24,"6:00","Alphaville","Antics!, Proper, Stay Inside, Rows, Footnote, Ross Newhouse","Altar Collective presents","21"],
+        [24,"8:30","Windjammer","Tiers La Familia, Sinead Youth, Crazy Makers","Footlight Underground presents","21"],
+        [24,"7:00","Elsewhere","Be Your Own Pet, Farmer's Wife, Josephine Network","","16"],
+        [24,"6:00","Hart Bar","Balloon Snake, Jeerleader, Dog Park, Winnifred","","21"],
+        [24,"8:00","Issue Project Room","Liturgy","","AA"],
+        [24,"8:00","Jalopy Theatre","Leah Tash*, Pearla","EP release",""],
+        [24,"6:30","Night Club 101","Dead Gowns, Helenor","","21"],
+        [24,"7:00","Stone Circle Theatre","Lost Grrrl Found*","EP release","AA"],
+        [24,"7:00","The Broadway","Radiator Hospital","","21"],
+        [24,"9:00","Mercury Lounge","Blonde Otter, Already Late","","21"],
+        [24,"7:00","Light & Sound Design","Carl Ashtray","",""],
+        [25,"9:30","Night Club 101","Telehealth, Imperial Motors","","21"],
+        [25,"6:00","Knockdown Center","Helado Tropical: Helado Negro, Reyna Tropical","","18"],
+        [25,"2:00","Scholes Street Studio","Max Perkins","","AA"],
+        [25,"7:00","TV Eye","Flooding, Bloodsports, Aeiou","","18"],
+        [25,"7:00","Sleepwalk","Wax Brides, Kabuki Love, Poppyseeds","",""],
+        [25,"8:30","Pete's Candy Store","Jess and Brendan of All Night Boogie Band, Sumu, First Flight","Tealeaf presents",""]
+      ];
+
+      /* Venues in Bushwick / Ridgewood / Williamsburg / Greenpoint — a short
+         ride from Irving Ave. */
+      var NEAR = {
+        "Alphaville":1,"Elsewhere":1,"Market Hotel":1,"Sleepwalk":1,"Hart Bar":1,
+        "Purgatory":1,"Wonderville":1,"The Broadway":1,"Trans Pecos":1,"TV Eye":1,
+        "Windjammer":1,"Bar Freda":1,"Stone Circle Theatre":1,"Cassette":1,
+        "Rubulad":1,"Light & Sound Design":1,"The Record Shop":1,"For the Record":1,
+        "Property Is Theft":1,"Brothers Wash and Dry":1,"B Scene":1,"Scholes Street Studio":1,
+        "Unruly Collective":1,"The Living Gallery":1,"Cutelab":1,
+        "Union Pool":1,"Baby's All Right":1,"Music Hall of Williamsburg":1,
+        "Pete's Candy Store":1,"Gutter Bar":1,"Rough Trade":1,"Brooklyn Steel":1,
+        "Knockdown Center":1,"Salon on Kingston":1,"Bridge & Tunnel Brewery":1,
+        "Greenpoint Comedy Club":1
+      };
+
+      var DOW = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+      var DOW3 = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+      var state = { q: "", age: "any", near: false, release: false, venue: "" };
+      var now = new Date();
+      var todayKey = (now.getFullYear() === 2026 && now.getMonth() === 9) ? now.getDate() : -1;
+
+      function esc(s) {
+        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+      function ageLabel(a) {
+        if (a === "AA") return "All Ages";
+        if (a) return a + "+";
+        return "";
+      }
+      function isRelease(note) { return /release/i.test(note); }
+
+      function passes(s) {
+        if (state.venue && s[2] !== state.venue) return false;
+        if (state.age !== "any") {
+          if (state.age === "none") { if (s[5] !== "") return false; }
+          else if (s[5] !== state.age) return false;
+        }
+        if (state.near && !NEAR[s[2]]) return false;
+        if (state.release && !isRelease(s[4])) return false;
+        if (state.q) {
+          var hay = (s[3] + " " + s[2]).toLowerCase();
+          if (hay.indexOf(state.q) === -1) return false;
+        }
+        return true;
+      }
+
+      function renderStats() {
+        var venues = {}, days = {};
+        SHOWS.forEach(function (s) { venues[s[2]] = 1; days[s[0]] = 1; });
+        var tonight = SHOWS.filter(function (s) { return s[0] === todayKey; }).length;
+        var stats = [
+          [SHOWS.length, "shows listed"],
+          [Object.keys(venues).length, "venues"],
+          [Object.keys(days).length, "days (Oct 1–25)"]
+        ];
+        if (todayKey >= 1 && todayKey <= 25) stats.push([tonight, "tonight"]);
+        document.getElementById("stats").innerHTML = stats.map(function (st) {
+          return '<div class="stat"><b>' + st[0] + '</b><span>' + st[1] + "</span></div>";
+        }).join("");
+      }
+
+      function renderDays() {
+        var main = document.getElementById("days");
+        var html = "", shown = 0, shownDays = 0;
+        for (var d = 1; d <= 25; d++) {
+          var dayShows = SHOWS.filter(function (s) { return s[0] === d; });
+          var vis = dayShows.filter(passes);
+          if (!vis.length && (state.q || state.age !== "any" || state.near || state.release || state.venue)) continue;
+          var date = new Date(2026, 9, d);
+          var cls = "day" + (d === todayKey ? " tonight" : "") + (todayKey > 0 && d < todayKey ? " past" : "");
+          html += '<section class="' + cls + '" id="day-' + d + '">';
+          html += '<div class="day-head"><h2>' + DOW[date.getDay()] + " Oct " + d + "</h2>";
+          html += '<span class="dnum">' + DOW3[date.getDay()] + " · 10/" + d + "/2026</span>";
+          if (d === todayKey) html += '<span class="tonight-tag">Tonight</span>';
+          else if (todayKey > 0 && d < todayKey) html += '<span class="past-tag">Already happened</span>';
+          html += '<span class="count">' + (vis.length === dayShows.length
+            ? dayShows.length + (dayShows.length === 1 ? " show" : " shows")
+            : vis.length + " of " + dayShows.length + " shows") + "</span></div>";
+          if (!dayShows.length) {
+            html += '<p class="no-shows">Nothing listed in this issue for this date.</p>';
+          } else if (!vis.length) {
+            html += '<p class="no-shows">No shows match the current filters.</p>';
+          }
+          vis.forEach(function (s) {
+            shown++;
+            var acts = esc(s[3]).replace(/\*/g, '<span class="hl">*</span>');
+            html += '<article class="show"><div class="time">' + (s[1] ? esc(s[1]) + " PM" : "—") + "</div>";
+            html += '<div class="acts">' + acts + "</div>";
+            html += '<div class="meta"><button class="venue-btn" data-venue="' + esc(s[2]) + '" title="Show only ' + esc(s[2]) + '">' + esc(s[2]) + "</button>";
+            if (s[5]) html += '<span class="badge age">' + ageLabel(s[5]) + "</span>";
+            if (isRelease(s[4])) html += '<span class="badge note">' + esc(s[4].split("·")[0].trim()) + "</span>";
+            if (NEAR[s[2]]) html += '<span class="badge near">Near home</span>';
+            var otherNote = s[4].replace(/^(Album release|Single release|Record release|EP release|Release show)\s*·?\s*/i, "");
+            if (otherNote && otherNote !== s[4]) html += '<span class="note-text">' + esc(otherNote) + "</span>";
+            else if (s[4] && !isRelease(s[4])) html += '<span class="note-text">' + esc(s[4]) + "</span>";
+            html += "</div></article>";
+          });
+          html += "</section>";
+          if (vis.length) shownDays++;
+        }
+        main.innerHTML = html || '<div class="empty">No shows match. Try clearing the filters.</div>';
+        var rl = document.getElementById("resultLine");
+        var filtering = state.q || state.age !== "any" || state.near || state.release || state.venue;
+        rl.textContent = filtering
+          ? "Showing " + shown + " of " + SHOWS.length + " shows" + (state.venue ? " · venue: " + state.venue : "")
+          : SHOWS.length + " shows · Oct 1–25, 2026";
+        document.getElementById("clearBtn").hidden = !filtering;
+        main.querySelectorAll(".venue-btn").forEach(function (b) {
+          b.addEventListener("click", function () {
+            state.venue = state.venue === b.getAttribute("data-venue") ? "" : b.getAttribute("data-venue");
+            renderAll();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+        });
+      }
+
+      function renderVenues() {
+        var counts = {};
+        SHOWS.forEach(function (s) { counts[s[2]] = (counts[s[2]] || 0) + 1; });
+        var list = Object.keys(counts).sort(function (a, b) {
+          return counts[b] - counts[a] || a.localeCompare(b);
+        }).slice(0, 15);
+        document.getElementById("venueList").innerHTML = list.map(function (v) {
+          return '<li><button data-v="' + esc(v) + '"' + (state.venue === v ? ' class="on"' : "") + ">" + esc(v) + '</button><span class="n">' + counts[v] + "</span></li>";
+        }).join("");
+        document.querySelectorAll("#venueList button").forEach(function (b) {
+          b.addEventListener("click", function () {
+            state.venue = state.venue === b.getAttribute("data-v") ? "" : b.getAttribute("data-v");
+            renderAll();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+        });
+      }
+
+      function renderJump() {
+        var html = "";
+        for (var d = 1; d <= 25; d++) {
+          var date = new Date(2026, 9, d);
+          html += '<a href="#day-' + d + '"' + (d === todayKey ? ' class="today"' : "") + ">" + DOW3[date.getDay()] + " " + d + "</a>";
+        }
+        document.getElementById("dayJump").innerHTML = html;
+      }
+
+      function renderAll() { renderStats(); renderDays(); renderVenues(); }
+
+      document.getElementById("q").addEventListener("input", function (e) {
+        state.q = e.target.value.trim().toLowerCase();
+        renderDays();
+      });
+      document.getElementById("ageRow").addEventListener("click", function (e) {
+        var b = e.target.closest("[data-age]");
+        if (!b) return;
+        state.age = b.getAttribute("data-age");
+        this.querySelectorAll("[data-age]").forEach(function (x) {
+          x.setAttribute("aria-pressed", x === b ? "true" : "false");
+        });
+        renderDays();
+      });
+      document.getElementById("nearBtn").addEventListener("click", function () {
+        state.near = !state.near;
+        this.setAttribute("aria-pressed", state.near ? "true" : "false");
+        renderDays();
+      });
+      document.getElementById("releaseBtn").addEventListener("click", function () {
+        state.release = !state.release;
+        this.setAttribute("aria-pressed", state.release ? "true" : "false");
+        renderDays();
+      });
+      document.getElementById("clearBtn").addEventListener("click", function () {
+        state = { q: "", age: "any", near: false, release: false, venue: "" };
+        document.getElementById("q").value = "";
+        document.querySelectorAll("#ageRow [data-age]").forEach(function (x) {
+          x.setAttribute("aria-pressed", x.getAttribute("data-age") === "any" ? "true" : "false");
+        });
+        document.getElementById("nearBtn").setAttribute("aria-pressed", "false");
+        document.getElementById("releaseBtn").setAttribute("aria-pressed", "false");
+        renderAll();
+      });
+
+      renderAll();
+      renderJump();
+      if (todayKey >= 1 && todayKey <= 25) {
+        var t = document.getElementById("day-" + todayKey);
+        if (t) t.scrollIntoView({ block: "start" });
+      }
+    </script>
+  </body>
+</html>
