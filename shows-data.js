@@ -13,7 +13,10 @@ var SHOW_META = {
     transcribed: "October 2",
     covers: "Oct 1–25, nothing listed for Mon Oct 5"
   },
+  /* The second source. Credited in the footer's Sources line only. */
   other: {
+    name: "Oh My Rockness",
+    url: "https://www.ohmyrockness.com/",
     pulled: "October 4"
   },
   /* "Also in this issue": [bold lead-in, text] */
