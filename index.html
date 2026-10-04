@@ -745,12 +745,24 @@
         renderAll();
       });
 
-      renderAll();
-      renderJump();
-      if (todayKey >= 1 && todayKey <= 25) {
+      function goToToday() {
+        if (todayKey < 1 || todayKey > 25) return;
+        // Canonicalize the URL to today's section so reloads/back/forward
+        // keep today's date instead of the top or an old #day- anchor.
+        try { history.replaceState(null, "", "#day-" + todayKey); } catch (e) {}
         var t = document.getElementById("day-" + todayKey);
         if (t) t.scrollIntoView({ block: "start" });
       }
+
+      renderAll();
+      renderJump();
+      // Let our scroll win over the browser's own scroll-position restore.
+      if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+      goToToday();
+      // Re-apply on back/forward (bfcache) and after full load in case
+      // fonts/layout shifts moved things.
+      window.addEventListener("pageshow", function (e) { if (e.persisted) goToToday(); });
+      window.addEventListener("load", function () { setTimeout(goToToday, 100); });
     </script>
   </body>
 </html>
