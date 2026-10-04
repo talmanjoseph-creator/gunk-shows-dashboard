@@ -300,7 +300,7 @@
           <label class="search">
             <input id="q" type="search" placeholder="Search acts or venues… (try: Palehound, TV Eye)" aria-label="Search acts or venues" />
           </label>
-          <button class="chip red" id="nearBtn" aria-pressed="false" title="Venues in Bushwick, Ridgewood, Williamsburg &amp; Greenpoint">Close to home</button>
+          <button class="chip red" id="nearBtn" aria-pressed="false" title="Use your location to show gigs within 1 mile">Close to home</button>
           <button class="chip" id="releaseBtn" aria-pressed="false">Release shows only</button>
           <button class="clear-btn" id="clearBtn" hidden>Clear all filters</button>
         </div>
@@ -346,6 +346,9 @@
         <a href="https://gunkyard.substack.com/p/october-gunk-gunk-no-39" target="_blank" rel="noopener">gunkyard.substack.com/p/october-gunk-gunk-no-39</a>
         (transcribed Oct 2; runs Oct 1–25, nothing listed for Mon Oct 5) —
         plus Oh My Rockness listings for Oct 1–31 (pulled Oct 4).
+        Close to home uses your device's location to show gigs within 1 mile — the
+        location never leaves your browser. A handful of DIY spots without public
+        addresses aren't covered by the radius filter.
         Listings can change — check the venue before you head out.
       </footer>
     </div>
@@ -1300,20 +1303,183 @@
         [31,"9:30 PM","Talon Bar","Vick Vapors, Holy Water","","21","omr","https://www.noreturnpostpunksociety.com/post-punk-events/vick"]
       ];
 
+      /* Venue coordinates [lat, lng]. Light & Sound Design and Scholes Street
+         Studio are approximate (secret/street-level addresses). Venues missing
+         here are excluded from the Close-to-home radius filter. */
+      var GEO = {
+        "(Le) Poisson Rouge": [40.7284753, -74.0000523],
+        "92NY": [40.7827524, -73.952907],
+        "99 Scott": [40.7104957, -73.9232382],
+        "Alice Tully Hall": [40.7726297, -73.9840963],
+        "ALPHAVILLE": [40.700573299999995, -73.9256722],
+        "Alphaville": [40.7005262, -73.9258167],
+        "Amityville Music Hall": [40.6789355, -73.41754379999999],
+        "Arlene's Grocery": [40.7213285, -73.9883827],
+        "Baby's All Right": [40.709985, -73.96347],
+        "BAM: Brooklyn Academy of Music": [40.6864624, -73.9777052],
+        "Bar Freda": [40.70159, -73.90518],
+        "Barclays Center": [40.6834453, -73.9760482],
+        "Basilica Hudson": [42.25196, -73.79885],
+        "Beacon Theatre": [40.7804964, -73.9810906],
+        "Bearsville Theater": [42.0409247, -74.1181971],
+        "Berlin": [40.7229989, -73.9860427],
+        "Bleecker Bell": [40.72881435925182, -73.99995558236938],
+        "Blue Note": [40.7309096, -74.00064259999999],
+        "Bowery Ballroom": [40.72040640000001, -73.9933583],
+        "Bowery Palace": [40.72570406537981, -73.99168372883567],
+        "Bric House": [40.6883532, -73.9791093],
+        "Bridge & Tunnel Brewery": [40.6937359, -73.9027629],
+        "Brooklyn Bowl": [40.7218878, -73.9573817],
+        "Brooklyn Paramount": [40.689487303030305, -73.98104193939395],
+        "Brooklyn Steel": [40.7193578, -73.9387835],
+        "Brooklyn Storehouse": [40.6997716, -73.9753359],
+        "C'mon Everybody": [40.6883159, -73.9568761],
+        "Cafe Wha?": [40.7301659, -74.000664],
+        "Café Carlyle": [40.7742972, -73.96299309999999],
+        "Carnegie Hall": [40.764938, -73.979897],
+        "Cassette": [40.70262927709929, -73.90118625664208],
+        "City Winery": [40.743056, -74.009048],
+        "Cooper Union": [40.7281505, -73.9916835],
+        "Crossroads": [40.6543567, -74.3206555],
+        "Crown Hill Theatre": [40.672982000000005, -73.9503165],
+        "Dada": [40.7008048, -73.8943969],
+        "David Rubenstein Atrium at Lincoln Center": [40.773457, -73.98327499999999],
+        "Dead Letter No. 9": [40.7159838, -73.9649064],
+        "DROM": [40.725358, -73.98443],
+        "Elsewhere": [40.70947715, -73.92323547344039],
+        "Flushing Meadows-Corona Park": [40.75, -73.86666699999999],
+        "Footlight Underground at The Windjammer": [40.709107, -73.9069791],
+        "For the Record": [40.7363076, -73.9554676],
+        "Forest Hills Stadium": [40.7198993, -73.84663499999999],
+        "Gold Sounds": [40.702624, -73.929611],
+        "Good Room": [40.726882, -73.9530135],
+        "Gramercy Theatre": [40.73994640000001, -73.9848403],
+        "Guggenheim Museum": [40.7830178, -73.95888839999999],
+        "Gutter Bar": [40.7227408, -73.9554759],
+        "H0L0": [40.6945516, -73.9023072],
+        "Hammerstein Ballroom": [40.75264060000001, -73.9940354],
+        "Hart Bar": [40.6964569, -73.9299104],
+        "House of Yes": [40.7068169, -73.9236004],
+        "Irving Plaza": [40.734917, -73.9884469],
+        "Issue Project Room": [40.6907684, -73.9897754],
+        "Jalopy Theater": [40.681311, -74.004201],
+        "Jalopy Theatre": [40.6813582, -74.00429],
+        "Joe's Pub": [40.729126, -73.9920822],
+        "Kings Theatre": [40.6458782, -73.95808389999999],
+        "Knockdown Center": [40.715655, -73.914273],
+        "Le Poisson Rouge": [40.7284254, -73.9998816],
+        "Light & Sound Design": [40.7306, -73.953],
+        "Lincoln Center - David Geffen Hall": [40.7725472, -73.9831159],
+        "Littlefield": [40.6785447, -73.983252],
+        "Los Depressos": [40.68057205110158, -73.95049854232937],
+        "Madison Square Garden": [40.7508707, -73.99426609999999],
+        "Main Drag Music": [40.7148742, -73.9650743],
+        "Maker Park ": [40.626228677788454, -74.07456533406145],
+        "Mama Tried": [40.66053, -74.000793],
+        "Maria Hernandez Park": [40.7028088, -73.9253918],
+        "Market Hotel": [40.696948, -73.93449869999999],
+        "Massapequa VFW Hall": [40.6773424, -73.47328825950055],
+        "Mercury Lounge": [40.722036, -73.986806],
+        "MoMA PS1": [40.745469, -73.947108],
+        "Music Hall of Williamsburg": [40.7192783, -73.9616949],
+        "National Sawdust": [40.718968, -73.961028],
+        "New Jersey Performing Arts Center": [40.7400362, -74.1678932],
+        "New York Society for Ethical Culture": [40.7711597, -73.9796965],
+        "Night Club 101": [40.72585325, -73.98403651489842],
+        "Nublu": [40.72565155, -73.97802020396065],
+        "Nublu 151": [40.72565040000001, -73.9780213],
+        "P.I.T.": [40.70733709168846, -73.95185928232564],
+        "Pacha New York": [40.71089558630895, -73.92575538148294],
+        "Paragon": [40.696111883983576, -73.93407108229741],
+        "Parkside Lounge": [40.7210809, -73.9832025],
+        "Pete's Candy Store": [40.7181021, -73.9501774],
+        "Pianos": [40.7210324, -73.98775169999999],
+        "Pine Box Rock Shop": [40.70524899999999, -73.932667],
+        "Pioneer Works": [40.67925326376359, -74.01215502059269],
+        "Property Is Theft": [40.7072652, -73.9519328],
+        "Public Records": [40.6822605, -73.9885662],
+        "Purgatory": [40.68721, -73.90573],
+        "Racket": [40.74308791608051, -74.00572910015576],
+        "Radio City Music Hall": [40.7599077, -73.9802926],
+        "Reforesters Laboratory": [40.7161422, -73.9620296],
+        "Riverside Church": [40.811954, -73.96333],
+        "Robert F. Wagner, Jr. Park (Battery Park City)": [40.7074892, -74.0181643],
+        "Rodrigue's Coffee House": [40.8620404, -73.88569869999999],
+        "Rough Trade": [40.7591232, -73.979556],
+        "Rough Trade NYC": [40.758839, -73.978821],
+        "Roulette": [40.6856404, -73.9807663],
+        "Rubulad": [40.7046125, -73.9273716],
+        "S.O.B.'s": [40.7284492, -74.0051241],
+        "Saint Vitus": [40.707180450121925, -73.92201220571803],
+        "Scholes Street Studio": [40.7088457, -73.9427726],
+        "SILO Brooklyn": [40.7105087, -73.922873],
+        "Silver Lining Lounge": [40.71895763361403, -73.99441337974969],
+        "Sleepwalk": [40.707319749999996, -73.93953629516716],
+        "Sony Hall": [40.75964865, -73.98700765640905],
+        "South Street Seaport": [40.7066002, -74.00282399999999],
+        "St. Ann & The Holy Trinity": [40.6945862, -73.99272700692987],
+        "Starland Ballroom": [40.4409031, -74.3543648],
+        "Starr Bar": [40.705059, -73.9229],
+        "Stone Circle Theatre": [40.70101538537947, -73.89950230305469],
+        "Stone Pony": [40.220001, -74.000947],
+        "Strand Bookstore": [40.7332739, -73.9908698],
+        "Sugar Mouse": [40.7308162, -73.9887471],
+        "Talon Bar": [40.7011145, -73.9165278],
+        "Terminal 5": [40.7697469, -73.99274366213939],
+        "The 1896": [40.711677, -73.9252735],
+        "The Bell House": [40.673735, -73.991658],
+        "The Bitter End": [40.728369004340465, -73.99917357116878],
+        "The Broadway": [40.6909434, -73.9270789],
+        "The Brooklyn Monarch": [40.71096, -73.93627],
+        "The Capitol Theatre": [41.001397, -73.6654978],
+        "The Chocolate Factory": [40.70988715, -73.92242214802934],
+        "The Count Basie Center for the Arts": [40.34914925365734, -74.07001281756172],
+        "The Gutter": [40.7227338, -73.9553639],
+        "The Living Gallery": [40.6941559, -73.9306465],
+        "The Meadows": [40.710885250000004, -73.93661886563007],
+        "The Paramount": [40.8697401, -73.4254878],
+        "The Rooftop at Pier 17": [40.7053125, -74.0026298],
+        "The Sheen Center": [40.6930481, -73.9229583],
+        "The Sheen Center for Thought & Culture": [40.7254164, -73.9932386],
+        "The Stone": [40.7365515, -73.9966157],
+        "The Sultan Room": [40.7055861, -73.9245308],
+        "The Wellmont Theater": [40.81264360000001, -74.2166274],
+        "The Wood Shop": [40.71077941121859, -73.93653687499761],
+        "Tompkins Square Park": [40.7264295, -73.9817841],
+        "Town Hall": [40.7560872, -73.9845642],
+        "Trans Pecos": [40.6970156, -73.9062504],
+        "Trans-Pecos": [40.6971148, -73.9061404],
+        "TV Eye": [40.6979108, -73.905334],
+        "TV EYE ": [40.697910750000005, -73.9053340480238],
+        "UBS Arena": [40.711833, -73.72637],
+        "Under the K Bridge Park": [40.72465069355455, -73.93660301351323],
+        "Union Hall": [40.6721887, -73.98462119999999],
+        "Union Pool": [40.71565175, -73.95198629166667],
+        "Venue TBA": [40.7143528, -74.00597309999999],
+        "Warsaw": [40.7224876, -73.94839189999999],
+        "Webster Hall": [40.7317679, -73.9892102],
+        "Windjammer": [40.7091645, -73.9069695],
+        "Wonderville": [40.6924111, -73.9275164],
+        "Xanadu": [40.70647963277205, -73.92142886441785],
+        "Yonkers Brewing Company": [40.93440271551478, -73.90282721266513]
+      };
+
       /* Venues in Bushwick / Ridgewood / Williamsburg / Greenpoint — a short
          ride from Irving Ave. */
-      var NEAR = {
-        "Alphaville":1,"Elsewhere":1,"Market Hotel":1,"Sleepwalk":1,"Hart Bar":1,
-        "Purgatory":1,"Wonderville":1,"The Broadway":1,"Trans Pecos":1,"TV Eye":1,
-        "Windjammer":1,"Bar Freda":1,"Stone Circle Theatre":1,"Cassette":1,
-        "Rubulad":1,"Light & Sound Design":1,"The Record Shop":1,"For the Record":1,
-        "Property Is Theft":1,"Brothers Wash and Dry":1,"B Scene":1,"Scholes Street Studio":1,
-        "Unruly Collective":1,"The Living Gallery":1,"Cutelab":1,
-        "Union Pool":1,"Baby's All Right":1,"Music Hall of Williamsburg":1,
-        "Pete's Candy Store":1,"Gutter Bar":1,"Rough Trade":1,"Brooklyn Steel":1,
-        "Knockdown Center":1,"Salon on Kingston":1,"Bridge & Tunnel Brewery":1,
-        "Greenpoint Comedy Club":1
-      };
+      var NEAR_MILES = 1; // Close-to-home radius
+      var userLoc = null; // [lat, lng], set once the user grants location access
+      function haversineMi(lat1, lon1, lat2, lon2) {
+        var R = 3958.8, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
+        var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        return 2 * R * Math.asin(Math.sqrt(a));
+      }
+      function venueDistMi(venue) {
+        var g = GEO[venue];
+        if (!g || !userLoc) return null;
+        return haversineMi(userLoc[0], userLoc[1], g[0], g[1]);
+      }
 
       var DOW = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
       var DOW3 = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -1340,7 +1506,10 @@
           if (state.age === "none") { if (s[5] !== "") return false; }
           else if (s[5] !== state.age) return false;
         }
-        if (state.near && !NEAR[s[2]]) return false;
+        if (state.near) {
+          var dd = venueDistMi(s[2]);
+          if (dd === null || dd > NEAR_MILES) return false;
+        }
         if (state.release && !isRelease(s[4])) return false;
         if (state.q) {
           var hay = (s[3] + " " + s[2]).toLowerCase();
@@ -1396,7 +1565,10 @@
             if (s[7]) html += '<a class="badge tix" href="' + esc(s[7]) + '" target="_blank" rel="noopener">Tickets</a>';
             if (s[5]) html += '<span class="badge age">' + ageLabel(s[5]) + "</span>";
             if (isRelease(s[4])) html += '<span class="badge note">' + esc(s[4].split("·")[0].trim()) + "</span>";
-            if (NEAR[s[2]]) html += '<span class="badge near">Near home</span>';
+            if (state.near && userLoc) {
+              var vdist = venueDistMi(s[2]);
+              if (vdist !== null) html += '<span class="badge near">' + vdist.toFixed(1) + ' mi</span>';
+            }
             var otherNote = s[4].replace(/^(Album release|Single release|Record release|EP release|Release show)\s*·?\s*/i, "");
             if (otherNote && otherNote !== s[4]) html += '<span class="note-text">' + esc(otherNote) + "</span>";
             else if (s[4] && !isRelease(s[4])) html += '<span class="note-text">' + esc(s[4]) + "</span>";
@@ -1411,6 +1583,7 @@
         rl.textContent = filtering
           ? "Showing " + shown + " of " + SHOWS.length + " shows" + (state.venue ? " · venue: " + state.venue : "")
           : SHOWS.length + " shows · Oct " + FIRST_DAY + "–" + LAST_DAY + ", 2026";
+        if (state.near && userLoc) rl.textContent += " · within " + NEAR_MILES + " mile of you";
         document.getElementById("clearBtn").hidden = !filtering;
         main.querySelectorAll(".venue-btn").forEach(function (b) {
           b.addEventListener("click", function () {
@@ -1472,10 +1645,32 @@
         });
         renderDays();
       });
+      function nearMsg(t) {
+        var rl = document.getElementById("resultLine");
+        rl.textContent = t;
+        setTimeout(function () { renderDays(); }, 2600);
+      }
       document.getElementById("nearBtn").addEventListener("click", function () {
-        state.near = !state.near;
-        this.setAttribute("aria-pressed", state.near ? "true" : "false");
-        renderDays();
+        var btn = this;
+        if (state.near) {
+          state.near = false;
+          btn.setAttribute("aria-pressed", "false");
+          btn.textContent = "Close to home";
+          renderDays();
+          return;
+        }
+        if (!("geolocation" in navigator)) { nearMsg("Location isn't available in this browser."); return; }
+        btn.textContent = "Locating\u2026";
+        navigator.geolocation.getCurrentPosition(function (pos) {
+          userLoc = [pos.coords.latitude, pos.coords.longitude];
+          state.near = true;
+          btn.setAttribute("aria-pressed", "true");
+          btn.textContent = "Close to home";
+          renderDays();
+        }, function () {
+          btn.textContent = "Close to home";
+          nearMsg("Couldn't get your location — enable location access to use this filter.");
+        }, { timeout: 12000, maximumAge: 600000 });
       });
       document.getElementById("releaseBtn").addEventListener("click", function () {
         state.release = !state.release;
@@ -1491,7 +1686,9 @@
         document.querySelectorAll("#srcRow [data-src]").forEach(function (x) {
           x.setAttribute("aria-pressed", x.getAttribute("data-src") === "all" ? "true" : "false");
         });
-        document.getElementById("nearBtn").setAttribute("aria-pressed", "false");
+        var nb = document.getElementById("nearBtn");
+        nb.setAttribute("aria-pressed", "false");
+        nb.textContent = "Close to home";
         document.getElementById("releaseBtn").setAttribute("aria-pressed", "false");
         renderAll();
       });
