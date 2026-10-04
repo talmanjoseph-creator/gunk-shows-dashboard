@@ -537,7 +537,9 @@
         return v < 300 ? v + 1440 : v;
       }
       /* Page name for a show: shows/<slug>.html. Must stay in step with
-         show_slug() in tools/build_pages.py, which writes those pages. */
+         show_slug() and unique_slugs() in tools/build_pages.py, which write
+         those pages. Rows that would share a name get -2, -3 ... in list
+         order (see the slug loop under "data prep"). */
       function slugify(t) {
         return fold(t).replace(/['\u2019]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
       }
@@ -546,7 +548,8 @@
       }
       function showSlug(s) {
         var m = /^(\d+):(\d+)\s*(AM|PM)/i.exec(s[1] || "");
-        return [MON.toLowerCase(), (s[0] < 10 ? "0" : "") + s[0], slugPart(s[2], 30), slugPart(s[3].split(",")[0], 30),
+        var mm = MONTH + 1;
+        return [YEAR + "-" + (mm < 10 ? "0" : "") + mm + "-" + (s[0] < 10 ? "0" : "") + s[0], slugPart(s[2], 30), slugPart(s[3].split(",")[0], 30),
           m ? parseInt(m[1], 10) + m[2] + m[3].toLowerCase() : "tba"].join("-");
       }
       function ageLabel(a) { return a === "AA" ? "All Ages" : (a ? a + "+" : ""); }
@@ -571,12 +574,17 @@
       /* ---------- data prep ---------- */
       SHOWS.forEach(function (s, i) { s.i = i; });
       SHOWS.sort(function (a, b) { return a[0] - b[0] || timeKey(a[1]) - timeKey(b[1]) || a.i - b.i; });
+      var slugCount = {};
       SHOWS.forEach(function (s, i) {
         s.i = i;
         s.hay = fold(s[3] + " " + s[2] + " " + s[4]);
         s.area = AREA[s[2]] || "";
         s.key = s[0] + "|" + s[2] + "|" + s[1] + "|" + s[3].slice(0, 40);
         s.sold = /sold-?out/i.test(s[7]);
+        // Page name; a row that would repeat an earlier name gets -2, -3 ...
+        var base = showSlug(s);
+        slugCount[base] = (slugCount[base] || 0) + 1;
+        s.slug = slugCount[base] === 1 ? base : base + "-" + slugCount[base];
       });
       var VENUE_SET = {};
       SHOWS.forEach(function (s) { VENUE_SET[s[2]] = 1; });
@@ -665,7 +673,7 @@
         var acts = esc(s[3]);
         var plain = s[3];
         var h = '<article class="show" data-i="' + s.i + '"><div class="time">' + (s[1] ? esc(s[1]) : "—") + "</div>";
-        h += '<div class="acts"><a href="shows/' + showSlug(s) + '.html">' + acts + "</a></div>";
+        h += '<div class="acts"><a href="shows/' + s.slug + '.html">' + acts + "</a></div>";
         h += '<button class="star" aria-pressed="' + (saved[s.key] ? "true" : "false") + '" aria-label="Save ' + esc(plain) + " at " + esc(s[2]) + '">' + (saved[s.key] ? "★" : "☆") + "</button>";
         h += '<div class="meta"><button class="venue-btn" data-venue="' + esc(s[2]) + '" title="Show only ' + esc(s[2]) + '">' + esc(s[2]) + "</button>";
         if (s.area === "out") h += '<span class="badge out">Out of town</span>';

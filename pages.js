@@ -49,7 +49,12 @@
   }
 
   /* ---------- show page ---------- */
-  if (body.getAttribute("data-date") < today) $("pastNote").hidden = false;
+  if (body.getAttribute("data-date") < today) {
+    $("pastNote").hidden = false;
+    // The list may have moved on to another month; don't jump to a day there.
+    var back = document.querySelector(".back");
+    if (back) back.setAttribute("href", "../");
+  }
 
   // Save: shares its list with the main page (same browser storage key).
   var saveKey = body.getAttribute("data-save-key"), showKey = body.getAttribute("data-show-key");
