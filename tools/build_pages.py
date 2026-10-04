@@ -237,7 +237,7 @@ REDIRECT = """<!doctype html>
 
 TOP = """    <div class="wrap">
       <header class="top">
-        <a class="brand" href="../">Show&nbsp;Me&nbsp;<span>NYC</span></a>
+        <a class="brand" href="../?intro">Show&nbsp;Me&nbsp;<span>NYC</span></a>
         <a class="back" href="{back}">{back_label}</a>
       </header>
 """
