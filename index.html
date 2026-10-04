@@ -345,11 +345,7 @@
         text-align: center;
       }
 
-      /* ---------- footer notes ---------- */
-      .issue-notes { border-top: 4px solid var(--line); margin-top: 44px; padding-top: 18px; }
-      .issue-notes h2 { font-size: 17px; font-weight: 900; text-transform: uppercase; margin: 0 0 10px; }
-      .issue-notes ul { margin: 0; padding-left: 20px; color: var(--ink-soft); font-size: 14.5px; }
-      .issue-notes li { margin-bottom: 6px; }
+      /* ---------- footer ---------- */
       footer.colophon {
         margin-top: 34px; border-top: 2px solid var(--line); padding-top: 14px;
         font-family: var(--mono); font-size: 12px; color: var(--muted);
@@ -417,7 +413,7 @@
 
         <div class="panel" id="filterPanel" hidden>
           <div class="ctl-row">
-            <button class="chip red" id="nearBtn" aria-pressed="false" title="Use your location to show gigs within 1 mile">Close to home</button>
+            <button class="chip red" id="nearBtn" aria-pressed="false" title="Use your location to show gigs within 1 mile. It never leaves your browser.">Close to home</button>
             <button class="chip" id="releaseBtn" aria-pressed="false">Release shows only</button>
             <button class="chip" id="gunkBtn" aria-pressed="false" title="Only shows listed in GUNK New York">GUNK picks only</button>
             <button class="chip" id="clubBtn" aria-pressed="false" title="Only club nights">Club nights only</button>
@@ -457,11 +453,6 @@
           <ul class="venue-list" id="venueList"></ul>
         </aside>
       </div>
-
-      <section class="issue-notes" id="issueNotes" hidden>
-        <h2>Also in this issue</h2>
-        <ul id="issueList"></ul>
-      </section>
 
       <footer class="colophon" id="colophon"></footer>
     </div>
@@ -733,7 +724,7 @@
             return '<button class="chip" data-area="' + a[0] + '" aria-pressed="false">' + a[1] + "</button>";
           }).join("");
 
-        // Masthead, stats, notes, colophon.
+        // Masthead and footer.
         var G = SHOW_META.gunk, O = SHOW_META.other;
         // Masthead: one hook (tonight's count, linking to tonight) and one line of totals.
         var tonightInTown = SHOWS.filter(function (s) { return s[0] === todayKey && s.area !== "out"; }).length;
@@ -744,17 +735,8 @@
           hook.hidden = false;
         }
         $("mastMeta").textContent = SHOWS.length + " shows · " + Object.keys(VENUE_SET).length + " venues · " + MONTHS[MONTH] + " " + YEAR;
-        if (SHOW_META.notes && SHOW_META.notes.length) {
-          $("issueList").innerHTML = SHOW_META.notes.map(function (n) {
-            return "<li><strong>" + esc(n[0]) + "</strong> — " + esc(n[1]) + "</li>";
-          }).join("");
-          $("issueNotes").hidden = false;
-        }
-        $("colophon").innerHTML = 'Sources: <a href="' + esc(G.url) + '" target="_blank" rel="noopener">GUNK New York, Issue No. ' + G.issue + "</a> (transcribed " +
-          esc(G.transcribed) + "; runs " + esc(G.covers) + ') and <a href="' + esc(O.url) + '" target="_blank" rel="noopener">' + esc(O.name) + "</a> (pulled " + esc(O.pulled) +
-          "). A GUNK badge marks the zine's picks; an asterisk (*) marks the headliner, per the zine. Close to home uses your device's location to show gigs within " + NEAR_MILES +
-          " mile — the location never leaves your browser, and a handful of DIY spots without public addresses aren't covered. " +
-          "Saved shows are stored only in this browser. Listings can change — check the venue before you head out.";
+        $("colophon").innerHTML = 'Sources: <a href="' + esc(G.url) + '" target="_blank" rel="noopener">GUNK New York</a>, <a href="' + esc(O.url) +
+          '" target="_blank" rel="noopener">' + esc(O.name) + "</a> and venue calendars. Listings can change — check the venue before you head out.";
 
         // Busiest venues (in town).
         var counts = {};
