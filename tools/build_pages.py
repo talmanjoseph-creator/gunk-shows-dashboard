@@ -395,6 +395,8 @@ def build():
                 for o, osl in near:
                     h += row_li(o, osl, d, with_date=False, with_venue=True).replace("          <li", "            <li")
                 h += '          </ul>\n        </section>\n'
+        h += (f'        <a class="mc-link" id="mcLink" href="../missed-connections.html?show={sl}" hidden>'
+              'Were you there? Read or leave a missed connection →</a>\n')
         h += "      </main>\n" + foot
         (ROOT / "shows" / f"{sl}.html").write_text(h, encoding="utf8")
         if (year, month) in LEGACY_MONTHS:
@@ -432,7 +434,7 @@ def build():
     # ----- sitemap -----
     all_shows = sorted(f.stem for f in (ROOT / "shows").glob("*.html") if re.match(r"\d{4}-\d{2}-\d{2}-", f.name))
     all_venues = sorted(f.stem for f in (ROOT / "venues").glob("*.html"))
-    urls = [SITE] + [f"{SITE}venues/{s}.html" for s in all_venues] + [f"{SITE}shows/{s}.html" for s in all_shows]
+    urls = [SITE, SITE + "missed-connections.html"] + [f"{SITE}venues/{s}.html" for s in all_venues] + [f"{SITE}shows/{s}.html" for s in all_shows]
     (ROOT / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         + "".join(f"  <url><loc>{esc(u)}</loc></url>\n" for u in urls) + "</urlset>\n", encoding="utf8")

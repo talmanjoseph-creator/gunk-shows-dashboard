@@ -144,3 +144,24 @@ footer.colophon a { color: var(--accent); }
   .btn.primary { flex: 1 1 100%; }
   .btn { flex: 1 1 auto; }
 }
+
+/* ---------- missed connections ---------- */
+.posts article { padding: 16px 0 14px; border-bottom: 1px solid var(--hair); }
+.posts p { margin: 0; }
+.posts .pm { font: 600 12.5px var(--mono); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+.posts .pm a { color: inherit; text-underline-offset: 3px; }
+.posts .pt { font-size: 18px; font-weight: 700; line-height: 1.35; margin-top: 6px; overflow-wrap: anywhere; }
+.posts .pf {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  font: 500 12.5px var(--mono); color: var(--muted); margin-top: 8px;
+}
+.posts .pf a { color: var(--accent); font-weight: 600; text-underline-offset: 3px; padding: 6px 0; }
+.rules { list-style: disc; padding-left: 20px; margin-top: 12px; color: var(--ink-soft); font-size: 15px; }
+.rules li { margin-bottom: 6px; }
+.hint a { color: var(--accent); }
+.mc-link {
+  display: block; margin-top: 38px; padding: 14px 16px;
+  border: 2px dashed var(--muted); text-decoration: none;
+  font: 600 13px var(--mono); color: var(--ink-soft);
+}
+.mc-link:hover { border-color: var(--accent); color: var(--accent); }

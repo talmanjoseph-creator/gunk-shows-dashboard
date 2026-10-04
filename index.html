@@ -177,7 +177,10 @@
 
       /* quick chips, then a swipeable day strip (narrow screens only; wide
          screens get the same day links in the sidebar) */
-      .quick { display: flex; gap: 6px; margin-top: 8px; }
+      .quick { display: flex; gap: 6px; margin-top: 8px; overflow-x: auto; scrollbar-width: none; }
+      .quick::-webkit-scrollbar { display: none; }
+      .quick > * { flex: 0 0 auto; }
+      a.chip { text-decoration: none; }
       .quick .chip { min-height: 38px; padding: 0 12px; }
       .strip {
         position: relative;
@@ -499,6 +502,7 @@
           <button class="chip red" id="tonightBtn" data-when="tonight" aria-pressed="false">Tonight</button>
           <button class="chip" id="weekendBtn" data-when="weekend" aria-pressed="false">This weekend</button>
           <button class="chip" id="savedBtn" aria-pressed="false">★ Saved <span class="n" id="savedCount">0</span></button>
+          <a class="chip" href="missed-connections.html">Missed connections</a>
         </div>
         <nav class="strip" id="strip" aria-label="Jump to a day"></nav>
 
@@ -849,7 +853,7 @@
         }
         $("mastMeta").textContent = SHOWS.length + " shows · " + Object.keys(VENUE_SET).length + " venues · " + MONTHS[MONTH] + " " + YEAR;
         $("colophon").innerHTML = 'Sources: <a href="' + esc(G.url) + '" target="_blank" rel="noopener">GUNK New York</a>, <a href="' + esc(O.url) +
-          '" target="_blank" rel="noopener">' + esc(O.name) + "</a> and venue calendars. Listings can change — check the venue before you head out.";
+          '" target="_blank" rel="noopener">' + esc(O.name) + "</a> and venue calendars. Listings can change — check the venue before you head out. <a href=\"missed-connections.html\">Missed connections</a>.";
 
         // Busiest venues (in town).
         var counts = {};

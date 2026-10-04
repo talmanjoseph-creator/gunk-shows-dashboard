@@ -37,6 +37,18 @@ Every show has its own page in `shows/` and every venue in `venues/`. They are g
 - **Show links are permanent.** The generator only rebuilds the pages for the month in `shows-data.js`; pages from earlier months stay where they are so shared links keep working.
 - The October 2026 pages were first published without the year (`oct-09-...`). Those addresses are small redirect pages now; leave them in place.
 
+## Missed connections
+
+`missed-connections.html` lists posts from `connections-data.js`. Nothing is posted automatically.
+
+1. A visitor fills in the form linked from the page (`formUrl` in `connections-data.js`). Answers land in the owner's private spreadsheet, never in this repo.
+2. The owner reads each submission. Approved ones are added to `CONNECTIONS` in `connections-data.js` with the next post number.
+3. Before adding a post, strip anything that identifies a person: last names, handles, phone numbers, emails. If it can't be made safe, don't post it.
+4. Replies ("That's me") come in through the same form with the post number. The owner passes them on privately.
+5. Posts older than `expiresDays` are hidden by the page. Delete them from the file when convenient.
+
+Show pages link to `missed-connections.html?show=<slug>` from the night of the show onward.
+
 ## Shareable links
 
 Filters are kept in the URL, so a filtered view can be shared as is, e.g.

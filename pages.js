@@ -49,6 +49,8 @@
   }
 
   /* ---------- show page ---------- */
+  // Missed connections make sense once the night has started.
+  if (body.getAttribute("data-date") <= today && $("mcLink")) $("mcLink").hidden = false;
   if (body.getAttribute("data-date") < today) {
     $("pastNote").hidden = false;
     // The list may have moved on to another month; don't jump to a day there.

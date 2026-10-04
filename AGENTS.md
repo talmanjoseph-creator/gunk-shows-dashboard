@@ -29,6 +29,12 @@ More than one person and more than one AI agent push to this repo. Read this bef
 - **Out-of-town shows are hidden by default** and tagged when shown.
 - **The street-level home location must not appear** anywhere in the code or comments.
 
+## Missed connections
+
+- `missed-connections.html` shows posts from `connections-data.js`. **Do not add, edit or remove a post unless the owner has approved that exact post.** Do not write posts yourself, not even as samples.
+- A post must never contain last names, social handles, phone numbers, emails, or anything else that identifies a person.
+- Submissions and people's contact details live in the owner's private spreadsheet. Never copy them into this repo, a commit message or a pull request.
+
 ## Check before pushing
 
 Open `index.html` in a browser at phone width and desktop width. The page should land on today, the day heading should sit below the sticky bar, and the browser console should show no errors.
