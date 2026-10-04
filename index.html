@@ -272,7 +272,6 @@
       section.day.past .show { opacity: 0.7; }
       .show .time { font: 600 13px var(--mono); white-space: nowrap; padding-top: 4px; }
       .show .acts { font-size: 16.5px; font-weight: 700; line-height: 1.3; padding-top: 2px; }
-      .show .acts .hl { color: var(--accent); }
       .star {
         grid-column: 3; grid-row: 1 / span 2; align-self: start;
         width: 40px; height: 40px;
@@ -648,8 +647,8 @@
       var rows = [], nearEls = [], secs = {}, dayLinks = [];
 
       function showHtml(s) {
-        var acts = esc(s[3]).replace(/\*/g, '<span class="hl">*</span>');
-        var plain = s[3].replace(/\*/g, "");
+        var acts = esc(s[3]);
+        var plain = s[3];
         var h = '<article class="show" data-i="' + s.i + '"><div class="time">' + (s[1] ? esc(s[1]) : "—") + "</div>";
         h += '<div class="acts">' + acts + "</div>";
         h += '<button class="star" aria-pressed="' + (saved[s.key] ? "true" : "false") + '" aria-label="Save ' + esc(plain) + " at " + esc(s[2]) + '">' + (saved[s.key] ? "★" : "☆") + "</button>";
@@ -843,7 +842,7 @@
         $("icsBtn").hidden = !list.length;
         $("savedList").innerHTML = list.map(function (s) {
           return '<li><a href="#day-' + s[0] + '">' + DOW3[dow(s[0])] + " " + s[0] + (s[1] ? " · " + esc(s[1]) : "") + "</a><span>" +
-            esc(s[3].replace(/\*/g, "")) + " — " + esc(s[2]) + "</span></li>";
+            esc(s[3]) + " — " + esc(s[2]) + "</span></li>";
         }).join("");
       }
 
@@ -1039,7 +1038,7 @@
           if (s[4]) desc.push(s[4]);
           if (s[7]) desc.push("Tickets: " + s[7]);
           desc.push("Listings can change — check the venue before you head out.");
-          L.push("SUMMARY:" + icsText(s[3].replace(/\*/g, "") + " at " + s[2]), "LOCATION:" + icsText(s[2]), "DESCRIPTION:" + icsText(desc.join("\n")));
+          L.push("SUMMARY:" + icsText(s[3] + " at " + s[2]), "LOCATION:" + icsText(s[2]), "DESCRIPTION:" + icsText(desc.join("\n")));
           L.push("END:VEVENT");
         });
         L.push("END:VCALENDAR");
