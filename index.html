@@ -175,6 +175,9 @@
       }
       .chip.red[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
       .chip .n { font-weight: 500; opacity: 0.75; }
+      .chip.add-show { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+      .chip.add-show { gap: 0; }
+      .chip.add-show:hover { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 
       /* quick chips, then a swipeable day strip (narrow screens only; wide
          screens get the same day links in the sidebar) */
@@ -382,6 +385,18 @@
 
       @media (max-width: 560px) {
         .brand-mini { flex: 1 1 auto; }
+        .ctl-row > .chip { padding: 0 11px; }
+        }
+      /* small phones: keep name, Add and Filters on one line */
+      @media (max-width: 380px) {
+        .brand-mini { font-size: 13.5px; }
+        .ctl-row > .chip { padding: 0 9px; }
+        .add-show .w-a { display: none; }
+        }
+      @media (max-width: 340px) {
+        .add-show .w-show { display: none; }
+        }
+      @media (max-width: 560px) {
         label.search { order: 3; flex-basis: 100%; }
         .strip { margin-left: -16px; margin-right: -16px; padding: 0 16px; }
         .panel { left: -16px; right: -16px; padding-left: 16px; padding-right: 16px; }
@@ -500,6 +515,7 @@
           <label class="search">
             <input id="q" type="search" placeholder="Search acts, venues, notes…" aria-label="Search acts, venues and notes" autocomplete="off" />
           </label>
+          <a class="chip add-show" href="submit.html" aria-label="Add a show">+ Add<span class="w-a">&nbsp;a</span><span class="w-show">&nbsp;show</span></a>
           <button class="chip" id="filterToggle" aria-expanded="false" aria-controls="filterPanel">Filters</button>
         </div>
 
@@ -508,7 +524,6 @@
           <button class="chip" id="weekendBtn" data-when="weekend" aria-pressed="false">This weekend</button>
           <button class="chip" id="savedBtn" aria-pressed="false">★ Saved <span class="n" id="savedCount">0</span></button>
           <a class="chip" href="missed-connections.html">Missed connections</a>
-          <a class="chip" href="submit.html">Add a show</a>
         </div>
         <nav class="strip" id="strip" aria-label="Jump to a day"></nav>
 
