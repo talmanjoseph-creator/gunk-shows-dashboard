@@ -12,11 +12,11 @@
 var CONNECTIONS_META = {
   /* Link to the submission form. Leave "" until the form exists; the page
      then says submissions open soon and shows no post buttons. */
-  formUrl: "",
+  formUrl: "https://docs.google.com/forms/d/e/1FAIpQLScqVd5eCJGufKcyrFPDJzYEbm5WxogQ6qav-zcDh_F1si_z2Q/viewform",
   /* Optional Google Forms pre-fill field names ("entry.123456"), so the
      form opens with the show or the post number already filled in. */
-  prefillShow: "",
-  prefillReply: "",
+  prefillShow: "entry.218739778",
+  prefillReply: "entry.1187751319",
   /* Posts older than this many days are hidden by the page. */
   expiresDays: 30
 };
