@@ -29,6 +29,7 @@
           </label>
           <div class="actions"><button class="btn primary" type="submit" id="adSend">Email me a sign-in link</button></div>
           <p class="hint" id="adNote" role="status"></p>
+          <p class="hint">You stay signed in on this device until you tap Sign out. Don't sign in on a shared device.</p>
         </form>
 
         <div id="adPanel" hidden>
@@ -65,35 +66,70 @@
         var HERE = location.origin + location.pathname;
         var KEY = "smn-admin-token";
 
-        // A sign-in link lands back here with the session in the address; keep it for this tab only.
-        var token = "";
+        /* The sign-in link lands back here with a short-lived access token and
+           a refresh token. Both are kept on this device so the owner stays
+           signed in; the access token is renewed when it runs out. */
+        var session = null; // { access, refresh, exp (ms) }
+        function save(s) {
+          session = s;
+          try { if (s) localStorage.setItem(KEY, JSON.stringify(s)); else localStorage.removeItem(KEY); } catch (e) {}
+        }
+        function fromAuth(j) {
+          return { access: j.access_token, refresh: j.refresh_token || "", exp: Date.now() + (parseInt(j.expires_in, 10) || 3600) * 1000 };
+        }
         try {
           var h = new URLSearchParams(location.hash.replace(/^#/, ""));
           if (h.get("access_token")) {
-            sessionStorage.setItem(KEY, h.get("access_token"));
+            save(fromAuth({ access_token: h.get("access_token"), refresh_token: h.get("refresh_token"), expires_in: h.get("expires_in") }));
             history.replaceState(null, "", HERE);
-          } else if (h.get("error_description")) {
-            $("adStatus").textContent = h.get("error_description").replace(/\+/g, " ");
-            history.replaceState(null, "", HERE);
+          } else {
+            if (h.get("error_description")) {
+              $("adStatus").textContent = h.get("error_description").replace(/\+/g, " ");
+              history.replaceState(null, "", HERE);
+            }
+            session = JSON.parse(localStorage.getItem(KEY) || "null");
           }
-          token = sessionStorage.getItem(KEY) || "";
-        } catch (e) {}
+        } catch (e) { session = null; }
 
-        function api(path, opts) {
-          opts = opts || {};
-          var headers = { apikey: M.supabaseKey, Authorization: "Bearer " + (token || M.supabaseKey) };
+        var renewing = null;
+        function renew() {
+          if (!session || !session.refresh) return Promise.reject(new Error("no refresh"));
+          if (!renewing) {
+            renewing = fetch(BASE + "/auth/v1/token?grant_type=refresh_token", {
+              method: "POST",
+              headers: { apikey: M.supabaseKey, "Content-Type": "application/json" },
+              body: JSON.stringify({ refresh_token: session.refresh })
+            }).then(function (r) {
+              if (!r.ok) throw new Error("refresh " + r.status);
+              return r.json();
+            }).then(function (j) { save(fromAuth(j)); })
+              .then(function () { renewing = null; }, function (e) { renewing = null; throw e; });
+          }
+          return renewing;
+        }
+        function call(path, opts) {
+          var headers = { apikey: M.supabaseKey, Authorization: "Bearer " + session.access };
           if (opts.body) headers["Content-Type"] = "application/json";
           if (opts.prefer) headers.Prefer = opts.prefer;
-          return fetch(BASE + path, { method: opts.method || "GET", headers: headers, body: opts.body ? JSON.stringify(opts.body) : undefined })
-            .then(function (r) {
-              if (r.status === 401) { signOut("Your sign-in ran out. Ask for a new link."); throw new Error("signed out"); }
-              if (!r.ok) throw new Error("Request failed (" + r.status + ")");
-              return r.status === 204 ? null : r.text().then(function (t) { return t ? JSON.parse(t) : null; });
-            });
+          return fetch(BASE + path, { method: opts.method || "GET", headers: headers, body: opts.body ? JSON.stringify(opts.body) : undefined });
+        }
+        function api(path, opts) {
+          opts = opts || {};
+          var expired = function () { signOut("Your sign-in ran out. Ask for a new link."); throw new Error("signed out"); };
+          if (!session) return Promise.reject(new Error("signed out"));
+          // Renew a minute early, and once more if the server still says no.
+          var ready = session.exp - Date.now() < 60000 ? renew().catch(expired) : Promise.resolve();
+          return ready.then(function () { return call(path, opts); }).then(function (r) {
+            if (r.status !== 401) return r;
+            return renew().then(function () { return call(path, opts); }, expired);
+          }).then(function (r) {
+            if (r.status === 401) expired();
+            if (!r.ok) throw new Error("Request failed (" + r.status + ")");
+            return r.status === 204 ? null : r.text().then(function (t) { return t ? JSON.parse(t) : null; });
+          });
         }
         function signOut(msg) {
-          token = "";
-          try { sessionStorage.removeItem(KEY); } catch (e) {}
+          save(null);
           $("adPanel").hidden = true;
           $("adSignin").hidden = false;
           $("adStatus").textContent = msg || "Sign in to read and approve posts.";
@@ -116,7 +152,11 @@
           }, function () { note.textContent = "Couldn't send the link. Try again."; })
             .then(function () { btn.disabled = false; });
         });
-        $("adOut").addEventListener("click", function () { signOut(); });
+        $("adOut").addEventListener("click", function () {
+          // Tell Supabase to end this sign-in too, then forget it here.
+          if (session) call("/auth/v1/logout?scope=local", { method: "POST" }).catch(function () {});
+          signOut();
+        });
 
         /* ---------- signed in ---------- */
         var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -169,7 +209,7 @@
           }).catch(fail);
         }
 
-        if (token) refresh(); else signOut();
+        if (session) refresh(); else signOut();
       })();
     </script>
   </body>
