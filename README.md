@@ -13,7 +13,7 @@ Live at https://talmanjoseph-creator.github.io/gunk-shows-dashboard/
 
 ## Updating for a new month
 
-1. In `shows-data.js`, update `SHOW_META` (year, month, issue details, notes) and replace the rows in `SHOWS`.
+1. In `shows-data.js`, update `SHOW_META` (year, month, source details) and replace the rows in `SHOWS`.
 2. Pull club nights from the venues' own calendars:
    `python3 tools/fetch_venues.py --merge`
    It reads the year and month from `SHOW_META`. Add `--from-day 4` to start partway

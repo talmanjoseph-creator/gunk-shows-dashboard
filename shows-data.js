@@ -18,13 +18,7 @@ var SHOW_META = {
     name: "Oh My Rockness",
     url: "https://www.ohmyrockness.com/",
     pulled: "October 4"
-  },
-  /* "Also in this issue": [bold lead-in, text] */
-  notes: [
-    ["GIRL NOISE festival", "Sunday Oct 4 at Bowery Ballroom, headlined by girlpuppy with six local female artists (16+, benefit for The Brave House). Listed above under Oct 4."],
-    ["GUNK × Marshall “Dead Venue Sessions” zine", "three bands play in dead venues."],
-    ["Missed connection", "Nirosta Steel show at Night Club 101, Saturday night late show."]
-  ]
+  }
 };
 
 /* [day, time, venue, acts, note, age, source, ticketUrl]
