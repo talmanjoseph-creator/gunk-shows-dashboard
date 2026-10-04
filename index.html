@@ -7,12 +7,12 @@
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)" />
     <title>Show Me NYC — every NYC show, night by night</title>
-    <meta name="description" content="Every NYC show this month in one list: DIY and indie listings from GUNK New York plus Oh My Rockness. Filter by area, age and date, and save the ones you want." />
+    <meta name="description" content="Every NYC show this month in one list: DIY and indie listings from GUNK New York and around the city. Filter by area, age and date, and save the ones you want." />
     <link rel="canonical" href="https://talmanjoseph-creator.github.io/gunk-shows-dashboard/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Show Me NYC" />
     <meta property="og:title" content="Show Me NYC — every NYC show, night by night" />
-    <meta property="og:description" content="DIY and indie listings from GUNK New York plus Oh My Rockness, in one list. Filter by area, age and date." />
+    <meta property="og:description" content="DIY and indie listings from GUNK New York and around the city, in one list. Filter by area, age and date." />
     <meta property="og:url" content="https://talmanjoseph-creator.github.io/gunk-shows-dashboard/" />
     <meta property="og:image" content="https://talmanjoseph-creator.github.io/gunk-shows-dashboard/og.png" />
     <meta property="og:image:width" content="1200" />
@@ -375,7 +375,7 @@
       <header class="mast">
         <h1>Show Me <span class="red">NYC</span></h1>
         <p class="mast-sub" id="mastSub">
-          Every NYC show this month — DIY and indie listings from GUNK New York plus Oh My Rockness.
+          Every NYC show this month — DIY and indie listings from GUNK New York and around the city.
         </p>
         <div class="stats" id="stats" aria-label="Totals"></div>
       </header>
@@ -406,6 +406,7 @@
           <div class="ctl-row">
             <button class="chip red" id="nearBtn" aria-pressed="false" title="Use your location to show gigs within 1 mile">Close to home</button>
             <button class="chip" id="releaseBtn" aria-pressed="false">Release shows only</button>
+            <button class="chip" id="gunkBtn" aria-pressed="false" title="Only shows listed in GUNK New York">GUNK picks only</button>
           </div>
           <div class="ctl-row" id="openRow" role="group" aria-label="Age: shows open to">
             <span class="ctl-label">Open to</span>
@@ -415,12 +416,6 @@
             <button class="chip" data-open="18" aria-pressed="false" title="All-ages, 16+ and 18+ shows">18 and up</button>
           </div>
           <div class="ctl-row" id="areaRow" role="group" aria-label="Area"></div>
-          <div class="ctl-row" id="srcRow" role="group" aria-label="Source">
-            <span class="ctl-label">Source</span>
-            <button class="chip" data-src="all" aria-pressed="true">All</button>
-            <button class="chip" data-src="gunk" aria-pressed="false">GUNK picks</button>
-            <button class="chip" data-src="omr" aria-pressed="false">Oh My Rockness</button>
-          </div>
           <div class="ctl-row panel-foot">
             <button class="chip solid" id="doneBtn">Show results</button>
             <button class="link-btn" id="clearBtn2">Clear filters</button>
@@ -599,7 +594,7 @@
         if ((v = p.get("q"))) { $("q").value = v; state.q = fold(v.trim()); }
         if (OPEN_TO[(v = p.get("open"))]) state.open = v;
         if (AREA_NAME[(v = p.get("area"))]) state.area = v;
-        if ((v = p.get("src")) === "gunk" || v === "omr") state.src = v;
+        if (p.get("src") === "gunk") state.src = "gunk";
         if (VENUE_SET[(v = p.get("venue"))]) state.venue = v;
         if (inMonth && ((v = p.get("when")) === "tonight" || (v === "weekend" && weekend.length))) state.when = v;
         if (p.get("release") === "1") state.release = true;
@@ -622,7 +617,7 @@
 
       function passes(s, ignoreArea) {
         if (state.venue && s[2] !== state.venue) return false;
-        if (state.src !== "all" && s[6] !== state.src && s[6] !== "both") return false;
+        if (state.src === "gunk" && s[6] === "other") return false;
         if (state.open !== "any" && !OPEN_TO[state.open][s[5]]) return false;
         // A venue filter or the saved list shows everything it names, in town or not.
         if (!ignoreArea && !state.venue && !state.saved) {
@@ -657,7 +652,7 @@
           h += '<a class="map-link" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&amp;query=' +
             encodeURIComponent(s[2] + (s.area === "out" ? "" : ", New York, NY")) + '" aria-label="Map of ' + esc(s[2]) + '">Map</a>';
         }
-        if (s[6] !== "omr") h += '<span class="badge src" title="Listed in GUNK New York">GUNK</span>';
+        if (s[6] !== "other") h += '<span class="badge src" title="Listed in GUNK New York">GUNK</span>';
         if (s[7]) {
           h += '<a class="badge tix' + (s.sold ? " sold" : "") + '" href="' + esc(s[7]) + '" target="_blank" rel="noopener">' + (s.sold ? "Sold out" : "Tickets") + "</a>";
         }
@@ -717,11 +712,11 @@
           }).join("");
 
         // Masthead, stats, notes, colophon.
-        var G = SHOW_META.gunk, O = SHOW_META.omr;
+        var G = SHOW_META.gunk, O = SHOW_META.other;
         document.title = "Show Me NYC — every NYC show, " + MONTHS[MONTH] + " " + YEAR;
         $("mastSub").innerHTML = "Every NYC show, " + MONTHS[MONTH] + " " + FIRST_DAY + "–" + LAST_DAY +
           ' — DIY/indie listings from <a href="' + esc(G.url) + '" target="_blank" rel="noopener">GUNK New York, Issue No. ' + G.issue +
-          "</a> (transcribed " + esc(G.transcribed) + '), plus <a href="' + esc(O.url) + '" target="_blank" rel="noopener">Oh My Rockness</a> listings (pulled ' +
+          "</a> (transcribed " + esc(G.transcribed) + "), plus more listings from around the city (pulled " +
           esc(O.pulled) + "). A GUNK badge marks the zine's picks; an asterisk (*) marks the headliner, per the zine.";
         var days = {};
         SHOWS.forEach(function (s) { days[s[0]] = 1; });
@@ -741,8 +736,8 @@
           $("issueNotes").hidden = false;
         }
         $("colophon").innerHTML = 'Sources: <a href="' + esc(G.url) + '" target="_blank" rel="noopener">GUNK New York, Issue No. ' + G.issue + "</a> (transcribed " +
-          esc(G.transcribed) + "; runs " + esc(G.covers) + ') and <a href="' + esc(O.url) + '" target="_blank" rel="noopener">Oh My Rockness</a> (pulled ' + esc(O.pulled) +
-          "). Most ticket links are Oh My Rockness's own. Close to home uses your device's location to show gigs within " + NEAR_MILES +
+          esc(G.transcribed) + "; runs " + esc(G.covers) + "), plus other public listings (pulled " + esc(O.pulled) +
+          "). Close to home uses your device's location to show gigs within " + NEAR_MILES +
           " mile — the location never leaves your browser, and a handful of DIY spots without public addresses aren't covered. " +
           "Saved shows are stored only in this browser. Listings can change — check the venue before you head out.";
 
@@ -839,7 +834,7 @@
         }
         press("[data-open]", "data-open", state.open);
         press("[data-area]", "data-area", state.area);
-        press("[data-src]", "data-src", state.src);
+        $("gunkBtn").setAttribute("aria-pressed", state.src === "gunk" ? "true" : "false");
         press("[data-when]", "data-when", state.when);
         $("releaseBtn").setAttribute("aria-pressed", state.release ? "true" : "false");
         $("nearBtn").setAttribute("aria-pressed", state.near ? "true" : "false");
@@ -940,7 +935,7 @@
         if (!b) return;
         if (b.hasAttribute("data-open")) state.open = b.getAttribute("data-open");
         else if (b.hasAttribute("data-area")) state.area = b.getAttribute("data-area");
-        else if (b.hasAttribute("data-src")) state.src = b.getAttribute("data-src");
+        else if (b.id === "gunkBtn") state.src = state.src === "gunk" ? "all" : "gunk";
         else if (b.id === "releaseBtn") state.release = !state.release;
         else return;
         changed();

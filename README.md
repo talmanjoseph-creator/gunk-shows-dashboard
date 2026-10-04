@@ -1,6 +1,6 @@
 # Show Me NYC
 
-Every NYC show for the month in one list: DIY/indie listings from GUNK New York plus Oh My Rockness.
+Every NYC show for the month in one list: DIY/indie listings from GUNK New York and around the city.
 Live at https://talmanjoseph-creator.github.io/gunk-shows-dashboard/
 
 ## Files

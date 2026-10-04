@@ -6,7 +6,7 @@ Run after pasting in new listings:  python3 tools/clean_shows.py
   1. Normalizes venue names (trims whitespace, merges known aliases).
   2. Merges duplicate listings (same day + venue with a matching bill).
      A show listed by both sources gets source "both" and keeps the GUNK
-     wording plus the Oh My Rockness ticket link.
+     wording plus the other source's ticket link.
   3. Sorts each day by start time (after-midnight sets go last).
   4. Regenerates AREA (venue -> area) from the GEO coordinates.
 
@@ -145,7 +145,7 @@ def is_dupe(x, y):
 
 
 def merge(x, y):
-    """Fold y into x. GUNK wording wins; OMR supplies what GUNK lacks."""
+    """Fold y into x. GUNK wording wins; the other source supplies what GUNK lacks."""
     if x[SRC] == y[SRC] or "both" in (x[SRC], y[SRC]):
         keep, other = (x, y) if len(act_set(x[ACTS])) >= len(act_set(y[ACTS])) else (y, x)
         src = "both" if "both" in (x[SRC], y[SRC]) else x[SRC]
