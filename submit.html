@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Add a show | Show Me NYC</title>
+    <meta name="description" content="Playing somewhere in New York? Get on the list. Free, no login." />
+    <link rel="canonical" href="https://talmanjoseph-creator.github.io/gunk-shows-dashboard/submit.html" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Show Me NYC" />
+    <meta property="og:title" content="Add a show — Show Me NYC" />
+    <meta property="og:description" content="Playing somewhere in New York? Get on the list. Free, no login." />
+    <meta property="og:url" content="https://talmanjoseph-creator.github.io/gunk-shows-dashboard/submit.html" />
+    <meta property="og:image" content="https://talmanjoseph-creator.github.io/gunk-shows-dashboard/og.png?v=3" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111'/%3E%3Cpath fill='%23ff4d4d' d='M3 29V17h6v12zM10 29V11l6-3v21zM17 29V13h2V8h1V3h1v5h1v5h2v16zM25 29V19h4v10z'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="pages.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="top">
+        <a class="brand" href="./?intro">Show&nbsp;Me&nbsp;<span>NYC</span></a>
+        <a class="back" href="./">← All shows</a>
+      </header>
+      <main>
+        <p class="when">Add a show</p>
+        <h1>Playing somewhere? Get on the list.</h1>
+        <p class="where">Free. No login. We check it, then it goes up.</p>
+
+        <p class="hint" id="subSoon" hidden>Adding shows opens soon.</p>
+        <noscript><p class="hint">This form needs JavaScript.</p></noscript>
+
+        <form class="compose" id="subForm" hidden novalidate>
+          <label>Who's playing?
+            <input id="subActs" type="text" maxlength="300" placeholder="Headliner, Support, Opener" autocomplete="off" required />
+          </label>
+          <label>Where?
+            <input id="subVenue" type="text" maxlength="80" placeholder="Venue name" list="subVenues" autocomplete="off" required />
+          </label>
+          <datalist id="subVenues"></datalist>
+          <div class="row3">
+            <label>Which night?
+              <input id="subNight" type="date" required />
+            </label>
+            <label>Start time
+              <input id="subTime" type="time" />
+            </label>
+            <label>Ages
+              <select id="subAge">
+                <option value="">Not sure</option>
+                <option value="AA">All ages</option>
+                <option value="16">16+</option>
+                <option value="18">18+</option>
+                <option value="21">21+</option>
+              </select>
+            </label>
+          </div>
+          <label>Ticket or event link
+            <input id="subUrl" type="url" maxlength="500" placeholder="https://" autocomplete="off" inputmode="url" />
+          </label>
+          <label>Anything else? <span class="opt">optional</span>
+            <input id="subNote" type="text" maxlength="140" placeholder="Album release, $10, free…" autocomplete="off" />
+          </label>
+          <label>Your email <span class="opt">optional</span>
+            <input id="subEmail" type="email" maxlength="120" placeholder="Only we see it" autocomplete="email" />
+          </label>
+          <label class="hp" aria-hidden="true">Leave this empty
+            <input id="subHp" type="text" tabindex="-1" autocomplete="off" />
+          </label>
+          <div class="actions">
+            <button class="btn primary" id="subSend" type="submit">Send it in</button>
+          </div>
+          <p class="hint" id="subStatus" role="status" aria-live="polite"></p>
+        </form>
+
+        <section>
+          <h2>House rules</h2>
+          <ul class="rules">
+            <li>Real shows in or near New York City. One show per entry.</li>
+            <li>We check every show before it goes up, so add a link we can check it against.</li>
+            <li>Direct ticket links only. No tracking links.</li>
+            <li>Your email is never shown. It's only so we can ask about your listing.</li>
+            <li>Something change? Send it again and say what's different.</li>
+          </ul>
+        </section>
+      </main>
+      <footer class="colophon">
+        Shows sent in here are read by a person before they appear on the list.
+      </footer>
+    </div>
+
+    <script src="shows-data.js"></script>
+    <script src="connections-data.js"></script>
+    <script>
+      (function () {
+        "use strict";
+        var M = CONNECTIONS_META;
+        function $(id) { return document.getElementById(id); }
+        if (!M.supabaseUrl || !M.supabaseKey) { $("subSoon").hidden = false; return; }
+        var API = M.supabaseUrl.replace(/\/+$/, "") + "/rest/v1/submitted_shows";
+        var form = $("subForm"), status = $("subStatus"), btn = $("subSend");
+        form.hidden = false;
+
+        // Venues already on the site, so the name is spelled the same way.
+        var names = {};
+        (typeof SHOWS === "undefined" ? [] : SHOWS).forEach(function (s) { names[s[2]] = 1; });
+        var dl = $("subVenues");
+        Object.keys(names).sort(function (a, b) { return a.toLowerCase() < b.toLowerCase() ? -1 : 1; }).forEach(function (v) {
+          var o = document.createElement("option");
+          o.value = v;
+          dl.appendChild(o);
+        });
+        var byLower = {};
+        Object.keys(names).forEach(function (v) { byLower[v.toLowerCase()] = v; });
+
+        // Dates: today (New York) to a year out.
+        function nyDate(addDays) {
+          var o = {};
+          try {
+            new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", year: "numeric", month: "numeric", day: "numeric" })
+              .formatToParts(new Date()).forEach(function (p) { o[p.type] = parseInt(p.value, 10); });
+          } catch (e) {
+            var n = new Date();
+            o = { year: n.getFullYear(), month: n.getMonth() + 1, day: n.getDate() };
+          }
+          return new Date(Date.UTC(o.year, o.month - 1, o.day + addDays)).toISOString().slice(0, 10);
+        }
+        var MIN = nyDate(0), MAX = nyDate(365);
+        $("subNight").min = MIN;
+        $("subNight").max = MAX;
+
+        // "20:00" -> "8:00 PM", the way the list writes times.
+        function clock(v) {
+          var m = /^(\d{1,2}):(\d{2})/.exec(v || "");
+          if (!m) return "";
+          var h = parseInt(m[1], 10);
+          return (h % 12 || 12) + ":" + m[2] + " " + (h < 12 ? "AM" : "PM");
+        }
+        // Tracking links that wrap the real ticket page: use the page itself.
+        function direct(url) {
+          var dice = /^https?:\/\/(?:www\.)?dice\.fm\/(?:partner\/tickets\/)?event\/([^?#\s]+)/i.exec(url);
+          if (dice) return "https://dice.fm/event/" + dice[1].replace(/\/+$/, "");
+          try {
+            var u = new URL(url);
+            if (/(^|\.)(evyy\.net|pxf\.io|sjv\.io)$/i.test(u.hostname)) {
+              var t = u.searchParams.get("u");
+              if (t && /^https:\/\//i.test(t)) return t;
+            }
+          } catch (e) {}
+          return url;
+        }
+        function say(text, field) {
+          status.textContent = text;
+          if (field) field.focus();
+        }
+        var THANKS = "Got it. It'll be on the list once we've checked it.";
+
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          if ($("subHp").value) { form.reset(); say(THANKS); return; } // bots fill the hidden field
+          var acts = $("subActs").value.replace(/\s+/g, " ").trim();
+          var venue = $("subVenue").value.replace(/\s+/g, " ").trim();
+          var night = $("subNight").value, url = $("subUrl").value.trim(), email = $("subEmail").value.trim();
+          if (acts.length < 2) return say("Who's playing?", $("subActs"));
+          if (venue.length < 2) return say("Where is it?", $("subVenue"));
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(night)) return say("Pick the night.", $("subNight"));
+          if (night < MIN || night > MAX) return say("Pick a date from today to a year from now.", $("subNight"));
+          if (url && !/^https?:\/\//i.test(url)) url = "https://" + url;
+          url = direct(url).replace(/^http:\/\//i, "https://");
+          if (url && !/^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)+(\/[^\s"<>]*)?$/i.test(url)) return say("That link doesn't look right. Paste the full address.", $("subUrl"));
+          if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return say("That email doesn't look right.", $("subEmail"));
+          var row = {
+            night: night,
+            start_time: clock($("subTime").value),
+            venue: byLower[venue.toLowerCase()] || venue,
+            acts: acts,
+            note: $("subNote").value.replace(/\s+/g, " ").trim(),
+            age: $("subAge").value,
+            ticket_url: url
+          };
+          if (email) row.contact_email = email;
+          btn.disabled = true;
+          say("Sending…");
+          fetch(API, {
+            method: "POST",
+            headers: { apikey: M.supabaseKey, Authorization: "Bearer " + M.supabaseKey, "Content-Type": "application/json", Prefer: "return=minimal" },
+            body: JSON.stringify(row)
+          }).then(function (r) {
+            if (r.ok) return;
+            return r.json().catch(function () { return {}; }).then(function (j) {
+              // Our own database messages are written for visitors; anything else gets a plain one.
+              var ours = j && j.message && /^(Pick a date|Use the direct|That show has|Too many)/.test(j.message);
+              throw new Error(ours ? j.message : "That didn't go through. Check it over and try again.");
+            });
+          }).then(function () {
+            form.reset();
+            if (email) $("subEmail").value = email; // handy when sending several
+            say(THANKS);
+          }, function (err) {
+            say(err && /^(Pick|Use|That|Too)/.test(err.message) ? err.message : "That didn't go through. Check your connection and try again.");
+          }).then(function () { btn.disabled = false; });
+        });
+      })();
+    </script>
+  </body>
+</html>
