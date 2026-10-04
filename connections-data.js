@@ -12,8 +12,8 @@
 var CONNECTIONS_META = {
   /* Supabase project URL ("https://xxxx.supabase.co") and public anon key.
      While either is "", the page falls back to the form link below. */
-  supabaseUrl: "",
-  supabaseKey: "",
+  supabaseUrl: "https://duwqdwyzdorridftyxva.supabase.co",
+  supabaseKey: "sb_publishable_wimklLlVfvlXBj8F1P0vjw_8pBu5RXj",
   /* Fallback only: the older Google Form, used while Supabase is not set. */
   formUrl: "https://docs.google.com/forms/d/e/1FAIpQLScqVd5eCJGufKcyrFPDJzYEbm5WxogQ6qav-zcDh_F1si_z2Q/viewform",
   /* Optional Google Forms pre-fill field names ("entry.123456"), so the

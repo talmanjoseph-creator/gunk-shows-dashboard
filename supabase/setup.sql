@@ -104,6 +104,11 @@ grant update (approved) on public.connections to authenticated;
 grant delete on public.connections to authenticated;
 revoke all on public.connection_admins from anon, authenticated;
 
+-- The trigger function is not meant to be called through the API.
+-- (is_connection_admin stays callable: the read rule and the admin page use it,
+-- and it only ever answers true or false about the caller.)
+revoke execute on function public.connections_guard() from public, anon, authenticated;
+
 -- LAST STEP, done by the owner in the SQL editor and NOT saved in the repo:
 --   insert into public.connection_admins (email) values ('you@example.com')
 --   on conflict do nothing;
