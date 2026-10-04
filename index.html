@@ -79,6 +79,30 @@
       }
       .skip:focus { left: 8px; top: 8px; }
 
+      /* ---------- title card: a few hard cuts, then the site ---------- */
+      #card {
+        position: fixed; inset: 0; z-index: 100;
+        display: none; align-items: center; justify-content: center;
+        overflow: hidden; cursor: pointer;
+        background: #0d0d0d; color: #f2f2f2;
+      }
+      #card.show { display: flex; }
+      #card.red { background: #d92323; color: #ffffff; }
+      #card.paper { background: #ffffff; color: #111111; }
+      #card.black { background: #000000; }
+      #card .w {
+        font: 900 100px/0.9 "Archivo", system-ui, sans-serif;
+        letter-spacing: -0.03em; text-transform: uppercase; white-space: nowrap;
+      }
+      #card .w em { font-style: normal; color: #ff4d4d; }
+      #card .w.sm { font: 600 clamp(12px, 3.4vw, 18px)/1.2 var(--mono); letter-spacing: 0.3em; }
+      #card .w.tl { position: absolute; top: 18px; left: 18px; }
+      #card .w.br { position: absolute; bottom: 18px; right: 18px; }
+      #card .w.big { transform: scale(1.9); } /* cropped by the screen on purpose */
+      #card .w.up { transform: translateY(-30vh); }
+      #card .w.dn { transform: translateY(28vh); }
+      #card .w.lf { transform: translateX(-20vw) scale(1.35); }
+
       /* ---------- masthead ---------- */
       header.mast { position: relative; border-bottom: 4px solid var(--line); padding: 28px 0 18px; }
       /* Skyline standing on the masthead's bottom rule. */
@@ -365,6 +389,79 @@
     </style>
   </head>
   <body>
+    <div id="card" aria-hidden="true"></div>
+    <script>
+      /* Title card. Plays once per browser session, never when the visitor
+         has asked for reduced motion, and a tap skips it. The page loads
+         underneath while it runs. Full-screen colour changes are kept under
+         three a second. */
+      (function () {
+        var el = document.getElementById("card");
+        var seen = false;
+        try { seen = sessionStorage.getItem("smn-intro") === "1"; } catch (e) {}
+        var calm = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (seen || calm) return;
+        try { sessionStorage.setItem("smn-intro", "1"); } catch (e) {}
+
+        // [words, card colour, word modifier, beats, extra corner text]
+        var CARDS = [
+          ["SHOW", "", "", 1],
+          ["ME", "", "big", 1],
+          ["NYC", "red", "", 2],
+          ["NEW", "", "up", 1, '<span class="w sm tl">40.7128 N</span><span class="w sm br">74.0060 W</span>'],
+          ["YORK", "", "", 1],
+          ["CITY", "", "dn", 1],
+          ["SHOWS", "paper", "", 2],
+          ["EVERY", "", "lf", 1],
+          ["NIGHT", "", "big", 1],
+          ["SHOW ME <em>NYC</em>", "", "", 3],
+          ["THE CITY NEVER SLEEPS", "", "sm", 2]
+        ];
+        var CUT = 150, i = 0, timer = null, done = false;
+
+        // Size each big word to 88% of the screen width, whatever font has loaded.
+        function fit() {
+          var w = el.querySelector(".w.fit");
+          if (!w) return;
+          w.style.fontSize = "100px";
+          var size = 100 * (window.innerWidth * 0.88) / (w.offsetWidth || 1);
+          w.style.fontSize = Math.min(size, window.innerHeight * 0.62, 320) + "px";
+        }
+        function finish() {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          el.className = "";
+          el.innerHTML = "";
+        }
+        function next() {
+          if (done) return;
+          if (i < CARDS.length) {
+            var c = CARDS[i++];
+            el.className = "show" + (c[1] ? " " + c[1] : "");
+            el.innerHTML = '<span class="w ' + (c[2] === "sm" ? "sm" : "fit " + c[2]) + '">' + c[0] + "</span>" + (c[4] || "");
+            fit();
+            timer = setTimeout(next, CUT * c[3]);
+          } else {
+            el.className = "show black"; // a beat of black, then the site
+            el.innerHTML = "";
+            timer = setTimeout(finish, 220);
+          }
+        }
+        el.addEventListener("click", finish);
+        document.addEventListener("keydown", function (e) { if (e.key === "Escape") finish(); });
+
+        // Hold a plain black card until the heavy font is ready (or 1.2s passes).
+        el.className = "show";
+        var started = false;
+        function go() { if (!started) { started = true; next(); } }
+        if (document.fonts && document.fonts.load) {
+          document.fonts.load('900 100px "Archivo"', "SHOWMENYCRKITVG").then(go, go);
+          document.fonts.addEventListener && document.fonts.addEventListener("loadingdone", fit);
+        }
+        setTimeout(go, 1200);
+      })();
+    </script>
     <a class="skip" href="#days">Skip to the listings</a>
     <div class="wrap">
       <header class="mast">
