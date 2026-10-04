@@ -108,6 +108,11 @@
         margin-top: 0;
       }
       .ctl-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      .brand-mini {
+        font-weight: 900; font-size: 15px; letter-spacing: 0.01em;
+        text-transform: uppercase; white-space: nowrap; margin-right: 2px;
+      }
+      .brand-mini .red { color: var(--accent); }
       .ctl-row + .ctl-row { margin-top: 8px; }
       label.search { flex: 1 1 240px; display: flex; }
       label.search input {
@@ -297,6 +302,7 @@
 
       <div class="controls" role="region" aria-label="Filters">
         <div class="ctl-row">
+          <span class="brand-mini">Show&nbsp;Me&nbsp;<span class="red">NYC</span></span>
           <label class="search">
             <input id="q" type="search" placeholder="Search acts or venues… (try: Palehound, TV Eye)" aria-label="Search acts or venues" />
           </label>
