@@ -27,6 +27,14 @@ Live at https://talmanjoseph-creator.github.io/gunk-shows-dashboard/
 5. If it puts a venue in the wrong area, add it to `AREA_OVERRIDES` in the script and run it again.
    New venue spellings go in `VENUE_ALIASES`.
 
+## Show and venue pages
+
+Every show has its own page in `shows/` and every venue in `venues/`. They are generated files: do not edit them by hand.
+
+- `tools/build_pages.py` writes them (plus `sitemap.xml`) from `shows-data.js`. `tools/clean_shows.py` runs it for you at the end, so one command keeps data and pages in step.
+- `pages.css` and `pages.js` are the shared styles and behavior for those pages. `404.html` is shown for a show link that no longer exists.
+- The main list links each show to `shows/<slug>.html`. The slug is computed twice, in `show_slug()` in `tools/build_pages.py` and in `showSlug()` in `index.html`. Change one and you must change the other.
+
 ## Shareable links
 
 Filters are kept in the URL, so a filtered view can be shared as is, e.g.

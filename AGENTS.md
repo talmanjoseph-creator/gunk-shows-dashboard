@@ -13,6 +13,9 @@ More than one person and more than one AI agent push to this repo. Read this bef
 - `index.html` — markup, styles and script. It contains **no listings and nothing month-specific**.
 - `shows-data.js` — all listings data: `SHOW_META`, `SHOWS`, `GEO`, `AREA`. Listings go here, not in `index.html`.
 - `tools/clean_shows.py` — run it after changing `shows-data.js`. It merges venue spellings, removes duplicates, sorts by start time, regenerates `AREA`, and unwraps affiliate ticket links.
+- `shows/` and `venues/` — one generated page per show and per venue. **Never edit these by hand**; `tools/build_pages.py` rewrites both folders from `shows-data.js`, and `tools/clean_shows.py` runs it automatically. If you change the data, the pages must be regenerated in the same pull request.
+- `pages.css`, `pages.js`, `404.html` — shared styles, behavior and not-found page for the generated pages.
+- The show page name is computed in two places that must match: `show_slug()` in `tools/build_pages.py` and `showSlug()` in `index.html`.
 - `og.png` — share preview image.
 - `README.md` — how to update for a new month.
 
