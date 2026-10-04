@@ -31,9 +31,11 @@ More than one person and more than one AI agent push to this repo. Read this bef
 
 ## Missed connections
 
-- `missed-connections.html` shows posts from `connections-data.js`. **Do not add, edit or remove a post unless the owner has approved that exact post.** Do not write posts yourself, not even as samples.
-- A post must never contain last names, social handles, phone numbers, emails, or anything else that identifies a person.
-- Submissions and people's contact details live in the owner's private spreadsheet. Never copy them into this repo, a commit message or a pull request.
+- Posts and replies live in the owner's Supabase project (table `connections`), not in this repo. Visitors add them on `missed-connections.html`; only the owner approves them, on `mc-admin.html`.
+- **Do not approve, edit, delete or write posts**, in the database or anywhere else, unless the owner has approved that exact action. Do not create sample or test posts in the live database.
+- Do not loosen `supabase/setup.sql`: visitors must never be able to approve their own posts or read unapproved ones. Any change to those rules needs the owner's say-so and a test.
+- The only Supabase value allowed in this repo is the project URL and the public anon / publishable key. **Never commit the service_role key, a database password, the admin email list, or anyone's contact details.**
+- A post must never contain last names, social handles, phone numbers or emails.
 
 ## Check before pushing
 

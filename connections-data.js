@@ -1,17 +1,20 @@
-/* Show Me NYC — missed connections.
+/* Show Me NYC — missed connections settings.
 
-   Nothing is posted here automatically. Submissions arrive privately
-   through the form; the owner reads each one and adds the approved ones
-   below by hand (or tells an agent to).
+   Posts and replies live in the owner's Supabase project (table
+   "connections", set up by supabase/setup.sql). Visitors add them on the
+   page; nothing shows until the owner approves it on mc-admin.html.
 
-   NEVER put in this file: last names, social handles, phone numbers,
-   email addresses, or anything that identifies a person beyond what a
-   stranger at the show could have seen. Never commit the submissions
-   spreadsheet or anyone's contact details to this repo. */
+   The key below is Supabase's public "anon" / publishable key. It is meant
+   to be in the page and can only do what supabase/setup.sql allows.
+   NEVER put the service_role / secret key, a database password, or anyone's
+   contact details in this repo. */
 
 var CONNECTIONS_META = {
-  /* Link to the submission form. Leave "" until the form exists; the page
-     then says submissions open soon and shows no post buttons. */
+  /* Supabase project URL ("https://xxxx.supabase.co") and public anon key.
+     While either is "", the page falls back to the form link below. */
+  supabaseUrl: "",
+  supabaseKey: "",
+  /* Fallback only: the older Google Form, used while Supabase is not set. */
   formUrl: "https://docs.google.com/forms/d/e/1FAIpQLScqVd5eCJGufKcyrFPDJzYEbm5WxogQ6qav-zcDh_F1si_z2Q/viewform",
   /* Optional Google Forms pre-fill field names ("entry.123456"), so the
      form opens with the show or the post number already filled in. */
@@ -21,14 +24,7 @@ var CONNECTIONS_META = {
   expiresDays: 30
 };
 
-/* One entry per approved post, any order:
-   {
-     id: 1,                      // post number, shown as #1; never reuse one
-     posted: "2026-10-05",       // the day it was approved
-     night: "2026-10-04",        // the night of the show
-     venue: "Elsewhere",         // as written in shows-data.js
-     show: "2026-10-04-elsewhere-disco-tehran-400pm",  // show page name, or "" if unsure
-     text: "You had the green jacket by the sound booth. I had the bad dancing."
-   } */
+/* Fallback only: posts approved by hand in the Google Form days. Unused
+   once Supabase is set. */
 var CONNECTIONS = [
 ];

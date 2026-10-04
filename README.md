@@ -39,15 +39,16 @@ Every show has its own page in `shows/` and every venue in `venues/`. They are g
 
 ## Missed connections
 
-`missed-connections.html` lists posts from `connections-data.js`. Nothing is posted automatically.
+Posts and replies are stored in the owner's Supabase project, not in this repo.
 
-1. A visitor fills in the form linked from the page (`formUrl` in `connections-data.js`). Answers land in the owner's private spreadsheet, never in this repo.
-2. The owner reads each submission. Approved ones are added to `CONNECTIONS` in `connections-data.js` with the next post number.
-3. Before adding a post, strip anything that identifies a person: last names, handles, phone numbers, emails. If it can't be made safe, don't post it.
-4. Replies ("That's me") come in through the same form with the post number. The owner passes them on privately.
-5. Posts older than `expiresDays` are hidden by the page. Delete them from the file when convenient.
-
-Show pages link to `missed-connections.html?show=<slug>` from the night of the show onward.
+- `missed-connections.html` has the post box and the list. Visitors give a name and a message, no login. Replies work the same way, one level deep.
+- **Nothing shows until it is approved.** New posts and replies are saved as not approved, and the public can only read approved rows.
+- `mc-admin.html` is the owner's page. Sign in with the emailed link, then Approve, Take down or Delete. Only emails listed in the `connection_admins` table can do this.
+- `supabase/setup.sql` creates the table and every rule above. It was tested in Postgres and is safe to run again. The admin email is added in Supabase directly and is never saved here.
+- `connections-data.js` holds the project URL and the public anon key. That key is meant to be public; it can only do what `setup.sql` allows. **Never commit the service_role key or a database password.**
+- Posts older than `expiresDays` are hidden by the page.
+- Show pages link to `missed-connections.html?show=<slug>&venue=…&night=…` from the night of the show onward, so a post made from there is tied to that show.
+- If `supabaseUrl` or `supabaseKey` is empty, the page falls back to the older Google Form link.
 
 ## Shareable links
 

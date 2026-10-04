@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Approve posts | Show Me NYC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="pages.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="top">
+        <a class="brand" href="./">Show&nbsp;Me&nbsp;<span>NYC</span></a>
+        <a class="back" href="missed-connections.html">Missed connections</a>
+      </header>
+      <main>
+        <p class="when">Owner only</p>
+        <h1>Approve posts</h1>
+        <p class="where" id="adStatus"></p>
+
+        <!-- Signed out: ask for a sign-in link by email -->
+        <form class="compose" id="adSignin" hidden novalidate>
+          <label>Your email
+            <input id="adEmail" type="email" autocomplete="email" required />
+          </label>
+          <div class="actions"><button class="btn primary" type="submit" id="adSend">Email me a sign-in link</button></div>
+          <p class="hint" id="adNote" role="status"></p>
+        </form>
+
+        <div id="adPanel" hidden>
+          <section class="pending">
+            <h2 id="adPendingHead">Waiting</h2>
+            <div class="posts" id="adPending"></div>
+            <p class="hint" id="adNone" hidden>Nothing waiting. All caught up.</p>
+          </section>
+          <section>
+            <h2>Up on the site</h2>
+            <div class="posts" id="adLive"></div>
+          </section>
+          <section>
+            <button class="more as-btn" id="adOut">Sign out</button>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script src="connections-data.js"></script>
+    <script>
+      (function () {
+        "use strict";
+        var M = CONNECTIONS_META;
+        function $(id) { return document.getElementById(id); }
+        function el(tag, cls, text) {
+          var e = document.createElement(tag);
+          if (cls) e.className = cls;
+          if (text !== undefined) e.textContent = text;
+          return e;
+        }
+        if (!M.supabaseUrl || !M.supabaseKey) { $("adStatus").textContent = "Supabase isn't set up in connections-data.js yet."; return; }
+        var BASE = M.supabaseUrl.replace(/\/+$/, "");
+        var HERE = location.origin + location.pathname;
+        var KEY = "smn-admin-token";
+
+        // A sign-in link lands back here with the session in the address; keep it for this tab only.
+        var token = "";
+        try {
+          var h = new URLSearchParams(location.hash.replace(/^#/, ""));
+          if (h.get("access_token")) {
+            sessionStorage.setItem(KEY, h.get("access_token"));
+            history.replaceState(null, "", HERE);
+          } else if (h.get("error_description")) {
+            $("adStatus").textContent = h.get("error_description").replace(/\+/g, " ");
+            history.replaceState(null, "", HERE);
+          }
+          token = sessionStorage.getItem(KEY) || "";
+        } catch (e) {}
+
+        function api(path, opts) {
+          opts = opts || {};
+          var headers = { apikey: M.supabaseKey, Authorization: "Bearer " + (token || M.supabaseKey) };
+          if (opts.body) headers["Content-Type"] = "application/json";
+          if (opts.prefer) headers.Prefer = opts.prefer;
+          return fetch(BASE + path, { method: opts.method || "GET", headers: headers, body: opts.body ? JSON.stringify(opts.body) : undefined })
+            .then(function (r) {
+              if (r.status === 401) { signOut("Your sign-in ran out. Ask for a new link."); throw new Error("signed out"); }
+              if (!r.ok) throw new Error("Request failed (" + r.status + ")");
+              return r.status === 204 ? null : r.text().then(function (t) { return t ? JSON.parse(t) : null; });
+            });
+        }
+        function signOut(msg) {
+          token = "";
+          try { sessionStorage.removeItem(KEY); } catch (e) {}
+          $("adPanel").hidden = true;
+          $("adSignin").hidden = false;
+          $("adStatus").textContent = msg || "Sign in to read and approve posts.";
+        }
+
+        /* ---------- signed out ---------- */
+        $("adSignin").addEventListener("submit", function (e) {
+          e.preventDefault();
+          var email = $("adEmail").value.trim(), note = $("adNote"), btn = $("adSend");
+          if (!email) { note.textContent = "Type your email first."; return; }
+          btn.disabled = true;
+          note.textContent = "Sending…";
+          fetch(BASE + "/auth/v1/otp?redirect_to=" + encodeURIComponent(HERE), {
+            method: "POST",
+            headers: { apikey: M.supabaseKey, "Content-Type": "application/json" },
+            body: JSON.stringify({ email: email, create_user: true })
+          }).then(function (r) {
+            note.textContent = r.ok ? "Check your email and open the link on this device."
+              : r.status === 429 ? "Too many tries. Wait a minute and try again." : "Couldn't send the link. Try again.";
+          }, function () { note.textContent = "Couldn't send the link. Try again."; })
+            .then(function () { btn.disabled = false; });
+        });
+        $("adOut").addEventListener("click", function () { signOut(); });
+
+        /* ---------- signed in ---------- */
+        var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        function when(iso) {
+          var d = new Date(iso);
+          return isNaN(d) ? "" : MONTHS[d.getMonth()] + " " + d.getDate() + ", " + d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+        }
+        function card(c, byId) {
+          var art = el("article");
+          var where = [c.night, c.venue].filter(Boolean).join(" · ");
+          var parent = c.parent_id ? byId[c.parent_id] : null;
+          art.appendChild(el("p", "pm", c.parent_id ? "Reply to #" + c.parent_id + (parent ? ": “" + parent.message.slice(0, 60) + (parent.message.length > 60 ? "…" : "") + "”" : "") : (where || "No show given")));
+          art.appendChild(el("p", "pt", c.message));
+          art.appendChild(el("p", "pf", c.name + " · #" + c.id + " · " + when(c.created_at)));
+          var acts = el("div", "admin-actions");
+          var a = el("button", "btn" + (c.approved ? "" : " primary"), c.approved ? "Take down" : "Approve");
+          a.addEventListener("click", function () {
+            a.disabled = true;
+            api("/rest/v1/connections?id=eq." + c.id, { method: "PATCH", body: { approved: !c.approved }, prefer: "return=minimal" }).then(refresh, fail);
+          });
+          var d = el("button", "btn", "Delete");
+          d.addEventListener("click", function () {
+            if (d.getAttribute("data-sure") !== "1") { d.setAttribute("data-sure", "1"); d.textContent = "Tap again to delete"; return; }
+            d.disabled = true;
+            api("/rest/v1/connections?id=eq." + c.id, { method: "DELETE", prefer: "return=minimal" }).then(refresh, fail);
+          });
+          acts.appendChild(a); acts.appendChild(d);
+          art.appendChild(acts);
+          return art;
+        }
+        function fail(err) { if (err && err.message !== "signed out") $("adStatus").textContent = err.message; }
+        function refresh() {
+          return api("/rest/v1/rpc/is_connection_admin", { method: "POST", body: {} }).then(function (isAdmin) {
+            if (!isAdmin) { signOut("That email isn't allowed to approve posts."); return; }
+            return api("/rest/v1/connections?select=*&order=created_at.desc&limit=500").then(function (rows) {
+              var byId = {};
+              rows.forEach(function (c) { byId[c.id] = c; });
+              var pending = rows.filter(function (c) { return !c.approved; }).reverse(); // oldest first
+              var live = rows.filter(function (c) { return c.approved; });
+              var P = $("adPending"), L = $("adLive");
+              P.textContent = ""; L.textContent = "";
+              pending.forEach(function (c) { P.appendChild(card(c, byId)); });
+              live.forEach(function (c) { L.appendChild(card(c, byId)); });
+              $("adNone").hidden = pending.length > 0;
+              $("adPendingHead").textContent = "Waiting" + (pending.length ? " · " + pending.length : "");
+              $("adStatus").textContent = "Approve puts a post on the site. Take down hides it again. Delete removes it for good.";
+              $("adSignin").hidden = true;
+              $("adPanel").hidden = false;
+            });
+          }).catch(fail);
+        }
+
+        if (token) refresh(); else signOut();
+      })();
+    </script>
+  </body>
+</html>
