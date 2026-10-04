@@ -3,18 +3,25 @@
 
     python3 tools/build_pages.py
 
-Writes shows/<slug>.html, venues/<slug>.html and sitemap.xml. Both folders
-are rebuilt from scratch each run, so pages for removed shows disappear.
+Writes shows/<slug>.html, venues/<slug>.html and sitemap.xml.
 tools/clean_shows.py runs this automatically after cleaning the data.
 
-The show slug is built from the row alone (date, venue, first act, time) so
-index.html can compute the same slug in the browser and link to the page.
-If you change slug rules here, change showSlug() in index.html to match.
+Show pages are permanent links. Only the pages for the month in
+shows-data.js are rebuilt (so a cancelled show's page disappears); pages
+from earlier months are left exactly where they are, and their "already
+happened" note is switched on by pages.js from the date on the page.
+Venue pages are rewritten for every venue in the current data; a venue page
+with no shows this month is left in place so older show pages still link.
+
+The show slug is built from the row alone (full date, venue, first act,
+time), with -2, -3 ... added when two rows would share a name, in list
+order. index.html computes the same slug in the browser to link each row,
+so if you change the rules here, change showSlug() and the slug loop in
+index.html to match.
 """
 import html
 import json
 import re
-import shutil
 import sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -84,11 +91,34 @@ def time_slug(t):
     return f"{int(m[1])}{m[2]}{m[3].lower()}" if m else "tba"
 
 
-def show_slug(s, month):
+def show_slug(s, year, month):
+    return "-".join([
+        f"{year}-{month:02d}-{s[DAY]:02d}",
+        part(s[VENUE], 30), part(s[ACTS].split(",")[0], 30), time_slug(s[TIME]),
+    ])
+
+
+def unique_slugs(shows, year, month):
+    """One slug per row, in list order; repeats get -2, -3, ... (same rule as index.html)."""
+    count, out = {}, []
+    for s in shows:
+        base = show_slug(s, year, month)
+        count[base] = count.get(base, 0) + 1
+        out.append(base if count[base] == 1 else f"{base}-{count[base]}")
+    return out
+
+
+def legacy_slug(s, month):
+    """The first scheme, live for part of Oct 4, 2026: no year, month by name."""
     return "-".join([
         MONTHS[month - 1][:3].lower(), f"{s[DAY]:02d}",
         part(s[VENUE], 30), part(s[ACTS].split(",")[0], 30), time_slug(s[TIME]),
     ])
+
+
+# Months whose pages were first published under legacy_slug(); their old
+# addresses keep working through small redirect pages.
+LEGACY_MONTHS = {(2026, 10)}
 
 
 def venue_slug(name):
@@ -178,6 +208,33 @@ HEAD = """<!doctype html>
   </head>
 """
 
+# A small page at an old address that sends people on to the new one. It
+# carries the same preview text so links already shared still unfurl.
+REDIRECT = """<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} | Show Me NYC</title>
+    <meta name="description" content="{desc}" />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href="{site}shows/{new}.html" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Show Me NYC" />
+    <meta property="og:title" content="{title}" />
+    <meta property="og:description" content="{desc}" />
+    <meta property="og:url" content="{site}shows/{new}.html" />
+    <meta property="og:image" content="{site}og.png?v=3" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta http-equiv="refresh" content="0; url={new}.html" />
+    <script>location.replace("{new}.html" + location.hash);</script>
+  </head>
+  <body>
+    <p><a href="{new}.html">This show's page has moved. Continue.</a></p>
+  </body>
+</html>
+"""
+
 TOP = """    <div class="wrap">
       <header class="top">
         <a class="brand" href="../">Show&nbsp;Me&nbsp;<span>NYC</span></a>
@@ -210,13 +267,7 @@ def build():
     mon = MONTHS[month - 1]
     shows.sort(key=sort_key)
 
-    slugs, seen = [], {}
-    for s in shows:
-        sl = show_slug(s, month)
-        if sl in seen:
-            print(f"WARNING: two rows share the page name {sl}; the second gets no page of its own", file=sys.stderr)
-        seen.setdefault(sl, s)
-        slugs.append(sl)
+    slugs = unique_slugs(shows, year, month)
     astral = [s[ACTS] for s in shows if any(ord(c) > 0xFFFF for c in s[ACTS][:40])]
     if astral:
         print(f"WARNING: {len(astral)} bills start with emoji-range characters; saved-show keys may not match", file=sys.stderr)
@@ -232,18 +283,19 @@ def build():
             sl += "-2"
         vslug[v] = sl
 
-    for folder in ("shows", "venues"):
-        shutil.rmtree(ROOT / folder, ignore_errors=True)
-        (ROOT / folder).mkdir()
+    (ROOT / "shows").mkdir(exist_ok=True)
+    (ROOT / "venues").mkdir(exist_ok=True)
+    # Clear only this month's show pages; earlier months are permanent.
+    prefix = f"{year}-{month:02d}-"
+    for old in (ROOT / "shows").glob(prefix + "*.html"):
+        old.unlink()
 
     foot = footer(gunk_url, other_name, other_url)
     save_key = f"smn-saved-{year}-{month}"
 
     # ----- show pages -----
-    written = set()
+    written, redirects = set(), {}
     for s, sl in zip(shows, slugs):
-        if sl in written:
-            continue
         written.add(sl)
         d = date(year, month, s[DAY])
         ar = area.get(s[VENUE], "")
@@ -259,8 +311,8 @@ def build():
             "@context": "https://schema.org", "@type": "MusicEvent",
             "name": s[ACTS], "startDate": start_iso(d, s[TIME]),
             "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-            "location": {"@type": "Place", "name": s[VENUE],
-                         "address": s[VENUE] + ("" if ar == "out" else ", New York, NY")},
+            # No street addresses in the data, so "address" is left out rather than guessed.
+            "location": {"@type": "Place", "name": s[VENUE]},
             "performer": [{"@type": "MusicGroup", "name": a} for a in act_names(s[ACTS])],
             "url": url,
         }
@@ -345,6 +397,14 @@ def build():
                 h += '          </ul>\n        </section>\n'
         h += "      </main>\n" + foot
         (ROOT / "shows" / f"{sl}.html").write_text(h, encoding="utf8")
+        if (year, month) in LEGACY_MONTHS:
+            # First row wins if two rows shared an old address, as it did then.
+            redirects.setdefault(legacy_slug(s, month), (sl, title, desc))
+
+    # ----- redirect pages for addresses shared under the first scheme -----
+    for old, (new, title, desc) in redirects.items():
+        (ROOT / "shows" / f"{old}.html").write_text(REDIRECT.format(
+            title=esc(title), desc=esc(desc), site=SITE, new=new), encoding="utf8")
 
     # ----- venue pages -----
     for v, items in by_venue.items():
@@ -370,12 +430,14 @@ def build():
         (ROOT / "venues" / f"{vslug[v]}.html").write_text(h, encoding="utf8")
 
     # ----- sitemap -----
-    urls = [SITE] + [f"{SITE}venues/{s}.html" for s in sorted(vslug.values())] + [f"{SITE}shows/{s}.html" for s in sorted(written)]
+    all_shows = sorted(f.stem for f in (ROOT / "shows").glob("*.html") if re.match(r"\d{4}-\d{2}-\d{2}-", f.name))
+    all_venues = sorted(f.stem for f in (ROOT / "venues").glob("*.html"))
+    urls = [SITE] + [f"{SITE}venues/{s}.html" for s in all_venues] + [f"{SITE}shows/{s}.html" for s in all_shows]
     (ROOT / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         + "".join(f"  <url><loc>{esc(u)}</loc></url>\n" for u in urls) + "</urlset>\n", encoding="utf8")
 
-    print(f"pages: {len(written)} shows, {len(vslug)} venues")
+    print(f"pages: {len(written)} shows this month ({len(all_shows)} in all), {len(vslug)} venues, {len(redirects)} redirects")
     return written, vslug
 
 

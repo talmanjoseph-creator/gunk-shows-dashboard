@@ -33,7 +33,9 @@ Every show has its own page in `shows/` and every venue in `venues/`. They are g
 
 - `tools/build_pages.py` writes them (plus `sitemap.xml`) from `shows-data.js`. `tools/clean_shows.py` runs it for you at the end, so one command keeps data and pages in step.
 - `pages.css` and `pages.js` are the shared styles and behavior for those pages. `404.html` is shown for a show link that no longer exists.
-- The main list links each show to `shows/<slug>.html`. The slug is computed twice, in `show_slug()` in `tools/build_pages.py` and in `showSlug()` in `index.html`. Change one and you must change the other.
+- The main list links each show to `shows/<slug>.html`. The slug starts with the full date (`2026-10-09-babys-all-right-cardinal-bloom-630pm`) and is computed twice: `show_slug()` and `unique_slugs()` in `tools/build_pages.py`, and `showSlug()` plus the slug loop in `index.html`. Two rows that would share a name get `-2`, `-3` in list order. Change one side and you must change the other.
+- **Show links are permanent.** The generator only rebuilds the pages for the month in `shows-data.js`; pages from earlier months stay where they are so shared links keep working.
+- The October 2026 pages were first published without the year (`oct-09-...`). Those addresses are small redirect pages now; leave them in place.
 
 ## Shareable links
 
