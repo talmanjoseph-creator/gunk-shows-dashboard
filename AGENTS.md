@@ -22,7 +22,7 @@ More than one person and more than one AI agent push to this repo. Read this bef
 - **Ticket links are direct**, never affiliate redirects (`evyy.net`, `pxf.io`). The cleanup script enforces this.
 - **Resident Advisor is not a source.** Their terms of use forbid automated collection without written permission, so do not scrape it.
 - **Copy is short.** Masthead: tagline, the "shows tonight" button, one line of totals. No stats grid, no source paragraph.
-- **Rows show a GUNK badge only** on the zine's picks (`gunk` and `both`); there is no badge for the other source. Source `club` is a club night, not a GUNK pick. `both` means GUNK plus another source, never club merged with the other source.
+- **Rows show no source badge and there is no source filter.** GUNK is credited in the footer only. In the data, `gunk`, `other`, `club` and `both` still record where a row came from; `both` means GUNK plus another source.
 - **Out-of-town shows are hidden by default** and tagged when shown.
 - **The street-level home location must not appear** anywhere in the code or comments.
 
