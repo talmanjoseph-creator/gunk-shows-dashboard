@@ -508,6 +508,7 @@
           <button class="chip" id="weekendBtn" data-when="weekend" aria-pressed="false">This weekend</button>
           <button class="chip" id="savedBtn" aria-pressed="false">★ Saved <span class="n" id="savedCount">0</span></button>
           <a class="chip" href="missed-connections.html">Missed connections</a>
+          <a class="chip" href="submit.html">Add a show</a>
         </div>
         <nav class="strip" id="strip" aria-label="Jump to a day"></nav>
 
@@ -563,6 +564,7 @@
     </div>
 
     <script src="shows-data.js"></script>
+    <script src="connections-data.js"></script>
     <script>
       "use strict";
       /* Listings live in shows-data.js: SHOW_META, SHOWS, GEO, AREA. */
@@ -680,21 +682,31 @@
       /* ---------- data prep ---------- */
       SHOWS.forEach(function (s, i) { s.i = i; });
       SHOWS.sort(function (a, b) { return a[0] - b[0] || timeKey(a[1]) - timeKey(b[1]) || a.i - b.i; });
+      // Page names, for the rows in shows-data.js only (those have a page).
+      // A row that would repeat an earlier name gets -2, -3 ...
       var slugCount = {};
-      SHOWS.forEach(function (s, i) {
-        s.i = i;
-        s.hay = fold(s[3] + " " + s[2] + " " + s[4]);
-        s.area = AREA[s[2]] || "";
-        s.key = s[0] + "|" + s[2] + "|" + s[1] + "|" + s[3].slice(0, 40);
-        s.sold = /sold-?out/i.test(s[7]);
-        // Page name; a row that would repeat an earlier name gets -2, -3 ...
+      SHOWS.forEach(function (s) {
         var base = showSlug(s);
         slugCount[base] = (slugCount[base] || 0) + 1;
         s.slug = slugCount[base] === 1 ? base : base + "-" + slugCount[base];
       });
-      var VENUE_SET = {};
-      SHOWS.forEach(function (s) { VENUE_SET[s[2]] = 1; });
-      var NYC_TOTAL = SHOWS.filter(function (s) { return s.area !== "out"; }).length;
+      /* Runs at the start, and again if approved sent-in shows are added
+         (see "shows sent in by bands" near the end). */
+      var VENUE_SET = {}, NYC_TOTAL = 0;
+      function prep() {
+        SHOWS.sort(function (a, b) { return a[0] - b[0] || timeKey(a[1]) - timeKey(b[1]) || a.i - b.i; });
+        VENUE_SET = {};
+        SHOWS.forEach(function (s, i) {
+          s.i = i;
+          s.hay = fold(s[3] + " " + s[2] + " " + s[4]);
+          s.area = AREA[s[2]] || "";
+          s.key = s[0] + "|" + s[2] + "|" + s[1] + "|" + s[3].slice(0, 40);
+          s.sold = /sold-?out/i.test(s[7]);
+          VENUE_SET[s[2]] = 1;
+        });
+        NYC_TOTAL = SHOWS.filter(function (s) { return s.area !== "out"; }).length;
+      }
+      prep();
 
       /* ---------- saved shows (this browser only) ---------- */
       var SAVE_KEY = "smn-saved-" + YEAR + "-" + (MONTH + 1);
@@ -779,7 +791,8 @@
         var acts = esc(s[3]);
         var plain = s[3];
         var h = '<article class="show" data-i="' + s.i + '"><div class="time">' + (s[1] ? esc(s[1]) : "—") + "</div>";
-        h += '<div class="acts"><a href="shows/' + s.slug + '.html">' + acts + "</a></div>";
+        // A sent-in show has no page of its own until it is folded into shows-data.js.
+        h += '<div class="acts">' + (s.slug ? '<a href="shows/' + s.slug + '.html">' + acts + "</a>" : acts) + "</div>";
         h += '<button class="star" aria-pressed="' + (saved[s.key] ? "true" : "false") + '" aria-label="Save ' + esc(plain) + " at " + esc(s[2]) + '">' + (saved[s.key] ? "★" : "☆") + "</button>";
         h += '<div class="meta"><button class="venue-btn" data-venue="' + esc(s[2]) + '" title="Show only ' + esc(s[2]) + '">' + esc(s[2]) + "</button>";
         if (s.area === "out") h += '<span class="badge out">Out of town</span>';
@@ -858,7 +871,7 @@
         }
         $("mastMeta").textContent = SHOWS.length + " shows · " + Object.keys(VENUE_SET).length + " venues · " + MONTHS[MONTH] + " " + YEAR;
         $("colophon").innerHTML = 'Sources: <a href="' + esc(G.url) + '" target="_blank" rel="noopener">GUNK New York</a>, <a href="' + esc(O.url) +
-          '" target="_blank" rel="noopener">' + esc(O.name) + "</a> and venue calendars. Listings can change — check the venue before you head out. <a href=\"missed-connections.html\">Missed connections</a>.";
+          '" target="_blank" rel="noopener">' + esc(O.name) + "</a>, venue calendars and <a href=\"submit.html\">shows sent in by bands</a>. Listings can change — check the venue before you head out. <a href=\"missed-connections.html\">Missed connections</a>.";
 
         // Busiest venues (in town).
         var counts = {};
@@ -1220,6 +1233,77 @@
       // Let our scroll win over the browser's own scroll-position restore.
       if ("scrollRestoration" in history) history.scrollRestoration = "manual";
       goToLanding();
+
+      /* ---------- shows sent in by bands (submit.html) ----------
+         Approved ones are read from the owner's Supabase project and added to
+         the list. If that is slow, asleep or down, the list above is simply
+         left as it is. Once a show has been folded into shows-data.js it is
+         skipped here, so it never shows twice. */
+      function firstActKey(day, venue, acts) {
+        return day + "|" + slugify(venue) + "|" + slugify(String(acts).split(",")[0]);
+      }
+      function addSubmitted(list) {
+        var have = {}, byLower = {}, add = [];
+        SHOWS.forEach(function (s) {
+          have[firstActKey(s[0], s[2], s[3])] = 1;
+          byLower[s[2].toLowerCase()] = s[2];
+        });
+        var mm = YEAR + "-" + pad(MONTH + 1) + "-";
+        (list || []).forEach(function (r) {
+          if (!r || typeof r.night !== "string" || r.night.slice(0, 8) !== mm) return;
+          var day = parseInt(r.night.slice(8, 10), 10);
+          var venue = String(r.venue || "").trim(), acts = String(r.acts || "").trim();
+          if (!(day >= FIRST_DAY && day <= LAST_DAY) || !venue || !acts) return;
+          venue = byLower[venue.toLowerCase()] || venue;
+          var k = firstActKey(day, venue, acts);
+          if (have[k]) return;
+          have[k] = 1;
+          var time = /^(1[0-2]|[1-9]):[0-5][0-9] (AM|PM)$/.test(r.start_time) ? r.start_time : "";
+          var age = { AA: 1, "16": 1, "18": 1, "21": 1 }[r.age] ? r.age : "";
+          var url = /^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)+(\/[^\s"<>]*)?$/i.test(r.ticket_url || "") ? r.ticket_url : "";
+          var row = [day, time, venue, acts, String(r.note || "").slice(0, 140), age, "sub", url];
+          row.slug = "";
+          row.i = SHOWS.length + add.length;
+          add.push(row);
+        });
+        if (!add.length) return;
+        // Keep the reader where they are: note the first row in view, rebuild, line it back up.
+        var anchorKey = null, anchorTop = 0;
+        for (var i = 0; i < rows.length; i++) {
+          if (rows[i].hidden || !rows[i].offsetParent) continue;
+          var rect = rows[i].getBoundingClientRect();
+          if (rect.bottom > stickyH) { anchorKey = SHOWS[i].key; anchorTop = rect.top; break; }
+        }
+        Array.prototype.push.apply(SHOWS, add);
+        prep();
+        build();
+        syncControls();
+        renderSaved();
+        apply();
+        if (anchorKey !== null && window.pageYOffset > 0) {
+          for (i = 0; i < SHOWS.length; i++) {
+            if (SHOWS[i].key === anchorKey && !rows[i].hidden && rows[i].offsetParent) {
+              var delta = rows[i].getBoundingClientRect().top - anchorTop;
+              if (delta) { try { window.scrollBy({ top: delta, behavior: "instant" }); } catch (e) { window.scrollBy(0, delta); } }
+              break;
+            }
+          }
+        }
+        curDay = -1; // the day links were redrawn
+        updateCurrent();
+      }
+      (function () {
+        var C = typeof CONNECTIONS_META === "undefined" ? null : CONNECTIONS_META;
+        if (!C || !C.supabaseUrl || !C.supabaseKey || !window.fetch) return;
+        var mm = YEAR + "-" + pad(MONTH + 1) + "-";
+        fetch(C.supabaseUrl.replace(/\/+$/, "") + "/rest/v1/submitted_shows?select=night,start_time,venue,acts,note,age,ticket_url" +
+          "&approved=is.true&night=gte." + mm + "01&night=lte." + mm + pad(LAST_DAY) + "&order=night.asc,id.asc&limit=300",
+          { headers: { apikey: C.supabaseKey, Authorization: "Bearer " + C.supabaseKey } })
+          .then(function (r) { return r.ok ? r.json() : []; })
+          .then(addSubmitted)
+          .catch(function () {});
+      })();
+
       // Re-apply on back/forward (bfcache) and once fonts/layout have settled.
       window.addEventListener("pageshow", function (e) { if (e.persisted) goToLanding(); });
       window.addEventListener("load", function () { setTimeout(goToLanding, 100); });

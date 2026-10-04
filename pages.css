@@ -176,6 +176,14 @@ footer.colophon a { color: var(--accent); }
   border: 2px solid var(--line); border-radius: 0; padding: 9px 11px;
   -webkit-appearance: none; appearance: none;
 }
+.compose select {
+  display: block; width: 100%; margin-top: 6px; min-height: 44px;
+  font: 500 16px var(--mono); color: var(--ink); background: var(--bg);
+  border: 2px solid var(--line); border-radius: 0; padding: 9px 11px;
+}
+.compose input[type="date"], .compose input[type="time"] { min-height: 44px; }
+.compose .opt { font-weight: 500; text-transform: none; letter-spacing: 0; }
+.compose .row3 { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 0 12px; }
 .compose textarea { resize: vertical; min-height: 96px; font-family: "Archivo", system-ui, sans-serif; font-weight: 500; line-height: 1.4; }
 .compose .row2 { display: grid; grid-template-columns: 1fr 170px; gap: 0 12px; }
 .compose .actions { margin-top: 4px; }
@@ -190,9 +198,11 @@ footer.colophon a { color: var(--accent); }
 .posts .reply { margin: 10px 0 0 14px; padding-left: 12px; border-left: 3px solid var(--hair); }
 .posts .rt { font-size: 15.5px; font-weight: 500; line-height: 1.4; overflow-wrap: anywhere; }
 .posts .rf { font: 500 12px var(--mono); color: var(--muted); margin-top: 3px; }
-@media (max-width: 520px) { .compose .row2 { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .compose .row2, .compose .row3 { grid-template-columns: 1fr; } }
 
 /* admin */
 .pending article { border-left: 4px solid var(--accent); padding-left: 12px; }
 .admin-actions { display: flex; gap: 8px; margin-top: 10px; }
 .admin-actions .btn { min-height: 40px; padding: 0 14px; }
+.posts .rf a { color: var(--accent); overflow-wrap: anywhere; }
+.posts .flag { font: 600 12.5px var(--mono); color: var(--accent); border: 2px solid var(--accent); padding: 7px 10px; margin-top: 8px; }

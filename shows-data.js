@@ -23,7 +23,9 @@ var SHOW_META = {
 
 /* [day, time, venue, acts, note, age, source, ticketUrl]
    age: "21" | "18" | "16" | "AA" | "" (not listed).
-   source: "gunk" | "other" | "club" | "both".
+   source: "gunk" | "other" | "club" | "both" | "sub".
+   "sub" was sent in on submit.html and approved by the owner
+   (tools/pull_submissions.py adds those rows).
    "both" is only a GUNK listing merged with another source.
    "club" is a club night. Merging one with "other" stays "club".
    The zine's trailing "*" headliner marks are stripped by tools/clean_shows.py. */

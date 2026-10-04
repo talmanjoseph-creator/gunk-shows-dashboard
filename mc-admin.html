@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Approve posts | Show Me NYC</title>
+    <title>Approve | Show Me NYC</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -19,7 +19,7 @@
       </header>
       <main>
         <p class="when">Owner only</p>
-        <h1>Approve posts</h1>
+        <h1>Approve shows and posts</h1>
         <p class="where" id="adStatus"></p>
 
         <!-- Signed out: ask for a sign-in link by email -->
@@ -34,12 +34,22 @@
 
         <div id="adPanel" hidden>
           <section class="pending">
-            <h2 id="adPendingHead">Waiting</h2>
+            <h2 id="adShowsHead">Shows waiting</h2>
+            <div class="posts" id="adShows"></div>
+            <p class="hint" id="adShowsNone" hidden>No shows waiting.</p>
+          </section>
+          <section class="pending">
+            <h2 id="adPendingHead">Posts waiting</h2>
             <div class="posts" id="adPending"></div>
-            <p class="hint" id="adNone" hidden>Nothing waiting. All caught up.</p>
+            <p class="hint" id="adNone" hidden>No posts waiting.</p>
           </section>
           <section>
-            <h2>Up on the site</h2>
+            <h2>Sent-in shows on the list</h2>
+            <div class="posts" id="adShowsLive"></div>
+            <p class="hint" id="adShowsLiveNone" hidden>None yet.</p>
+          </section>
+          <section>
+            <h2>Posts up on the site</h2>
             <div class="posts" id="adLive"></div>
           </section>
           <section>
@@ -49,6 +59,7 @@
       </main>
     </div>
 
+    <script src="shows-data.js"></script>
     <script src="connections-data.js"></script>
     <script>
       (function () {
@@ -132,7 +143,7 @@
           save(null);
           $("adPanel").hidden = true;
           $("adSignin").hidden = false;
-          $("adStatus").textContent = msg || "Sign in to read and approve posts.";
+          $("adStatus").textContent = msg || "Sign in to check shows and posts.";
         }
 
         /* ---------- signed out ---------- */
@@ -187,10 +198,96 @@
           art.appendChild(acts);
           return art;
         }
+        /* ---------- shows sent in on submit.html ---------- */
+        var DOW3 = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+        function nightLabel(d) {
+          var p = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || "");
+          if (!p) return d || "";
+          var t = new Date(Date.UTC(+p[1], +p[2] - 1, +p[3], 12));
+          return DOW3[t.getUTCDay()] + " " + MONTHS[t.getUTCMonth()] + " " + t.getUTCDate() + (t.getUTCFullYear() !== new Date().getFullYear() ? " " + t.getUTCFullYear() : "");
+        }
+        function norm(t) { return String(t).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+        function actList(t) { return String(t).split(",").map(norm).filter(Boolean); }
+        var LISTED = typeof SHOWS === "undefined" ? [] : SHOWS;
+        var KNOWN = {};
+        LISTED.forEach(function (s) { KNOWN[norm(s[2])] = 1; });
+        /* What the list already has at that venue that night, and whether any
+           of it shares an act with the show sent in. */
+        function clash(c) {
+          var p = /^(\d{4})-(\d{2})-(\d{2})$/.exec(c.night || "");
+          if (!p || typeof SHOW_META === "undefined" || +p[1] !== SHOW_META.year || +p[2] !== SHOW_META.month) return null;
+          var mine = actList(c.acts), same = [], near = [];
+          LISTED.forEach(function (s) {
+            if (s[0] !== +p[3] || norm(s[2]) !== norm(c.venue)) return;
+            var shared = actList(s[3]).some(function (a) { return mine.indexOf(a) !== -1; });
+            (shared ? same : near).push((s[1] ? s[1] + " · " : "") + s[3]);
+          });
+          return { same: same, near: near };
+        }
+        function showCard(c, contacts) {
+          var art = el("article");
+          art.appendChild(el("p", "pm", [nightLabel(c.night), c.start_time, c.venue].filter(Boolean).join(" · ")));
+          art.appendChild(el("p", "pt", c.acts));
+          var bits = [c.age === "AA" ? "All ages" : (c.age ? c.age + "+" : ""), c.note, "#" + c.id, "sent " + when(c.created_at)].filter(Boolean);
+          art.appendChild(el("p", "pf", bits.join(" · ")));
+          var info = el("p", "rf");
+          if (c.ticket_url && /^https:\/\//i.test(c.ticket_url)) {
+            var a0 = el("a", "", c.ticket_url.replace(/^https:\/\//i, "").slice(0, 60));
+            a0.href = c.ticket_url; a0.target = "_blank"; a0.rel = "noopener noreferrer";
+            info.appendChild(document.createTextNode("Link: "));
+            info.appendChild(a0);
+          } else info.textContent = "No link given.";
+          art.appendChild(info);
+          if (contacts[c.id]) art.appendChild(el("p", "rf", "Contact (only you see this): " + contacts[c.id]));
+          var k = clash(c);
+          if (k && k.same.length) art.appendChild(el("p", "flag", "Looks like it's already on the list: " + k.same.join(" / ")));
+          else if (k && k.near.length) art.appendChild(el("p", "rf", "Also at this venue that night: " + k.near.join(" / ")));
+          if (!KNOWN[norm(c.venue)]) art.appendChild(el("p", "rf", "New venue for the site: it will show without an area or map link."));
+          var acts = el("div", "admin-actions");
+          var a = el("button", "btn" + (c.approved ? "" : " primary"), c.approved ? "Take down" : "Approve");
+          a.addEventListener("click", function () {
+            a.disabled = true;
+            api("/rest/v1/submitted_shows?id=eq." + c.id, { method: "PATCH", body: { approved: !c.approved }, prefer: "return=minimal" }).then(refresh, fail);
+          });
+          var d = el("button", "btn", "Delete");
+          d.addEventListener("click", function () {
+            if (d.getAttribute("data-sure") !== "1") { d.setAttribute("data-sure", "1"); d.textContent = "Tap again to delete"; return; }
+            d.disabled = true;
+            api("/rest/v1/submitted_shows?id=eq." + c.id, { method: "DELETE", prefer: "return=minimal" }).then(refresh, fail);
+          });
+          acts.appendChild(a); acts.appendChild(d);
+          art.appendChild(acts);
+          return art;
+        }
+        var SHOW_COLS = "id,created_at,night,start_time,venue,acts,note,age,ticket_url,approved";
+        function loadShows() {
+          return Promise.all([
+            api("/rest/v1/submitted_shows?select=" + SHOW_COLS + "&order=night.asc,created_at.asc&limit=500"),
+            api("/rest/v1/rpc/submitted_show_contacts", { method: "POST", body: {} }).catch(function () { return []; })
+          ]).then(function (res) {
+            var rows = res[0] || [], contacts = {};
+            (res[1] || []).forEach(function (r) { contacts[r.id] = r.contact_email; });
+            var W = $("adShows"), U = $("adShowsLive");
+            W.textContent = ""; U.textContent = "";
+            var waiting = rows.filter(function (c) { return !c.approved; });
+            var up = rows.filter(function (c) { return c.approved; });
+            waiting.forEach(function (c) { W.appendChild(showCard(c, contacts)); });
+            up.forEach(function (c) { U.appendChild(showCard(c, contacts)); });
+            $("adShowsNone").hidden = waiting.length > 0;
+            $("adShowsLiveNone").hidden = up.length > 0;
+            $("adShowsHead").textContent = "Shows waiting" + (waiting.length ? " · " + waiting.length : "");
+          }, function (err) {
+            if (err && err.message === "signed out") throw err;
+            $("adShows").textContent = "";
+            $("adShowsNone").textContent = "Couldn't load the shows just now.";
+            $("adShowsNone").hidden = false;
+          });
+        }
+
         function fail(err) { if (err && err.message !== "signed out") $("adStatus").textContent = err.message; }
         function refresh() {
           return api("/rest/v1/rpc/is_connection_admin", { method: "POST", body: {} }).then(function (isAdmin) {
-            if (!isAdmin) { signOut("That email isn't allowed to approve posts."); return; }
+            if (!isAdmin) { signOut("That email isn't allowed to approve things here."); return; }
             return api("/rest/v1/connections?select=*&order=created_at.desc&limit=500").then(function (rows) {
               var byId = {};
               rows.forEach(function (c) { byId[c.id] = c; });
@@ -201,10 +298,11 @@
               pending.forEach(function (c) { P.appendChild(card(c, byId)); });
               live.forEach(function (c) { L.appendChild(card(c, byId)); });
               $("adNone").hidden = pending.length > 0;
-              $("adPendingHead").textContent = "Waiting" + (pending.length ? " · " + pending.length : "");
-              $("adStatus").textContent = "Approve puts a post on the site. Take down hides it again. Delete removes it for good.";
+              $("adPendingHead").textContent = "Posts waiting" + (pending.length ? " · " + pending.length : "");
+              $("adStatus").textContent = "Approve puts it on the site. Take down hides it again. Delete removes it for good.";
               $("adSignin").hidden = true;
               $("adPanel").hidden = false;
+              return loadShows();
             });
           }).catch(fail);
         }
