@@ -229,6 +229,9 @@ def clean(shows):
     for s in shows:
         raw = s[VENUE].strip()
         s[VENUE] = canon_venue(raw)
+        # Drop the zine's trailing "*" headliner marks ("Mars Motel*"). An
+        # asterisk inside a name ("Sub*T") is part of the name and stays.
+        s[ACTS] = re.sub(r"\*(?=\s*(?:,|$))", "", s[ACTS]).strip()
         s[URL] = direct_url(s[URL])
         if raw in ALIAS_NOTES and not s[NOTE]:
             s[NOTE] = ALIAS_NOTES[raw]
