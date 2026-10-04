@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Missed connections | Show Me NYC</title>
+    <meta name="description" content="Locked eyes at a show and never said hi? Leave a missed connection." />
+    <link rel="canonical" href="https://talmanjoseph-creator.github.io/gunk-shows-dashboard/missed-connections.html" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Show Me NYC" />
+    <meta property="og:title" content="Missed connections — Show Me NYC" />
+    <meta property="og:description" content="Locked eyes at a show and never said hi? Leave a missed connection." />
+    <meta property="og:url" content="https://talmanjoseph-creator.github.io/gunk-shows-dashboard/missed-connections.html" />
+    <meta property="og:image" content="https://talmanjoseph-creator.github.io/gunk-shows-dashboard/og.png?v=3" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111'/%3E%3Cpath fill='%23ff4d4d' d='M3 29V17h6v12zM10 29V11l6-3v21zM17 29V13h2V8h1V3h1v5h1v5h2v16zM25 29V19h4v10z'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="pages.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="top">
+        <a class="brand" href="./">Show&nbsp;Me&nbsp;<span>NYC</span></a>
+        <a class="back" href="./">← All shows</a>
+      </header>
+      <main>
+        <p class="when">Missed connections</p>
+        <h1>You looked. They looked. Nobody said anything.</h1>
+        <p class="where" id="mcIntro">Say it now. Tell us the show and what you remember, and we'll post it here.</p>
+        <div class="actions">
+          <a class="btn primary" id="mcPost" href="#" target="_blank" rel="noopener" hidden>Post one</a>
+        </div>
+        <p class="hint" id="mcSoon" hidden>Posting opens soon.</p>
+
+        <section>
+          <h2 id="mcHead">Recent</h2>
+          <p class="hint" id="mcFilter" hidden></p>
+          <div class="posts" id="mcList"></div>
+          <p class="hint" id="mcEmpty" hidden></p>
+        </section>
+
+        <section>
+          <h2>House rules</h2>
+          <ul class="rules">
+            <li>We read every post before it goes up.</li>
+            <li>No last names, handles, phone numbers or emails in a post.</li>
+            <li>Describe the moment, not someone's body. Nothing creepy, nothing mean.</li>
+            <li>Replies go through us, so nobody's contact details are ever public.</li>
+            <li>Posts come down after 30 days. Want yours gone sooner? Reply to it and say so.</li>
+          </ul>
+        </section>
+      </main>
+      <footer class="colophon">
+        Posts are written by visitors and read by a person before they appear. They are not checked for accuracy.
+      </footer>
+    </div>
+
+    <script src="connections-data.js"></script>
+    <script>
+      (function () {
+        "use strict";
+        var M = CONNECTIONS_META;
+        function $(id) { return document.getElementById(id); }
+        var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        var DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+        // "2026-10-04" -> a date at noon UTC, so no timezone can shift the day
+        function parse(d) {
+          var p = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || "");
+          return p ? new Date(Date.UTC(+p[1], +p[2] - 1, +p[3], 12)) : null;
+        }
+        function nice(d, withDow) {
+          var t = parse(d);
+          return t ? (withDow ? DOW[t.getUTCDay()] + " " : "") + MONTHS[t.getUTCMonth()] + " " + t.getUTCDate() : "";
+        }
+        function formLink(field, value) {
+          if (!M.formUrl) return "";
+          if (!field || !value) return M.formUrl;
+          return M.formUrl + (M.formUrl.indexOf("?") === -1 ? "?" : "&") + "usp=pp_url&" + encodeURIComponent(field) + "=" + encodeURIComponent(value);
+        }
+
+        var showFilter = "";
+        try { showFilter = new URLSearchParams(location.search).get("show") || ""; } catch (e) {}
+        if (!/^[a-z0-9-]+$/.test(showFilter)) showFilter = "";
+
+        // Post button (or "opens soon" until there is a form).
+        if (M.formUrl) {
+          var post = $("mcPost");
+          post.href = formLink(M.prefillShow, showFilter);
+          post.hidden = false;
+        } else {
+          $("mcSoon").hidden = false;
+        }
+
+        // Newest first; drop anything past its expiry.
+        var cutoff = Date.now() - (M.expiresDays || 30) * 86400000;
+        var posts = CONNECTIONS.filter(function (c) {
+          var t = parse(c.posted);
+          return t && t.getTime() >= cutoff && c.text;
+        }).sort(function (a, b) { return a.posted < b.posted ? 1 : a.posted > b.posted ? -1 : b.id - a.id; });
+
+        var shown = posts;
+        if (showFilter) {
+          shown = posts.filter(function (c) { return c.show === showFilter; });
+          $("mcHead").textContent = "From this night";
+          var f = $("mcFilter");
+          f.innerHTML = 'Only posts from one show. <a href="missed-connections.html">See them all</a>';
+          f.hidden = false;
+        }
+
+        var list = $("mcList");
+        shown.forEach(function (c) {
+          var art = document.createElement("article");
+          var meta = document.createElement("p");
+          meta.className = "pm";
+          var where = nice(c.night, true) + (c.venue ? " · " + c.venue : "");
+          if (c.show && /^[a-z0-9-]+$/.test(c.show)) {
+            var a = document.createElement("a");
+            a.href = "shows/" + c.show + ".html";
+            a.textContent = where;
+            meta.appendChild(a);
+          } else meta.textContent = where;
+          var text = document.createElement("p");
+          text.className = "pt";
+          text.textContent = c.text;
+          var foot = document.createElement("p");
+          foot.className = "pf";
+          foot.appendChild(document.createTextNode("#" + c.id + " · posted " + nice(c.posted)));
+          if (M.formUrl) {
+            var r = document.createElement("a");
+            r.href = formLink(M.prefillReply, String(c.id));
+            r.target = "_blank";
+            r.rel = "noopener";
+            r.textContent = "That's me";
+            foot.appendChild(r);
+          }
+          art.appendChild(meta); art.appendChild(text); art.appendChild(foot);
+          list.appendChild(art);
+        });
+        if (!shown.length) {
+          var e = $("mcEmpty");
+          e.textContent = showFilter ? "Nothing from this night yet." + (M.formUrl ? " Be the first." : "")
+            : "Nothing here yet." + (M.formUrl ? " Be the first." : "");
+          e.hidden = false;
+        }
+      })();
+    </script>
+  </body>
+</html>
