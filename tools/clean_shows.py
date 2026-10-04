@@ -5,8 +5,8 @@ Run after pasting in new listings:  python3 tools/clean_shows.py
 
   1. Normalizes venue names (trims whitespace, merges known aliases).
   2. Merges duplicate listings (same day + venue with a matching bill).
-     A show listed by both sources gets source "both" and keeps the GUNK
-     wording plus the other source's ticket link.
+     "both" means GUNK plus another source, and keeps the GUNK wording.
+     A club night merged with an "other" row stays "club".
   3. Sorts each day by start time (after-midnight sets go last).
   4. Regenerates AREA (venue -> area) from the GEO coordinates.
   5. Replaces affiliate-redirect ticket links with the direct ticket page.
@@ -95,6 +95,13 @@ TRACKING_PARAMS = {"aff", "subid1", "subid2", "subid3", "irclickid", "irgwc", "c
 
 def direct_url(url):
     """Unwrap an affiliate redirect to the ticket page it points at."""
+    if not url:
+        return url
+    # Dice marketing links (.../partner/tickets/event/<slug>?utm=...) are the
+    # same event page as https://dice.fm/event/<slug>.
+    dice = re.search(r"https?://(?:www\.)?dice\.fm/(?:partner/tickets/)?event/([^?#\s]+)", url, re.I)
+    if dice:
+        return "https://dice.fm/event/" + dice.group(1).strip("/")
     parts = urlsplit(url)
     if not parts.netloc.endswith(REDIRECT_HOSTS):
         return url
@@ -165,6 +172,10 @@ def overlap(x, y):
 def is_dupe(x, y):
     if x[DAY] != y[DAY] or x[VENUE] != y[VENUE]:
         return False
+    # One ticket page is one night, even when the bills are worded differently.
+    # A shared venue homepage used on several days is not this case.
+    if x[URL] and x[URL] == y[URL]:
+        return True
     ov = overlap(x, y)
     if x[TIME] == y[TIME]:
         return ov > 0
@@ -173,18 +184,43 @@ def is_dupe(x, y):
     return x[SRC] != y[SRC] and ov > 0.5
 
 
+def merged_source(a, b):
+    """'both' is only GUNK plus something else. Club merged with other stays club."""
+    srcs = {a, b}
+    if "gunk" in srcs or "both" in srcs:
+        return "gunk" if srcs <= {"gunk"} else "both"
+    if "club" in srcs:
+        return "club"
+    return a if a == b else "other"
+
+
+def url_rank(url):
+    """Prefer a direct ticket page over an empty link or a redirect short link."""
+    if not url:
+        return 0
+    host = urlsplit(url).netloc.lower()
+    if host.endswith("ra.co") or "link.dice.fm" in host:
+        return 1
+    return 2
+
+
 def merge(x, y):
-    """Fold y into x. GUNK wording wins; the other source supplies what GUNK lacks."""
-    if x[SRC] == y[SRC] or "both" in (x[SRC], y[SRC]):
-        keep, other = (x, y) if len(act_set(x[ACTS])) >= len(act_set(y[ACTS])) else (y, x)
-        src = "both" if "both" in (x[SRC], y[SRC]) else x[SRC]
+    """Fold y into x. GUNK wording wins; the other row supplies what that one lacks."""
+    src = merged_source(x[SRC], y[SRC])
+    def gunkish(row):
+        return row[SRC] in ("gunk", "both")
+    if gunkish(x) and not gunkish(y):
+        keep, other = x, y
+    elif gunkish(y) and not gunkish(x):
+        keep, other = y, x
     else:
-        keep, other = (x, y) if x[SRC] == "gunk" else (y, x)
-        src = "both"
+        keep, other = (x, y) if len(act_set(x[ACTS])) >= len(act_set(y[ACTS])) else (y, x)
     out = list(keep)
     for f in (TIME, NOTE, AGE, URL):
         if not out[f]:
             out[f] = other[f]
+    if url_rank(other[URL]) > url_rank(out[URL]):
+        out[URL] = other[URL]
     out[SRC] = src
     return out
 

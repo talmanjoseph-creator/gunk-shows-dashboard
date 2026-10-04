@@ -398,6 +398,7 @@
             <button class="chip red" id="nearBtn" aria-pressed="false" title="Use your location to show gigs within 1 mile">Close to home</button>
             <button class="chip" id="releaseBtn" aria-pressed="false">Release shows only</button>
             <button class="chip" id="gunkBtn" aria-pressed="false" title="Only shows listed in GUNK New York">GUNK picks only</button>
+            <button class="chip" id="clubBtn" aria-pressed="false" title="Only club nights">Club nights only</button>
           </div>
           <div class="ctl-row" id="openRow" role="group" aria-label="Age: shows open to">
             <span class="ctl-label">Open to</span>
@@ -568,8 +569,11 @@
       function savedShows() { return SHOWS.filter(function (s) { return saved[s.key]; }); }
 
       /* ---------- state (mirrored in the URL so views can be shared) ---------- */
+      /* Club nights are included in the list. Set this to false to hide them
+         unless the Club chip is on (the chip then shows club nights only). */
+      var CLUB_BY_DEFAULT = true;
       function defaults() {
-        return { q: "", open: "any", area: "nyc", src: "all", venue: "", when: "all", release: false, saved: false, near: false };
+        return { q: "", open: "any", area: "nyc", src: "all", venue: "", when: "all", release: false, saved: false, near: false, club: false };
       }
       var state = defaults();
       var showPast = !inMonth; // earlier dates stay folded while the month is running
@@ -590,6 +594,7 @@
         if (inMonth && ((v = p.get("when")) === "tonight" || (v === "weekend" && weekend.length))) state.when = v;
         if (p.get("release") === "1") state.release = true;
         if (p.get("saved") === "1") state.saved = true;
+        if (p.get("club") === "1") state.club = true;
       }
       function writeUrl() {
         var p = new URLSearchParams();
@@ -602,13 +607,17 @@
         if (state.when !== "all") p.set("when", state.when);
         if (state.release) p.set("release", "1");
         if (state.saved) p.set("saved", "1");
+        if (state.club) p.set("club", "1");
         var qs = p.toString();
         try { history.replaceState(null, "", location.pathname + (qs ? "?" + qs : "") + location.hash); } catch (e) {}
       }
 
       function passes(s, ignoreArea) {
         if (state.venue && s[2] !== state.venue) return false;
-        if (state.src === "gunk" && s[6] === "other") return false;
+        if (state.src === "gunk" && s[6] !== "gunk" && s[6] !== "both") return false;
+        var clubRow = s[6] === "club";
+        if (state.club) { if (!clubRow) return false; }
+        else if (!CLUB_BY_DEFAULT && clubRow && !state.venue && !state.saved) return false;
         if (state.open !== "any" && !OPEN_TO[state.open][s[5]]) return false;
         // A venue filter or the saved list shows everything it names, in town or not.
         if (!ignoreArea && !state.venue && !state.saved) {
@@ -643,7 +652,7 @@
           h += '<a class="map-link" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&amp;query=' +
             encodeURIComponent(s[2] + (s.area === "out" ? "" : ", New York, NY")) + '" aria-label="Map of ' + esc(s[2]) + '">Map</a>';
         }
-        if (s[6] !== "other") h += '<span class="badge src" title="Listed in GUNK New York">GUNK</span>';
+        if (s[6] === "gunk" || s[6] === "both") h += '<span class="badge src" title="Listed in GUNK New York">GUNK</span>';
         if (s[7]) {
           h += '<a class="badge tix' + (s.sold ? " sold" : "") + '" href="' + esc(s[7]) + '" target="_blank" rel="noopener">' + (s.sold ? "Sold out" : "Tickets") + "</a>";
         }
@@ -819,11 +828,12 @@
         press("[data-open]", "data-open", state.open);
         press("[data-area]", "data-area", state.area);
         $("gunkBtn").setAttribute("aria-pressed", state.src === "gunk" ? "true" : "false");
+        $("clubBtn").setAttribute("aria-pressed", state.club ? "true" : "false");
         press("[data-when]", "data-when", state.when);
         $("releaseBtn").setAttribute("aria-pressed", state.release ? "true" : "false");
         $("nearBtn").setAttribute("aria-pressed", state.near ? "true" : "false");
         $("savedBtn").setAttribute("aria-pressed", state.saved ? "true" : "false");
-        var n = (state.open !== "any") + (state.area !== "nyc") + (state.src !== "all") + state.release + state.near;
+        var n = (state.open !== "any") + (state.area !== "nyc") + (state.src !== "all") + state.release + state.near + (state.club ? 1 : 0);
         $("filterToggle").textContent = n ? "Filters · " + n : "Filters";
         var side = document.querySelectorAll(".venue-btn-side");
         for (var i = 0; i < side.length; i++) side[i].classList.toggle("on", side[i].getAttribute("data-venue") === state.venue);
@@ -920,6 +930,7 @@
         if (b.hasAttribute("data-open")) state.open = b.getAttribute("data-open");
         else if (b.hasAttribute("data-area")) state.area = b.getAttribute("data-area");
         else if (b.id === "gunkBtn") state.src = state.src === "gunk" ? "all" : "gunk";
+        else if (b.id === "clubBtn") state.club = !state.club;
         else if (b.id === "releaseBtn") state.release = !state.release;
         else return;
         changed();
