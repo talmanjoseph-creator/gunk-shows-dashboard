@@ -297,6 +297,11 @@ def main():
     for code in sorted(by_area):
         print(f"  {code:>4}: {', '.join(sorted(by_area[code]))}")
 
+    # Rebuild the show and venue pages so they match the cleaned data.
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import build_pages
+    build_pages.build()
+
 
 if __name__ == "__main__":
     sys.exit(main())
