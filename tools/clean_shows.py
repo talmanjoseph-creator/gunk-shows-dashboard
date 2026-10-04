@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Clean the SHOWS and GEO data embedded in index.html.
+"""Clean the listings in shows-data.js.
 
 Run after pasting in new listings:  python3 tools/clean_shows.py
 
@@ -8,15 +8,17 @@ Run after pasting in new listings:  python3 tools/clean_shows.py
      A show listed by both sources gets source "both" and keeps the GUNK
      wording plus the Oh My Rockness ticket link.
   3. Sorts each day by start time (after-midnight sets go last).
+  4. Regenerates AREA (venue -> area) from the GEO coordinates.
 
-Add new spellings to VENUE_ALIASES as they turn up.
+Add new spellings to VENUE_ALIASES as they turn up, and fix a wrong area
+in AREA_OVERRIDES.
 """
 import json
 import re
 import sys
 from pathlib import Path
 
-INDEX = Path(__file__).resolve().parent.parent / "index.html"
+INDEX = Path(__file__).resolve().parent.parent / "shows-data.js"
 
 # alias -> canonical name
 VENUE_ALIASES = {
@@ -34,6 +36,53 @@ VENUE_ALIASES = {
 ALIAS_NOTES = {"Footlight Underground at The Windjammer": "Footlight Underground presents"}
 
 DAY, TIME, VENUE, ACTS, NOTE, AGE, SRC, URL = range(8)
+
+# Area codes used by the page's Area filter (labels live in index.html).
+#   bush = Bushwick / Ridgewood      wbg = Williamsburg / Greenpoint
+#   bk   = Rest of Brooklyn          qns = Queens
+#   les  = Manhattan below 14th St   mid = Manhattan above 14th St
+#   bx   = The Bronx / Staten Island out = outside the five boroughs
+AREA_OVERRIDES = {
+    "Under the K Bridge Park": "wbg",
+    "UBS Arena": "out",  # Elmont, just over the Nassau line
+    "Sleepwalk": "bush",  # Bushwick Ave, a block inside the Williamsburg box
+    "Venue TBA": "",  # placeholder coordinates, not a real location
+}
+
+
+def area_for(lat, lng):
+    """Rough area from coordinates. Good enough for a filter; override misses."""
+    # Outside the five boroughs: Westchester and north, Long Island, New Jersey.
+    if lat > 40.917 or lat < 40.49 or lng > -73.70:
+        return "out"
+    if lng < -74.03 and not (lat < 40.65 and lng > -74.26):  # NJ, but not Staten Island
+        return "out"
+    if lat < 40.65 and lng < -74.05:
+        return "bx"  # Staten Island
+    # East River, as longitude by latitude (Manhattan is west of this line).
+    river = [(40.700, -73.997), (40.710, -73.975), (40.720, -73.968), (40.730, -73.966),
+             (40.740, -73.963), (40.750, -73.960), (40.760, -73.950), (40.780, -73.938),
+             (40.800, -73.928), (40.835, -73.934), (40.880, -73.910)]
+    if lat >= 40.700:
+        for (la0, lo0), (la1, lo1) in zip(river, river[1:]):
+            if la0 <= lat <= la1:
+                edge = lo0 + (lo1 - lo0) * (lat - la0) / (la1 - la0)
+                break
+        else:
+            edge = river[-1][1]
+        if lng < edge:
+            # 14th St runs at a slant; this is its latitude at a given longitude.
+            fourteenth = 40.7347 - 0.444 * (lng + 73.9907)
+            return "les" if lat < fourteenth else "mid"
+        if lat > 40.800:
+            return "bx"
+    if 40.680 <= lat <= 40.720 and -73.937 <= lng <= -73.885:
+        return "bush"
+    if 40.700 <= lat <= 40.740 and -73.972 <= lng < -73.937:
+        return "wbg"
+    if lat > 40.735 or lng > -73.885:
+        return "qns"
+    return "bk"
 
 
 def canon_venue(name):
@@ -136,8 +185,8 @@ def main():
     end = src.index("];", start) + 1
     shows = json.loads(re.sub(r",\s*\]$", "]", src[start:end].strip()))
     cleaned, merged = clean(shows)
-    rows = ",\n".join("        " + json.dumps(s, ensure_ascii=False, separators=(",", ":")) for s in cleaned)
-    src = src[:start] + "[\n" + rows + "\n      ]" + src[end:]
+    rows = ",\n".join("  " + json.dumps(s, ensure_ascii=False, separators=(",", ":")) for s in cleaned)
+    src = src[:start] + "[\n" + rows + "\n]" + src[end:]
 
     # GEO: move coordinates from alias keys onto canonical names.
     g0 = src.index("var GEO = {")
@@ -151,8 +200,18 @@ def main():
         seen.add(name)
         lines.append((name, coords))
     lines.sort(key=lambda e: e[0].lower())
-    body = ",\n".join("        " + json.dumps(n, ensure_ascii=False) + ": " + c for n, c in lines)
-    src = src[:g0] + "var GEO = {\n" + body + "\n      " + src[g1:]
+    body = ",\n".join("  " + json.dumps(n, ensure_ascii=False) + ": " + c for n, c in lines)
+    src = src[:g0] + "var GEO = {\n" + body + "\n" + src[g1:]
+
+    # AREA: venue -> area code, from coordinates plus overrides.
+    areas = {}
+    for name, coords in lines:
+        lat, lng = json.loads(coords)
+        areas[name] = AREA_OVERRIDES[name] if name in AREA_OVERRIDES else area_for(lat, lng)
+    a0 = src.index("var AREA = {")
+    a1 = src.index("};", a0)
+    abody = ",\n".join("  " + json.dumps(n, ensure_ascii=False) + ": " + json.dumps(areas[n]) for n, _ in lines)
+    src = src[:a0] + "var AREA = {\n" + abody + "\n" + src[a1:]
 
     INDEX.write_text(src, encoding="utf8")
     print(f"{len(shows)} rows in, {len(cleaned)} out, {len(merged)} merged")
@@ -161,7 +220,12 @@ def main():
     venues = {s[VENUE] for s in cleaned}
     missing = sorted(venues - seen)
     if missing:
-        print("No coordinates (excluded from Close to home):", ", ".join(missing))
+        print("No coordinates (no area, excluded from Close to home):", ", ".join(missing))
+    by_area = {}
+    for s in cleaned:
+        by_area.setdefault(areas.get(s[VENUE]) or "-", set()).add(s[VENUE])
+    for code in sorted(by_area):
+        print(f"  {code:>4}: {', '.join(sorted(by_area[code]))}")
 
 
 if __name__ == "__main__":
