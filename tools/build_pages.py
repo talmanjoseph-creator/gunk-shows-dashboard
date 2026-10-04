@@ -395,7 +395,8 @@ def build():
                 for o, osl in near:
                     h += row_li(o, osl, d, with_date=False, with_venue=True).replace("          <li", "            <li")
                 h += '          </ul>\n        </section>\n'
-        h += (f'        <a class="mc-link" id="mcLink" href="../missed-connections.html?show={sl}" hidden>'
+        mc_q = f"show={sl}&venue={quote(s[VENUE])}&night={d.isoformat()}"
+        h += (f'        <a class="mc-link" id="mcLink" href="../missed-connections.html?{esc(mc_q)}" hidden>'
               'Were you there? Read or leave a missed connection →</a>\n')
         h += "      </main>\n" + foot
         (ROOT / "shows" / f"{sl}.html").write_text(h, encoding="utf8")
