@@ -121,6 +121,7 @@
         text-transform: uppercase;
       }
       h1 .red { color: var(--accent); }
+      h1 a, a.brand-mini { color: inherit; text-decoration: none; }
       .tagline { font-size: clamp(17px, 2.6vw, 22px); font-weight: 700; line-height: 1.25; margin: 12px 0 0; }
       .hook {
         display: inline-flex; align-items: baseline; gap: 10px;
@@ -403,7 +404,11 @@
         var seen = false;
         try { seen = sessionStorage.getItem("smn-intro") === "1"; } catch (e) {}
         var calm = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-        if (seen || calm) return;
+        // Tapping the Show Me NYC name anywhere on the site comes here with
+        // ?intro, which replays the card. The flag is removed from the address.
+        var asked = /[?&]intro(=|&|$)/.test(location.search);
+        if (asked) { try { history.replaceState(null, "", location.pathname); } catch (e) {} }
+        if ((seen && !asked) || calm) return;
         try { sessionStorage.setItem("smn-intro", "1"); } catch (e) {}
 
         // [words, card colour, word modifier, beats, extra corner text]
@@ -483,7 +488,7 @@
           <rect x="408" y="136" width="32" height="64"/>
           <rect x="444" y="100" width="36" height="100"/>
         </svg>
-        <h1>Show Me <span class="red">NYC</span></h1>
+        <h1><a href="./?intro" aria-label="Show Me NYC, back to the top">Show Me <span class="red">NYC</span></a></h1>
         <p class="tagline">The city never sleeps. Why should you?</p>
         <a class="hook" id="hook" href="#days" hidden></a>
         <p class="mast-meta" id="mastMeta"></p>
@@ -491,7 +496,7 @@
 
       <div class="controls" role="region" aria-label="Search and filters">
         <div class="ctl-row">
-          <span class="brand-mini">Show&nbsp;Me&nbsp;<span class="red">NYC</span></span>
+          <a class="brand-mini" href="./?intro" aria-label="Show Me NYC, reload">Show&nbsp;Me&nbsp;<span class="red">NYC</span></a>
           <label class="search">
             <input id="q" type="search" placeholder="Search acts, venues, notes…" aria-label="Search acts, venues and notes" autocomplete="off" />
           </label>
