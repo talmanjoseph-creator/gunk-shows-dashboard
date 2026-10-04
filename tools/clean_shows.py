@@ -9,6 +9,7 @@ Run after pasting in new listings:  python3 tools/clean_shows.py
      wording plus the other source's ticket link.
   3. Sorts each day by start time (after-midnight sets go last).
   4. Regenerates AREA (venue -> area) from the GEO coordinates.
+  5. Replaces affiliate-redirect ticket links with the direct ticket page.
 
 Add new spellings to VENUE_ALIASES as they turn up, and fix a wrong area
 in AREA_OVERRIDES.
@@ -17,6 +18,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from urllib.parse import parse_qsl, unquote, urlencode, urlsplit, urlunsplit
 
 INDEX = Path(__file__).resolve().parent.parent / "shows-data.js"
 
@@ -83,6 +85,33 @@ def area_for(lat, lng):
     if lat > 40.735 or lng > -73.885:
         return "qns"
     return "bk"
+
+
+# Affiliate redirectors that wrap the real ticket page in a "u" parameter.
+REDIRECT_HOSTS = ("evyy.net", "pxf.io", "sjv.io")
+# Tracking parameters to drop from the unwrapped link.
+TRACKING_PARAMS = {"aff", "subid1", "subid2", "subid3", "irclickid", "irgwc", "clickid"}
+
+
+def direct_url(url):
+    """Unwrap an affiliate redirect to the ticket page it points at."""
+    parts = urlsplit(url)
+    if not parts.netloc.endswith(REDIRECT_HOSTS):
+        return url
+    # The target may be percent-encoded or pasted raw (with its own "?").
+    m = re.search(r"[?&]u=(.+)$", url)
+    if not m:
+        return url
+    target = m[1]
+    if not target.lower().startswith("http"):
+        return url
+    if "%3A%2F%2F" in target[:16].upper():
+        target = unquote(target.split("&")[0])
+    t = urlsplit(target)
+    if not t.netloc:
+        return url
+    query = [(k, v) for k, v in parse_qsl(t.query, keep_blank_values=True) if k.lower() not in TRACKING_PARAMS]
+    return urlunsplit((t.scheme, t.netloc, t.path, urlencode(query), t.fragment))
 
 
 def canon_venue(name):
@@ -164,6 +193,7 @@ def clean(shows):
     for s in shows:
         raw = s[VENUE].strip()
         s[VENUE] = canon_venue(raw)
+        s[URL] = direct_url(s[URL])
         if raw in ALIAS_NOTES and not s[NOTE]:
             s[NOTE] = ALIAS_NOTES[raw]
     out, merged = [], []
@@ -214,7 +244,8 @@ def main():
     src = src[:a0] + "var AREA = {\n" + abody + "\n" + src[a1:]
 
     INDEX.write_text(src, encoding="utf8")
-    print(f"{len(shows)} rows in, {len(cleaned)} out, {len(merged)} merged")
+    wrapped = sum(1 for s in cleaned if urlsplit(s[URL]).netloc.endswith(REDIRECT_HOSTS))
+    print(f"{len(shows)} rows in, {len(cleaned)} out, {len(merged)} merged, {wrapped} affiliate links left")
     for a, b in merged:
         print(f"  Oct {a[DAY]:>2} {a[VENUE]}: [{a[SRC]} {a[TIME]}] {a[ACTS][:45]!r} + [{b[SRC]} {b[TIME]}] {b[ACTS][:45]!r}")
     venues = {s[VENUE] for s in cleaned}

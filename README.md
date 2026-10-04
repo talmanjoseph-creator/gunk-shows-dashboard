@@ -15,7 +15,8 @@ Live at https://talmanjoseph-creator.github.io/gunk-shows-dashboard/
 1. In `shows-data.js`, update `SHOW_META` (year, month, issue details, notes) and replace the rows in `SHOWS`.
 2. Add coordinates to `GEO` for any venue that is new.
 3. Run `python3 tools/clean_shows.py`. It merges venue spellings, removes duplicate listings,
-   sorts each day by start time, and regenerates `AREA`. It prints what it merged and which
+   sorts each day by start time, regenerates `AREA`, and replaces affiliate-redirect ticket links
+   with the direct ticket page. It prints what it merged and which
    venues have no coordinates, so check that output.
 4. If it puts a venue in the wrong area, add it to `AREA_OVERRIDES` in the script and run it again.
    New venue spellings go in `VENUE_ALIASES`.
