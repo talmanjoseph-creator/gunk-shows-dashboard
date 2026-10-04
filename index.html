@@ -6,15 +6,15 @@
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)" />
-    <title>Show Me NYC — every NYC show, night by night</title>
-    <meta name="description" content="Every NYC show this month in one list: DIY and indie listings from GUNK New York and around the city. Filter by area, age and date, and save the ones you want." />
+    <title>Show Me NYC — who's playing tonight?</title>
+    <meta name="description" content="The city never sleeps. Why should you? Every show in NYC, night by night." />
     <link rel="canonical" href="https://talmanjoseph-creator.github.io/gunk-shows-dashboard/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Show Me NYC" />
-    <meta property="og:title" content="Show Me NYC — every NYC show, night by night" />
-    <meta property="og:description" content="DIY and indie listings from GUNK New York and around the city, in one list. Filter by area, age and date." />
+    <meta property="og:title" content="Show Me NYC — who's playing tonight?" />
+    <meta property="og:description" content="The city never sleeps. Why should you?" />
     <meta property="og:url" content="https://talmanjoseph-creator.github.io/gunk-shows-dashboard/" />
-    <meta property="og:image" content="https://talmanjoseph-creator.github.io/gunk-shows-dashboard/og.png" />
+    <meta property="og:image" content="https://talmanjoseph-creator.github.io/gunk-shows-dashboard/og.png?v=2" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -366,7 +366,7 @@
     <div class="wrap">
       <header class="mast">
         <h1>Show Me <span class="red">NYC</span></h1>
-        <p class="tagline">Every show in the city, night by night.</p>
+        <p class="tagline">The city never sleeps. Why should you?</p>
         <a class="hook" id="hook" href="#days" hidden></a>
         <p class="mast-meta" id="mastMeta"></p>
       </header>
@@ -704,7 +704,6 @@
 
         // Masthead, stats, notes, colophon.
         var G = SHOW_META.gunk, O = SHOW_META.other;
-        document.title = "Show Me NYC — every NYC show, " + MONTHS[MONTH] + " " + YEAR;
         // Masthead: one hook (tonight's count, linking to tonight) and one line of totals.
         var tonightInTown = SHOWS.filter(function (s) { return s[0] === todayKey && s.area !== "out"; }).length;
         if (inMonth && tonightInTown) {
