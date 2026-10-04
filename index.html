@@ -90,23 +90,17 @@
         text-transform: uppercase;
       }
       h1 .red { color: var(--accent); }
-      .mast-sub {
-        font-family: var(--mono);
-        font-size: 13px;
-        color: var(--ink-soft);
-        max-width: 66ch;
-        margin: 10px 0 0;
+      .tagline { font-size: clamp(17px, 2.6vw, 22px); font-weight: 700; line-height: 1.25; margin: 12px 0 0; }
+      .hook {
+        display: inline-flex; align-items: baseline; gap: 10px;
+        margin-top: 18px; padding: 10px 18px 12px;
+        background: var(--accent); color: var(--accent-ink);
+        font-size: 19px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.01em;
+        text-decoration: none;
       }
-      .mast-sub a { color: var(--accent); text-underline-offset: 2px; }
-      .stats { display: flex; flex-wrap: wrap; margin-top: 18px; border: 2px solid var(--line); }
-      .stat { padding: 10px 16px; border-right: 2px solid var(--line); min-width: 110px; }
-      .stat:last-child { border-right: 0; }
-      .stat b { display: block; font-size: 26px; font-weight: 900; line-height: 1; }
-      .stat span {
-        font-family: var(--mono);
-        font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
-        color: var(--muted);
-      }
+      .hook b { font-size: 40px; line-height: 1; letter-spacing: -0.02em; }
+      .hook:hover { background: var(--ink); color: var(--bg); }
+      .mast-meta { font: 500 12.5px var(--mono); color: var(--muted); margin: 14px 0 0; }
 
       /* ---------- sticky bar ---------- */
       .controls {
@@ -364,9 +358,7 @@
         .show .area-tag { display: none; } /* the Area filter covers it; rows stay short */
         .controls:not(.has-line) .result-row { display: none; }
         .show .acts { font-size: 15.5px; }
-        .stat { min-width: 84px; padding: 8px 12px; }
-        .stat b { font-size: 21px; }
-      }
+        }
     </style>
   </head>
   <body>
@@ -374,10 +366,9 @@
     <div class="wrap">
       <header class="mast">
         <h1>Show Me <span class="red">NYC</span></h1>
-        <p class="mast-sub" id="mastSub">
-          Every NYC show this month — DIY and indie listings from GUNK New York and around the city.
-        </p>
-        <div class="stats" id="stats" aria-label="Totals"></div>
+        <p class="tagline">Every show in the city, night by night.</p>
+        <a class="hook" id="hook" href="#days" hidden></a>
+        <p class="mast-meta" id="mastMeta"></p>
       </header>
 
       <div class="controls" role="region" aria-label="Search and filters">
@@ -714,21 +705,15 @@
         // Masthead, stats, notes, colophon.
         var G = SHOW_META.gunk, O = SHOW_META.other;
         document.title = "Show Me NYC — every NYC show, " + MONTHS[MONTH] + " " + YEAR;
-        $("mastSub").innerHTML = "Every NYC show, " + MONTHS[MONTH] + " " + FIRST_DAY + "–" + LAST_DAY +
-          ' — DIY/indie listings from <a href="' + esc(G.url) + '" target="_blank" rel="noopener">GUNK New York, Issue No. ' + G.issue +
-          "</a> (transcribed " + esc(G.transcribed) + "), plus more listings from around the city (pulled " +
-          esc(O.pulled) + "). A GUNK badge marks the zine's picks; an asterisk (*) marks the headliner, per the zine.";
-        var days = {};
-        SHOWS.forEach(function (s) { days[s[0]] = 1; });
-        var stats = [
-          [SHOWS.length, "shows listed"],
-          [Object.keys(VENUE_SET).length, "venues"],
-          [Object.keys(days).length, "days (" + MON + " " + FIRST_DAY + "–" + LAST_DAY + ")"]
-        ];
-        if (inMonth) stats.push([secs[todayKey].total, "tonight"]);
-        $("stats").innerHTML = stats.map(function (st) {
-          return '<div class="stat"><b>' + st[0] + "</b><span>" + st[1] + "</span></div>";
-        }).join("");
+        // Masthead: one hook (tonight's count, linking to tonight) and one line of totals.
+        var tonightInTown = SHOWS.filter(function (s) { return s[0] === todayKey && s.area !== "out"; }).length;
+        if (inMonth && tonightInTown) {
+          var hook = $("hook");
+          hook.href = "#day-" + todayKey;
+          hook.innerHTML = "<b>" + tonightInTown + "</b> " + (tonightInTown === 1 ? "show" : "shows") + ' tonight <span aria-hidden="true">↓</span>';
+          hook.hidden = false;
+        }
+        $("mastMeta").textContent = SHOWS.length + " shows · " + Object.keys(VENUE_SET).length + " venues · " + MONTHS[MONTH] + " " + YEAR;
         if (SHOW_META.notes && SHOW_META.notes.length) {
           $("issueList").innerHTML = SHOW_META.notes.map(function (n) {
             return "<li><strong>" + esc(n[0]) + "</strong> — " + esc(n[1]) + "</li>";
@@ -737,7 +722,7 @@
         }
         $("colophon").innerHTML = 'Sources: <a href="' + esc(G.url) + '" target="_blank" rel="noopener">GUNK New York, Issue No. ' + G.issue + "</a> (transcribed " +
           esc(G.transcribed) + "; runs " + esc(G.covers) + "), plus other public listings (pulled " + esc(O.pulled) +
-          "). Close to home uses your device's location to show gigs within " + NEAR_MILES +
+          "). A GUNK badge marks the zine's picks; an asterisk (*) marks the headliner, per the zine. Close to home uses your device's location to show gigs within " + NEAR_MILES +
           " mile — the location never leaves your browser, and a handful of DIY spots without public addresses aren't covered. " +
           "Saved shows are stored only in this browser. Listings can change — check the venue before you head out.";
 
