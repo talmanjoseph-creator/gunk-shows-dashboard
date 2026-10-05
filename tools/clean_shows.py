@@ -93,10 +93,29 @@ REDIRECT_HOSTS = ("evyy.net", "pxf.io", "sjv.io")
 TRACKING_PARAMS = {"aff", "subid1", "subid2", "subid3", "irclickid", "irgwc", "clickid"}
 
 
+# Tags that only record who shared a link. Safe to drop from any link.
+# NOT in this list on purpose: Eventim's "afflky" (wl.eventim.us/...?afflky=TVEye).
+# That is the venue's own storefront key, not an affiliate tag; without it the
+# ticket page shows an error instead of tickets (checked Oct 5, 2026).
+SHARE_PARAMS = {"stkn", "igsh", "igshid", "fbclid", "gclid", "mc_cid", "mc_eid"}
+
+
+def drop_share_params(url):
+    parts = urlsplit(url)
+    if not parts.query:
+        return url
+    keep = [(k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True)
+            if k.lower() not in SHARE_PARAMS and not k.lower().startswith("utm_")]
+    if len(keep) == len(parse_qsl(parts.query, keep_blank_values=True)):
+        return url
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(keep), parts.fragment))
+
+
 def direct_url(url):
     """Unwrap an affiliate redirect to the ticket page it points at."""
     if not url:
         return url
+    url = drop_share_params(url)
     # Dice marketing links (.../partner/tickets/event/<slug>?utm=...) are the
     # same event page as https://dice.fm/event/<slug>.
     dice = re.search(r"https?://(?:www\.)?dice\.fm/(?:partner/tickets/)?event/([^?#\s]+)", url, re.I)
