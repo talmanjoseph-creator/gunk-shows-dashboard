@@ -72,7 +72,7 @@ var SHOWS = [
   [3,"8:00 PM","Bar Freda","Anti-Folk Night: Out of System Transfer, Theylovethem, The Skirst","","21","gunk",""],
   [3,"11:00 PM","Market Hotel","Loukeman, Dyltwosix","Elsewhere and SD Music Group present","21","gunk",""],
   [3,"","The Record Shop","Evan Welsh guest curation","","AA","gunk",""],
-  [4,"2:00 PM","Maria Hernandez Park","Noun, Dead Tooth, Francie Moon","","AA","other","https://www.instagram.com/p/DdhhAm_TQkm/?stkn=Zmk3eDExOWc1eHJl"],
+  [4,"2:00 PM","Maria Hernandez Park","Noun, Dead Tooth, Francie Moon","","AA","other","https://www.instagram.com/p/DdhhAm_TQkm/"],
   [4,"3:00 PM","Gold Sounds","Trust, Reality, In Jest, Riva Mae, A Murder's Dismay","","21","other","https://dice.fm/event/mxyg9k-trust-reality-in-jest-riva-mae-amurdersdismay-4th-oct-gold-sounds-new-york-tickets"],
   [4,"3:00 PM","Maker Park","The Parallel Lines, Grandma Drinks, Modern Day Machines, Deadendz","Punk Rock Mini Golf","AA","other","https://dice.fm/event/k62638-punk-rock-mini-golf-night-55-w-the-parallel-lines-a-tribute-to-andy-mac-etc-4th-oct-maker-park-new-york-city-tickets"],
   [4,"3:00 PM","Public Records","Floorplan, CARISTA","The Nursery","","club","https://dice.fm/event/oepgqr-the-nursery-floorplan-carista-beewack-4th-oct-public-records-new-york-tickets"],

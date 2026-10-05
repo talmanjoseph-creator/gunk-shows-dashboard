@@ -290,16 +290,23 @@
           var nm = el("input");
           nm.type = "text"; nm.maxLength = 40; nm.value = savedName();
           l2.appendChild(nm);
+          // Hidden field: people never see it, bots fill it in.
+          var l3 = el("label", "hp", "Leave this empty");
+          l3.setAttribute("aria-hidden", "true");
+          var hp = el("input");
+          hp.type = "text"; hp.tabIndex = -1; hp.autocomplete = "off";
+          l3.appendChild(hp);
           var act = el("div", "actions");
           var go = el("button", "btn primary", "Send reply");
           go.type = "submit";
           act.appendChild(go);
           var st = el("p", "hint");
           st.setAttribute("role", "status");
-          f.appendChild(l1); f.appendChild(l2); f.appendChild(act); f.appendChild(st);
+          f.appendChild(l1); f.appendChild(l2); f.appendChild(l3); f.appendChild(act); f.appendChild(st);
           f.addEventListener("submit", function (e) {
             e.preventDefault();
             var name = nm.value.trim(), msg = ta.value.trim();
+            if (hp.value) { f.textContent = ""; f.appendChild(el("p", "hint", THANKS)); return; } // a bot: say thanks, send nothing
             if (msg.length < 3) { st.textContent = "Write a little more first."; ta.focus(); return; }
             if (!name) { st.textContent = "Add a name or nickname."; nm.focus(); return; }
             go.disabled = true;

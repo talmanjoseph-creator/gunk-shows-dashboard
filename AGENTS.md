@@ -22,7 +22,7 @@ More than one person and more than one AI agent push to this repo. Read this bef
 ## How things stand (check with the owner before undoing any of these)
 
 - **Sources are credited in the footer only.** The footer's Sources line names and links GUNK New York and Oh My Rockness. The masthead and the filters do not name Oh My Rockness.
-- **Ticket links are direct**, never affiliate redirects (`evyy.net`, `pxf.io`). The cleanup script enforces this.
+- **Ticket links are direct**, never affiliate redirects (`evyy.net`, `pxf.io`). The cleanup script enforces this. Do not strip `afflky` from Eventim links (`wl.eventim.us/...?afflky=TVEye`): it is the venue's own storefront key, and the ticket page shows an error without it.
 - **Resident Advisor is not a source.** Their terms of use forbid automated collection without written permission, so do not scrape it.
 - **Copy is short.** Masthead: tagline, the "shows tonight" button, one line of totals. No stats grid, no source paragraph.
 - **Rows show no source badge and there is no source filter.** GUNK is credited in the footer only. In the data, `gunk`, `other`, `club`, `both` and `sub` still record where a row came from; `both` means GUNK plus another source, `sub` was sent in by a band.

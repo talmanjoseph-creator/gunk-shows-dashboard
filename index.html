@@ -975,7 +975,11 @@
             : filtering ? "Show " + plural(foldedShows, "earlier match", "earlier matches")
             : "Show earlier dates · " + plural(foldedDays, "day", "days") + ", " + plural(foldedShows, "show", "shows");
         }
+        // Nothing left to show: say whether the matches are just on earlier (folded) dates.
         $("emptyMsg").hidden = !(filtering && shown === 0);
+        $("emptyMsg").textContent = foldedShows
+          ? "Nothing coming up matches, but " + plural(foldedShows, "earlier show does", "earlier shows do") + ". Tap “Show " + plural(foldedShows, "earlier match", "earlier matches") + "” above."
+          : "No shows match. Try clearing the filters.";
 
         var line;
         if (filtering) {
