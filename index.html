@@ -147,7 +147,31 @@
         text-transform: uppercase; white-space: nowrap; margin-right: 2px;
       }
       .brand-mini .red { color: var(--accent); }
-      label.search { flex: 1 1 220px; display: flex; }
+      .search-wrap { flex: 1 1 220px; display: flex; position: relative; }
+      label.search { flex: 1 1 auto; display: flex; }
+      /* venue menu under the search box */
+      .suggest {
+        position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 30;
+        margin: 0; padding: 0; list-style: none;
+        background: var(--bg); border: 2px solid var(--line);
+        max-height: 268px; overflow-y: auto; overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        box-shadow: 0 22px 28px -22px rgba(0, 0, 0, 0.45);
+      }
+      .suggest li {
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        min-height: 44px; padding: 4px 12px;
+        font: 600 13.5px var(--mono); cursor: pointer;
+        border-bottom: 1px solid var(--hair);
+      }
+      .suggest li:last-child { border-bottom: 0; }
+      .suggest li .n { font-weight: 500; font-size: 12px; color: var(--muted); white-space: nowrap; }
+      .suggest li.on, .suggest li[role="option"]:hover { background: var(--chip-on); color: var(--chip-on-ink); }
+      .suggest li.on .n, .suggest li[role="option"]:hover .n { color: inherit; opacity: 0.75; }
+      .suggest li.sg-head {
+        min-height: 28px; cursor: default;
+        font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+      }
       label.search input {
         width: 100%; min-height: 42px;
         font: 500 16px var(--mono); /* 16px stops iOS zooming on focus */
@@ -397,7 +421,7 @@
         .add-show .w-show { display: none; }
         }
       @media (max-width: 560px) {
-        label.search { order: 3; flex-basis: 100%; }
+        .search-wrap { order: 3; flex-basis: 100%; }
         .strip { margin-left: -16px; margin-right: -16px; padding: 0 16px; }
         .panel { left: -16px; right: -16px; padding-left: 16px; padding-right: 16px; }
         .show { grid-template-columns: 62px 1fr 40px; gap: 0 8px; }
@@ -512,9 +536,13 @@
       <div class="controls" role="region" aria-label="Search and filters">
         <div class="ctl-row">
           <a class="brand-mini" href="./?intro" aria-label="Show Me NYC, reload">Show&nbsp;Me&nbsp;<span class="red">NYC</span></a>
-          <label class="search">
-            <input id="q" type="search" placeholder="Search acts, venues, notes…" aria-label="Search acts, venues and notes" autocomplete="off" />
-          </label>
+          <div class="search-wrap">
+            <label class="search">
+              <input id="q" type="search" placeholder="Search acts, venues, notes…" aria-label="Search acts, venues and notes" autocomplete="off"
+                role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list" />
+            </label>
+            <ul class="suggest" id="suggest" role="listbox" aria-label="Venues" hidden></ul>
+          </div>
           <a class="chip add-show" href="submit.html" aria-label="Add a show">+ Add<span class="w-a">&nbsp;a</span><span class="w-show">&nbsp;show</span></a>
           <button class="chip" id="filterToggle" aria-expanded="false" aria-controls="filterPanel">Filters</button>
         </div>
@@ -1062,6 +1090,102 @@
       $("q").addEventListener("input", function (e) {
         state.q = fold(e.target.value.trim());
         apply(); writeUrl(); syncStickyHeight(); toListTop();
+        drawSuggest();
+      });
+
+      /* Venue menu: tap the search box and the venues drop down, busiest
+         first; typing narrows them. Picking one filters the list to it.
+         The typed text still searches acts and notes as before. */
+      var sg = $("suggest"), sgOn = -1;
+      function sgOptions() { return sg.querySelectorAll('li[role="option"]'); }
+      function closeSuggest() {
+        if (sg.hidden) return;
+        sg.hidden = true;
+        sgOn = -1;
+        $("q").setAttribute("aria-expanded", "false");
+        $("q").removeAttribute("aria-activedescendant");
+      }
+      function drawSuggest() {
+        var typed = fold($("q").value.trim());
+        var left = {}, all = {};
+        SHOWS.forEach(function (s) {
+          all[s[2]] = (all[s[2]] || 0) + 1;
+          if (!inMonth || s[0] >= todayKey) left[s[2]] = (left[s[2]] || 0) + 1;
+        });
+        var names = Object.keys(all).filter(function (v) {
+          return typed ? fold(v).indexOf(typed) !== -1 : left[v];
+        });
+        names.sort(function (a, b) {
+          if (typed) { // names that start with what was typed come first
+            var pa = fold(a).indexOf(typed) === 0 ? 0 : 1, pb = fold(b).indexOf(typed) === 0 ? 0 : 1;
+            if (pa !== pb) return pa - pb;
+          }
+          return (left[b] || 0) - (left[a] || 0) || a.localeCompare(b);
+        });
+        if (!names.length) { closeSuggest(); return; }
+        sg.innerHTML = '<li class="sg-head" role="presentation">Venues</li>' + names.map(function (v, i) {
+          var n = left[v] || 0;
+          return '<li role="option" id="sg-' + i + '" aria-selected="false" data-venue="' + esc(v) + '"><span>' + esc(v) +
+            '</span><span class="n">' + (n ? plural(n, "show", "shows") : "none left") + "</span></li>";
+        }).join("");
+        sgOn = -1;
+        sg.scrollTop = 0;
+        sg.hidden = false;
+        $("q").setAttribute("aria-expanded", "true");
+        fitSuggest();
+      }
+      /* Keep the menu above the phone keyboard. */
+      function fitSuggest() {
+        if (sg.hidden) return;
+        var vv = window.visualViewport;
+        var room = (vv ? vv.height + vv.offsetTop : window.innerHeight) - sg.getBoundingClientRect().top - 10;
+        sg.style.maxHeight = Math.max(120, Math.min(268, Math.floor(room))) + "px";
+      }
+      if (window.visualViewport) window.visualViewport.addEventListener("resize", fitSuggest);
+      function pickVenue(v) {
+        $("q").value = "";
+        state.q = "";
+        state.venue = v;
+        closeSuggest();
+        $("q").blur();
+        changed();
+      }
+      function openSuggest() {
+        // Bring the bar to the top first so the menu has room above the keyboard.
+        var top = controls.getBoundingClientRect().top;
+        if (top > 1) { try { window.scrollBy({ top: top, behavior: "instant" }); } catch (e) { window.scrollBy(0, top); } }
+        drawSuggest();
+      }
+      $("q").addEventListener("focus", openSuggest);
+      $("q").addEventListener("click", function () { if (sg.hidden) openSuggest(); });
+      $("q").addEventListener("blur", function () { setTimeout(closeSuggest, 150); });
+      $("q").addEventListener("keydown", function (e) {
+        if (e.key === "Escape") { closeSuggest(); return; }
+        var opts = sgOptions();
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          if (sg.hidden) { drawSuggest(); opts = sgOptions(); }
+          if (!opts.length) return;
+          e.preventDefault();
+          if (sgOn >= 0) { opts[sgOn].classList.remove("on"); opts[sgOn].setAttribute("aria-selected", "false"); }
+          sgOn = e.key === "ArrowDown" ? (sgOn + 1) % opts.length : (sgOn <= 0 ? opts.length - 1 : sgOn - 1);
+          opts[sgOn].classList.add("on");
+          opts[sgOn].setAttribute("aria-selected", "true");
+          opts[sgOn].scrollIntoView({ block: "nearest" });
+          $("q").setAttribute("aria-activedescendant", opts[sgOn].id);
+        } else if (e.key === "Enter") {
+          if (!sg.hidden && sgOn >= 0 && opts[sgOn]) { e.preventDefault(); pickVenue(opts[sgOn].getAttribute("data-venue")); }
+          else { closeSuggest(); $("q").blur(); } // plain text search: put the keyboard away
+        }
+      });
+      // A tap anywhere else puts the menu away (phones don't always blur the box).
+      document.addEventListener("pointerdown", function (e) {
+        if (!sg.hidden && !e.target.closest(".search-wrap")) closeSuggest();
+      });
+      // Keep the search box focused while the menu is scrolled or tapped.
+      sg.addEventListener("mousedown", function (e) { e.preventDefault(); });
+      sg.addEventListener("click", function (e) {
+        var li = e.target.closest('li[role="option"]');
+        if (li) pickVenue(li.getAttribute("data-venue"));
       });
 
       function setPanel(open) {
