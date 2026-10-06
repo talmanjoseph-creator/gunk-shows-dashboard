@@ -55,7 +55,9 @@ Posts and replies are stored in the owner's Supabase project, not in this repo.
 - `submit.html` is the form: acts, venue, night, time, ages, ticket link, a note and an optional contact email. No login.
 - Sent-in shows are stored in the owner's Supabase project, table `submitted_shows`. `supabase/submitted-shows.sql` creates it and its rules; run it after `setup.sql`. It was tested in Postgres and is safe to run again.
 - **Nothing shows until it is approved.** `mc-admin.html` lists the shows waiting, flags one that looks like it is already on the list, and shows the contact email to the owner only.
-- Approved shows appear on the main list right away (read from Supabase when the page loads) without a page of their own. If Supabase can't be reached the list loads without them.
+- Approved shows appear on the main list right away (read from Supabase when the page loads). If Supabase can't be reached the list loads without them.
+- Each approved show has a page at once: `show.html?id=<number>`. It has the details, tickets, a calendar button and a share kit: a 4:5 poster drawn in the browser, words to copy and the link. Its link preview is the site's general one, because the page is filled in by script; the generated page in `shows/` (after the next data update) has a preview of its own.
+- On `mc-admin.html`, an approved show has "Open its page" and, if the band left an email, "Email the band their link", which opens a ready-written email in the owner's own mail app. Nothing is sent automatically.
 - `python3 tools/pull_submissions.py` copies approved shows into `shows-data.js` (source `sub`) and runs the cleanup, which gives them a show page, a venue page and a calendar button. Add `--dry-run` to see what it would add. Run it as part of each data update.
 - The contact email can't be read through the public API by anyone; the owner's page gets it through `submitted_show_contacts()`.
 

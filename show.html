@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Show | Show Me NYC</title>
+    <meta name="description" content="A show on Show Me NYC, sent in by the band." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Show Me NYC" />
+    <meta property="og:title" content="A show on Show Me NYC" />
+    <meta property="og:description" content="The city never sleeps. Why should you?" />
+    <meta property="og:image" content="https://talmanjoseph-creator.github.io/gunk-shows-dashboard/og.png?v=3" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111'/%3E%3Cpath fill='%23ff4d4d' d='M3 29V17h6v12zM10 29V11l6-3v21zM17 29V13h2V8h1V3h1v5h1v5h2v16zM25 29V19h4v10z'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="pages.css" />
+  </head>
+  <body>
+    <!-- The page for one show a band sent in (submit.html) and the owner
+         approved. It is read from Supabase, so it exists the moment the show
+         is approved, before the show has a generated page in shows/. -->
+    <div class="wrap">
+      <header class="top">
+        <a class="brand" href="./?intro">Show&nbsp;Me&nbsp;<span>NYC</span></a>
+        <a class="back" href="./">← All shows</a>
+      </header>
+      <main>
+        <p class="hint" id="shMsg" role="status">Finding the show…</p>
+        <noscript><p class="hint">This page needs JavaScript.</p></noscript>
+
+        <div id="shBody" hidden>
+          <p class="when" id="shWhen"></p>
+          <h1 id="shActs"></h1>
+          <p class="where">
+            <span class="venue" id="shVenue"></span>
+            <span class="area" id="shArea" hidden></span>
+            <a class="map" id="shMap" target="_blank" rel="noopener" hidden>Map</a>
+          </p>
+          <p class="tags" id="shTags"></p>
+          <p class="past-note" id="shPast" hidden>This one already happened.</p>
+          <div class="actions">
+            <a class="btn primary" id="shTix" target="_blank" rel="noopener" hidden>Tickets</a>
+            <button class="btn" id="shShare" type="button">Share</button>
+            <button class="btn" id="shCal" type="button">Add to calendar</button>
+          </div>
+
+          <section class="kit">
+            <h2>Spread the word</h2>
+            <p class="hint">Your show, ready to post. Save the picture, copy the words, send the link.</p>
+            <img class="poster" id="shPoster" alt="" hidden />
+            <div class="actions">
+              <button class="btn" id="shImg" type="button" hidden>Save the picture</button>
+              <button class="btn" id="shCopyText" type="button">Copy the words</button>
+              <button class="btn" id="shCopyLink" type="button">Copy the link</button>
+            </div>
+            <pre class="caption" id="shCaption"></pre>
+          </section>
+        </div>
+
+        <div class="actions" id="shBack" hidden>
+          <a class="btn primary" href="./">See what's on tonight</a>
+          <a class="btn" href="submit.html">Add a show</a>
+        </div>
+      </main>
+      <footer class="colophon">
+        Sent in by the band and checked by a person. Listings can change — check the venue before you head out.
+      </footer>
+    </div>
+
+    <script src="shows-data.js"></script>
+    <script src="connections-data.js"></script>
+    <script>
+      (function () {
+        "use strict";
+        var M = CONNECTIONS_META;
+        function $(id) { return document.getElementById(id); }
+        function stop(text) {
+          $("shMsg").textContent = text;
+          $("shBack").hidden = false;
+        }
+        var id = (/[?&]id=(\d{1,12})(&|$)/.exec(location.search) || [])[1];
+        if (!id) return stop("That link is missing its show.");
+        if (!M.supabaseUrl || !M.supabaseKey || !window.fetch) return stop("Couldn't load the show.");
+
+        var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        var DOW = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+        var AREAS = { bush: "Bushwick / Ridgewood", wbg: "Williamsburg / Greenpoint", bk: "Brooklyn", les: "Manhattan below 14th",
+          mid: "Manhattan above 14th", qns: "Queens", bx: "Bronx / Staten Island", out: "Out of town" };
+
+        /* Today's date in New York as YYYY-MM-DD; the night runs until 4 AM. */
+        function nyToday() {
+          var d;
+          try {
+            var o = {};
+            new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", hourCycle: "h23" })
+              .formatToParts(new Date()).forEach(function (p) { o[p.type] = parseInt(p.value, 10); });
+            d = new Date(Date.UTC(o.year, o.month - 1, o.day, o.hour % 24));
+          } catch (e) {
+            var n = new Date();
+            d = new Date(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate(), n.getHours()));
+          }
+          d.setUTCHours(d.getUTCHours() - 4);
+          return d.toISOString().slice(0, 10);
+        }
+
+        fetch(M.supabaseUrl.replace(/\/+$/, "") + "/rest/v1/submitted_shows?select=id,night,start_time,venue,acts,note,age,ticket_url&approved=is.true&id=eq." + id,
+          { headers: { apikey: M.supabaseKey, Authorization: "Bearer " + M.supabaseKey } })
+          .then(function (r) { if (!r.ok) throw new Error("load"); return r.json(); })
+          .then(function (rows) {
+            if (!rows || !rows.length) return stop("That show isn't up. It may still be waiting to be checked, or it was taken down.");
+            draw(rows[0]);
+          })
+          .catch(function () { stop("Couldn't load the show just now. Try again in a bit."); });
+
+        function draw(r) {
+          var p = /^(\d{4})-(\d{2})-(\d{2})$/.exec(r.night || "");
+          if (!p) return stop("Couldn't load the show.");
+          var when = new Date(Date.UTC(+p[1], +p[2] - 1, +p[3], 12));
+          var acts = String(r.acts || "").trim(), venue = String(r.venue || "").trim();
+          var time = /^(1[0-2]|[1-9]):[0-5][0-9] (AM|PM)$/.test(r.start_time) ? r.start_time : "";
+          var age = { AA: "All Ages", "16": "16+", "18": "18+", "21": "21+" }[r.age] || "";
+          var note = String(r.note || "").trim();
+          var url = /^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)+(\/[^\s"<>]*)?$/i.test(r.ticket_url || "") ? r.ticket_url : "";
+          var here = location.origin + location.pathname + "?id=" + r.id;
+          var dateLong = DOW[when.getUTCDay()] + " " + MONTHS[when.getUTCMonth()] + " " + when.getUTCDate();
+          var dateShort = DOW[when.getUTCDay()].slice(0, 3) + " " + MONTHS[when.getUTCMonth()] + " " + when.getUTCDate();
+
+          // Use the site's spelling of the venue if it is one we already list.
+          var known = {};
+          (typeof SHOWS === "undefined" ? [] : SHOWS).forEach(function (s) { known[s[2].toLowerCase()] = s[2]; });
+          var listed = known[venue.toLowerCase()];
+          if (listed) venue = listed;
+          var area = typeof AREA === "undefined" ? "" : (AREA[venue] || "");
+
+          document.title = acts + " at " + venue + " | Show Me NYC";
+          $("shWhen").textContent = dateLong + (time ? " · " + time : "");
+          $("shActs").textContent = acts;
+          var v = $("shVenue");
+          if (listed) {
+            var a = document.createElement("a");
+            a.className = "venue";
+            a.href = "./?venue=" + encodeURIComponent(venue);
+            a.textContent = venue;
+            v.parentNode.replaceChild(a, v);
+          } else v.textContent = venue;
+          if (area && AREAS[area]) { $("shArea").textContent = AREAS[area]; $("shArea").hidden = false; }
+          if (area) {
+            $("shMap").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(venue + (area === "out" ? "" : ", New York, NY"));
+            $("shMap").hidden = false;
+          }
+          var tags = $("shTags");
+          if (age) { var b = document.createElement("span"); b.className = "badge"; b.textContent = age; tags.appendChild(b); }
+          if (note) { var n = document.createElement("span"); n.className = "note"; n.textContent = note; tags.appendChild(n); }
+          tags.hidden = !age && !note;
+          if (url) { $("shTix").href = url; $("shTix").hidden = false; }
+          var past = r.night < nyToday();
+          $("shPast").hidden = !past;
+          $("shMsg").hidden = true;
+          $("shBody").hidden = false;
+
+          /* ---------- the words ---------- */
+          var caption = [acts, dateLong + (time ? ", " + time : "") + " at " + venue];
+          if (age || note) caption.push([age, note].filter(Boolean).join(" · "));
+          if (url) caption.push("Tickets: " + url);
+          caption.push(here);
+          caption = caption.join("\n");
+          $("shCaption").textContent = caption;
+
+          function flash(btn, text) {
+            var was = btn.textContent;
+            btn.textContent = text;
+            setTimeout(function () { btn.textContent = was; }, 1800);
+          }
+          function copy(btn, text) {
+            var no = function () { flash(btn, "Press and hold to copy"); };
+            if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { flash(btn, "Copied"); }, no);
+            else no();
+          }
+          $("shCopyText").addEventListener("click", function () { copy($("shCopyText"), caption); });
+          $("shCopyLink").addEventListener("click", function () { copy($("shCopyLink"), here); });
+          $("shShare").addEventListener("click", function () {
+            if (navigator.share) navigator.share({ title: document.title, text: acts + " — " + dateShort + " at " + venue, url: here }).catch(function () {});
+            else copy($("shShare"), here);
+          });
+
+          /* ---------- calendar file (assumes a 3-hour show) ---------- */
+          function icsText(t) { return String(t).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n"); }
+          function fold(line) {
+            var out = [];
+            while (line.length > 73) { out.push(line.slice(0, 73)); line = " " + line.slice(73); }
+            out.push(line);
+            return out.join("\r\n");
+          }
+          function pad(x) { return (x < 10 ? "0" : "") + x; }
+          function save(blob, name) {
+            var u = URL.createObjectURL(blob), a = document.createElement("a");
+            a.href = u; a.download = name;
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(function () { URL.revokeObjectURL(u); }, 1000);
+          }
+          $("shCal").addEventListener("click", function () {
+            var L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Show Me NYC//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "BEGIN:VEVENT",
+              "UID:sent-in-" + r.id + "@show-me-nyc", "DTSTAMP:" + new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "")];
+            var m = /^(\d+):(\d+) (AM|PM)$/.exec(time), ymd = p[1] + p[2] + p[3];
+            if (!m) {
+              var next = new Date(Date.UTC(+p[1], +p[2] - 1, +p[3] + 1)).toISOString().slice(0, 10).replace(/-/g, "");
+              L.push("DTSTART;VALUE=DATE:" + ymd, "DTEND;VALUE=DATE:" + next);
+            } else {
+              var h = parseInt(m[1], 10) % 12 + (m[3] === "PM" ? 12 : 0), day = ymd;
+              if (h < 5) day = new Date(Date.UTC(+p[1], +p[2] - 1, +p[3] + 1)).toISOString().slice(0, 10).replace(/-/g, ""); // after-midnight set
+              L.push("DTSTART;TZID=America/New_York:" + day + "T" + pad(h) + m[2] + "00", "DURATION:PT3H");
+            }
+            var desc = [age, note, url ? "Tickets: " + url : "", "Listings can change — check the venue before you head out."].filter(Boolean).join("\n");
+            L.push("SUMMARY:" + icsText(acts + " at " + venue), "LOCATION:" + icsText(venue), "DESCRIPTION:" + icsText(desc), "URL:" + here, "END:VEVENT", "END:VCALENDAR");
+            save(new Blob([L.map(fold).join("\r\n") + "\r\n"], { type: "text/calendar;charset=utf-8" }), "show-me-nyc-" + r.night + ".ics");
+          });
+
+          /* ---------- the picture: a 4:5 poster drawn in the browser ---------- */
+          function poster() {
+            var W = 1080, H = 1350, pad = 84;
+            var c = document.createElement("canvas");
+            c.width = W; c.height = H;
+            var g = c.getContext("2d");
+            if (!g) return null;
+            var RED = "#ff4d4d", INK = "#f2f2f2", MUTED = "#9a9a9a";
+            g.fillStyle = "#0d0d0d"; g.fillRect(0, 0, W, H);
+            g.textBaseline = "alphabetic";
+            function spaced(text, x, y, gap) { // canvas has no letter-spacing everywhere, so space by hand
+              for (var i = 0; i < text.length; i++) { g.fillText(text[i], x, y); x += g.measureText(text[i]).width + gap; }
+              return x;
+            }
+            // name
+            g.font = "900 44px Archivo, Arial, sans-serif";
+            g.fillStyle = INK; g.fillText("SHOW ME ", pad, pad + 40);
+            g.fillStyle = RED; g.fillText("NYC", pad + g.measureText("SHOW ME ").width, pad + 40);
+            g.fillStyle = INK; g.fillRect(pad, pad + 64, W - pad * 2, 8);
+            // when
+            g.font = "600 40px 'IBM Plex Mono', monospace";
+            g.fillStyle = RED;
+            spaced((dateLong + (time ? " · " + time : "")).toUpperCase(), pad, pad + 170, 2);
+            // acts: one per line when they fit, as large as the space allows
+            // Text lives above the skyline: acts, then venue, then one line of extras.
+            var extra = [age, note].filter(Boolean).join(" · ");
+            var s = 1, skyTop = H - pad - 96 - 200 * s, textEnd = skyTop - 36;
+            var names = acts.split(/\s*,\s*/).filter(Boolean), maxW = W - pad * 2, top = pad + 216;
+            var room = textEnd - top - (extra ? 150 : 96);
+            function fit(text) { // shorten with an ellipsis instead of squashing the letters
+              if (g.measureText(text).width <= maxW) return text;
+              while (text.length > 1 && g.measureText(text + "…").width > maxW) text = text.slice(0, -1);
+              return text.replace(/[\s·,]+$/, "") + "…";
+            }
+            function wrap(size) {
+              g.font = "900 " + size + "px Archivo, Arial, sans-serif";
+              var lines = [];
+              names.forEach(function (name, i) {
+                var words = (name.toUpperCase() + (i < names.length - 1 ? "," : "")).split(/\s+/), line = "";
+                words.forEach(function (w) {
+                  var t = line ? line + " " + w : w;
+                  if (line && g.measureText(t).width > maxW) { lines.push(line); line = w; } else line = t;
+                });
+                if (line) lines.push(line);
+              });
+              return lines;
+            }
+            var size = 132, lines = wrap(size);
+            while (size > 44 && (lines.length * size * 1.02 > room || lines.some(function (l) { return g.measureText(l).width > maxW; }))) {
+              size -= 4; lines = wrap(size);
+            }
+            var maxLines = Math.max(1, Math.floor(room / (size * 1.02)));
+            if (lines.length > maxLines) { lines = lines.slice(0, maxLines); lines[maxLines - 1] = lines[maxLines - 1].replace(/,?$/, "…"); }
+            g.fillStyle = INK;
+            var y = top + size * 0.86;
+            lines.forEach(function (l) { g.fillText(l, pad, y, maxW); y += size * 1.02; });
+            // where
+            y = y - size * 0.86 + 72;
+            g.font = "700 54px Archivo, Arial, sans-serif";
+            g.fillStyle = INK; g.fillText(fit(venue), pad, y);
+            if (extra) {
+              g.font = "500 32px 'IBM Plex Mono', monospace";
+              g.fillStyle = MUTED; g.fillText(fit(extra), pad, y + 54);
+            }
+            // skyline (same shapes as the masthead), sitting on a rule
+            var sx = W - pad - 480 * s, sy = skyTop;
+            g.fillStyle = INK;
+            [[0,130,40,70],[82,140,30,60],[88,114,18,18],[89,132,2.5,8],[102.5,132,2.5,8],[118,100,64,100],[128,62,44,40],[138,38,24,26],[144,26,12,14],[148.5,2,3,26],
+             [188,116,36,84],[230,74,40,126],[249,6,2,22],[276,144,44,56],[324,70,30,130],[338,42,2,30],[358,110,46,90],[366,94,30,18],[408,136,32,64],[444,100,36,100]]
+              .forEach(function (q) { g.fillRect(sx + q[0] * s, sy + q[1] * s, q[2] * s, q[3] * s); });
+            [[[44,200],[44,100],[78,80],[78,200]], [[85,114],[97,101],[109,114]], [[230,74],[250,24],[270,74]]].forEach(function (poly) {
+              g.beginPath();
+              poly.forEach(function (pt, i) { g[i ? "lineTo" : "moveTo"](sx + pt[0] * s, sy + pt[1] * s); });
+              g.closePath(); g.fill();
+            });
+            g.fillRect(pad, sy + 200 * s, W - pad * 2, 8);
+            g.font = "500 30px 'IBM Plex Mono', monospace";
+            g.fillStyle = MUTED;
+            g.fillText("The city never sleeps. Why should you?", pad, H - pad - 22, maxW);
+            return c;
+          }
+          function makePoster() {
+            var c;
+            try { c = poster(); } catch (e) { c = null; }
+            if (!c || !c.toBlob) return;
+            c.toBlob(function (blob) {
+              if (!blob) return;
+              var img = $("shPoster");
+              img.src = URL.createObjectURL(blob);
+              img.alt = "Poster: " + acts + ", " + dateLong + " at " + venue;
+              img.hidden = false;
+              var btn = $("shImg"), name = "show-me-nyc-" + r.night + ".png";
+              btn.hidden = false;
+              btn.addEventListener("click", function () {
+                // Phones: the share sheet can save to Photos or go straight to an app.
+                try {
+                  var file = new File([blob], name, { type: "image/png" });
+                  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    navigator.share({ files: [file] }).catch(function () {});
+                    return;
+                  }
+                } catch (e) {}
+                save(blob, name);
+              });
+            }, "image/png");
+          }
+          // Draw once the site's fonts are in, so the poster matches the page.
+          var fonts = document.fonts && document.fonts.load
+            ? Promise.all([document.fonts.load("900 100px Archivo"), document.fonts.load("700 54px Archivo"), document.fonts.load("600 40px 'IBM Plex Mono'"), document.fonts.load("500 32px 'IBM Plex Mono'")])
+            : Promise.resolve();
+          var drawn = false;
+          function once() { if (!drawn) { drawn = true; makePoster(); } }
+          fonts.then(once, once);
+          setTimeout(once, 2500); // slow fonts: draw with what is there
+        }
+      })();
+    </script>
+  </body>
+</html>

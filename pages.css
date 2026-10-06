@@ -200,6 +200,15 @@ footer.colophon a { color: var(--accent); }
 .posts .rf { font: 500 12px var(--mono); color: var(--muted); margin-top: 3px; }
 @media (max-width: 520px) { .compose .row2, .compose .row3 { grid-template-columns: 1fr; } }
 
+/* share kit on show.html */
+.kit .poster { display: block; width: 100%; max-width: 360px; height: auto; margin-top: 14px; border: 2px solid var(--line); }
+.kit .actions { margin-top: 14px; }
+.kit .caption {
+  margin: 14px 0 0; padding: 12px 14px; border: 2px dashed var(--muted);
+  font: 500 13px/1.5 var(--mono); color: var(--ink-soft);
+  white-space: pre-wrap; overflow-wrap: anywhere; -webkit-user-select: all; user-select: all;
+}
+
 /* admin */
 .pending article { border-left: 4px solid var(--accent); padding-left: 12px; }
 .admin-actions { display: flex; gap: 8px; margin-top: 10px; }
