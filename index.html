@@ -834,8 +834,9 @@
         var acts = esc(s[3]);
         var plain = s[3];
         var h = '<article class="show" data-i="' + s.i + '"><div class="time">' + (s[1] ? esc(s[1]) : "—") + "</div>";
-        // A sent-in show has no page of its own until it is folded into shows-data.js.
-        h += '<div class="acts">' + (s.slug ? '<a href="shows/' + s.slug + '.html">' + acts + "</a>" : acts) + "</div>";
+        // A sent-in show uses show.html until it is folded into shows-data.js and gets a page in shows/.
+        var page = s.slug ? "shows/" + s.slug + ".html" : (s.page || "");
+        h += '<div class="acts">' + (page ? '<a href="' + page + '">' + acts + "</a>" : acts) + "</div>";
         h += '<button class="star" aria-pressed="' + (saved[s.key] ? "true" : "false") + '" aria-label="Save ' + esc(plain) + " at " + esc(s[2]) + '">' + (saved[s.key] ? "★" : "☆") + "</button>";
         h += '<div class="meta"><button class="venue-btn" data-venue="' + esc(s[2]) + '" title="Show only ' + esc(s[2]) + '">' + esc(s[2]) + "</button>";
         if (s.area === "out") h += '<span class="badge out">Out of town</span>';
@@ -1406,6 +1407,7 @@
           var url = /^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)+(\/[^\s"<>]*)?$/i.test(r.ticket_url || "") ? r.ticket_url : "";
           var row = [day, time, venue, acts, String(r.note || "").slice(0, 140), age, "sub", url];
           row.slug = "";
+          row.page = /^\d+$/.test(String(r.id)) ? "show.html?id=" + r.id : "";
           row.i = SHOWS.length + add.length;
           add.push(row);
         });
@@ -1439,7 +1441,7 @@
         var C = typeof CONNECTIONS_META === "undefined" ? null : CONNECTIONS_META;
         if (!C || !C.supabaseUrl || !C.supabaseKey || !window.fetch) return;
         var mm = YEAR + "-" + pad(MONTH + 1) + "-";
-        fetch(C.supabaseUrl.replace(/\/+$/, "") + "/rest/v1/submitted_shows?select=night,start_time,venue,acts,note,age,ticket_url" +
+        fetch(C.supabaseUrl.replace(/\/+$/, "") + "/rest/v1/submitted_shows?select=id,night,start_time,venue,acts,note,age,ticket_url" +
           "&approved=is.true&night=gte." + mm + "01&night=lte." + mm + pad(LAST_DAY) + "&order=night.asc,id.asc&limit=300",
           { headers: { apikey: C.supabaseKey, Authorization: "Bearer " + C.supabaseKey } })
           .then(function (r) { return r.ok ? r.json() : []; })

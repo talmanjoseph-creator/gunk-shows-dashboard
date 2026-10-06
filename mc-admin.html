@@ -240,6 +240,24 @@
           } else info.textContent = "No link given.";
           art.appendChild(info);
           if (contacts[c.id]) art.appendChild(el("p", "rf", "Contact (only you see this): " + contacts[c.id]));
+          if (c.approved) {
+            // The show's own page, and a ready-written email to send the band their link.
+            var page = HERE.replace(/[^/]*$/, "") + "show.html?id=" + c.id;
+            var links = el("p", "rf");
+            var pv = el("a", "", "Open its page");
+            pv.href = page; pv.target = "_blank"; pv.rel = "noopener";
+            links.appendChild(pv);
+            if (contacts[c.id] && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(contacts[c.id])) {
+              var mail = el("a", "", "Email the band their link");
+              mail.href = "mailto:" + encodeURIComponent(contacts[c.id]).replace(/%40/g, "@") +
+                "?subject=" + encodeURIComponent("Your show is up on Show Me NYC") +
+                "&body=" + encodeURIComponent("Hi,\n\nYour show is on the list: " + c.acts + ", " + nightLabel(c.night) + " at " + c.venue + ".\n\n" +
+                  "Here's its page, with a picture and words ready to post:\n" + page + "\n\nSee you there,\nShow Me NYC");
+              links.appendChild(document.createTextNode(" · "));
+              links.appendChild(mail);
+            }
+            art.appendChild(links);
+          }
           var k = clash(c);
           if (k && k.same.length) art.appendChild(el("p", "flag", "Looks like it's already on the list: " + k.same.join(" / ")));
           else if (k && k.near.length) art.appendChild(el("p", "rf", "Also at this venue that night: " + k.near.join(" / ")));

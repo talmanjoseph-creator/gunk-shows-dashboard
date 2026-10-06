@@ -41,6 +41,7 @@ More than one person and more than one AI agent push to this repo. Read this bef
 
 - Bands add shows on `submit.html`. They are stored in the owner's Supabase project (table `submitted_shows`, set up by `supabase/submitted-shows.sql`), and only the owner approves them, on `mc-admin.html`.
 - Approved ones appear on the main list straight away: `index.html` reads them from Supabase. If Supabase is down the list still loads without them; keep it that way.
+- `show.html?id=<number>` is the page for one approved sent-in show, read from Supabase, with the share kit (a poster drawn in the browser, words to copy, the link). It is not a generated file; edit it directly. Shows in `shows-data.js` keep using the generated pages in `shows/`.
 - `python3 tools/pull_submissions.py` copies approved shows into `shows-data.js` as source `sub`, then runs the cleanup script. It only reads; it never changes the database.
 - **Do not approve, delete or add submitted shows** in the database unless the owner has approved that exact action, and do not create test rows in the live database.
 - **The contact email is private.** No public role can read that column; do not grant select on it, and never copy an email into this repo, a commit, a pull request or a listing.
