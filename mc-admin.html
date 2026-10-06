@@ -241,6 +241,26 @@
           var d = new Date(iso);
           return isNaN(d) ? "" : MONTHS[d.getMonth()] + " " + d.getDate() + ", " + d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
         }
+        /* What the reviewer (an agent with a look-only login) made of a waiting
+           item. Its words are shown as plain text and decide nothing. */
+        var VERDICT = { ok: "Checks out", hold: "Hold", unsure: "Not sure" };
+        function verdictLine(v) {
+          if (!v || !VERDICT[v.review_verdict]) return el("p", "rf", "Not checked yet.");
+          var line = el("p", v.review_verdict === "ok" ? "checked" : "flag",
+            "Checked: " + VERDICT[v.review_verdict] + (v.review_note ? " — " + v.review_note : ""));
+          if (v.reviewed_at) line.title = "Checked " + when(v.reviewed_at);
+          return line;
+        }
+        var reviews = { show: {}, post: {} };
+        function loadReviews() {
+          function grab(fn, into) {
+            return api("/rest/v1/rpc/" + fn, { method: "POST", body: {} }).then(function (rows) {
+              (rows || []).forEach(function (r) { into[r.id] = r; });
+            }, function (err) { if (err && err.message === "signed out") throw err; }); // not set up yet: carry on without
+          }
+          reviews = { show: {}, post: {} };
+          return Promise.all([grab("review_queue_shows", reviews.show), grab("review_queue_posts", reviews.post)]);
+        }
         function card(c, byId) {
           var art = el("article");
           var where = [c.night, c.venue].filter(Boolean).join(" · ");
@@ -248,6 +268,7 @@
           art.appendChild(el("p", "pm", c.parent_id ? "Reply to #" + c.parent_id + (parent ? ": “" + parent.message.slice(0, 60) + (parent.message.length > 60 ? "…" : "") + "”" : "") : (where || "No show given")));
           art.appendChild(el("p", "pt", c.message));
           art.appendChild(el("p", "pf", c.name + " · #" + c.id + " · " + when(c.created_at)));
+          if (!c.approved) art.appendChild(verdictLine(reviews.post[c.id]));
           var acts = el("div", "admin-actions");
           var a = el("button", "btn" + (c.approved ? "" : " primary"), c.approved ? "Take down" : "Approve");
           a.addEventListener("click", function () {
@@ -323,6 +344,7 @@
             }
             art.appendChild(links);
           }
+          if (!c.approved) art.appendChild(verdictLine(reviews.show[c.id]));
           var k = clash(c);
           if (k && k.same.length) art.appendChild(el("p", "flag", "Looks like it's already on the list: " + k.same.join(" / ")));
           else if (k && k.near.length) art.appendChild(el("p", "rf", "Also at this venue that night: " + k.near.join(" / ")));
@@ -372,7 +394,9 @@
         function refresh() {
           return api("/rest/v1/rpc/is_connection_admin", { method: "POST", body: {} }).then(function (isAdmin) {
             if (!isAdmin) { signOut("That email isn't allowed to approve things here."); return; }
-            return api("/rest/v1/connections?select=*&order=created_at.desc&limit=500").then(function (rows) {
+            return loadReviews().then(function () {
+              return api("/rest/v1/connections?select=id,created_at,parent_id,show_slug,night,venue,name,message,approved&order=created_at.desc&limit=500");
+            }).then(function (rows) {
               var byId = {};
               rows.forEach(function (c) { byId[c.id] = c; });
               var pending = rows.filter(function (c) { return !c.approved; }).reverse(); // oldest first
