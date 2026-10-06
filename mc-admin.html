@@ -23,13 +23,18 @@
         <h1>Approve shows and posts</h1>
         <p class="where" id="adStatus"></p>
 
-        <!-- Signed out: ask for a sign-in link by email -->
+        <!-- Signed out: email and password. The emailed link is the way in
+             the first time and if the password is forgotten. -->
         <form class="compose" id="adSignin" hidden novalidate>
-          <label>Your email
-            <input id="adEmail" type="email" autocomplete="email" required />
+          <label>Email
+            <input id="adEmail" type="email" autocomplete="username" autocapitalize="none" required />
           </label>
-          <div class="actions"><button class="btn primary" type="submit" id="adSend">Email me a sign-in link</button></div>
+          <label>Password
+            <input id="adPass" type="password" autocomplete="current-password" required />
+          </label>
+          <div class="actions"><button class="btn primary" type="submit" id="adSend">Sign in</button></div>
           <p class="hint" id="adNote" role="status"></p>
+          <p class="hint"><button class="link-btn" type="button" id="adLink">No password yet, or forgot it? Email me a sign-in link</button></p>
           <p class="hint">You stay signed in on this device until you tap Sign out. Don't sign in on a shared device.</p>
         </form>
 
@@ -52,6 +57,18 @@
           <section>
             <h2>Posts up on the site</h2>
             <div class="posts" id="adLive"></div>
+          </section>
+          <section>
+            <button class="more as-btn" id="adPwToggle" aria-expanded="false" aria-controls="adPwForm">Set or change your password</button>
+            <form class="compose small" id="adPwForm" hidden novalidate>
+              <!-- lets the phone's password manager file the new password under the right account -->
+              <input class="hp" id="adPwUser" type="email" autocomplete="username" tabindex="-1" aria-hidden="true" />
+              <label>New password
+                <input id="adPwNew" type="password" autocomplete="new-password" minlength="10" required />
+              </label>
+              <div class="actions"><button class="btn primary" type="submit" id="adPwSave">Save password</button></div>
+              <p class="hint" id="adPwNote" role="status">At least 10 characters. Let your phone suggest and save one.</p>
+            </form>
           </section>
           <section>
             <button class="more as-btn" id="adOut">Sign out</button>
@@ -127,7 +144,7 @@
         }
         function api(path, opts) {
           opts = opts || {};
-          var expired = function () { signOut("Your sign-in ran out. Ask for a new link."); throw new Error("signed out"); };
+          var expired = function () { signOut("Your sign-in ran out. Sign in again."); throw new Error("signed out"); };
           if (!session) return Promise.reject(new Error("signed out"));
           // Renew a minute early, and once more if the server still says no.
           var ready = session.exp - Date.now() < 60000 ? renew().catch(expired) : Promise.resolve();
@@ -144,25 +161,73 @@
           save(null);
           $("adPanel").hidden = true;
           $("adSignin").hidden = false;
+          $("adPwForm").hidden = true;
+          $("adPwToggle").setAttribute("aria-expanded", "false");
           $("adStatus").textContent = msg || "Sign in to check shows and posts.";
         }
 
         /* ---------- signed out ---------- */
+        // Sign in with email and password.
         $("adSignin").addEventListener("submit", function (e) {
           e.preventDefault();
-          var email = $("adEmail").value.trim(), note = $("adNote"), btn = $("adSend");
-          if (!email) { note.textContent = "Type your email first."; return; }
+          var email = $("adEmail").value.trim(), pass = $("adPass").value, note = $("adNote"), btn = $("adSend");
+          if (!email) { note.textContent = "Type your email first."; $("adEmail").focus(); return; }
+          if (!pass) { note.textContent = "Type your password, or use the link below."; $("adPass").focus(); return; }
+          btn.disabled = true;
+          note.textContent = "Signing in…";
+          fetch(BASE + "/auth/v1/token?grant_type=password", {
+            method: "POST",
+            headers: { apikey: M.supabaseKey, "Content-Type": "application/json" },
+            body: JSON.stringify({ email: email, password: pass })
+          }).then(function (r) {
+            if (!r.ok) {
+              note.textContent = r.status === 429 ? "Too many tries. Wait a minute and try again." : "Wrong email or password.";
+              return;
+            }
+            return r.json().then(function (j) {
+              $("adPass").value = "";
+              note.textContent = "";
+              save(fromAuth(j));
+              return refresh();
+            });
+          }, function () { note.textContent = "Couldn't reach the sign-in. Check your connection and try again."; })
+            .then(function () { btn.disabled = false; });
+        });
+        // The emailed link: the way in before a password is set, or if it is forgotten.
+        $("adLink").addEventListener("click", function () {
+          var email = $("adEmail").value.trim(), note = $("adNote"), btn = $("adLink");
+          if (!email) { note.textContent = "Type your email first."; $("adEmail").focus(); return; }
           btn.disabled = true;
           note.textContent = "Sending…";
           fetch(BASE + "/auth/v1/otp?redirect_to=" + encodeURIComponent(HERE), {
             method: "POST",
             headers: { apikey: M.supabaseKey, "Content-Type": "application/json" },
-            body: JSON.stringify({ email: email, create_user: true })
+            body: JSON.stringify({ email: email, create_user: false })
           }).then(function (r) {
-            note.textContent = r.ok ? "Check your email and open the link on this device."
-              : r.status === 429 ? "Too many tries. Wait a minute and try again." : "Couldn't send the link. Try again.";
+            note.textContent = r.ok ? "Check your email and open the link in this browser. Then set a password so you don't need a link next time."
+              : r.status === 429 ? "Too many links asked for. Wait an hour, or sign in with your password." : "Couldn't send the link. Try again.";
           }, function () { note.textContent = "Couldn't send the link. Try again."; })
             .then(function () { btn.disabled = false; });
+        });
+        // Signed in: set or change the password.
+        $("adPwToggle").addEventListener("click", function () {
+          var f = $("adPwForm");
+          f.hidden = !f.hidden;
+          $("adPwToggle").setAttribute("aria-expanded", f.hidden ? "false" : "true");
+          if (!f.hidden) $("adPwNew").focus();
+        });
+        $("adPwForm").addEventListener("submit", function (e) {
+          e.preventDefault();
+          var pw = $("adPwNew").value, note = $("adPwNote"), btn = $("adPwSave");
+          if (pw.length < 10) { note.textContent = "Make it at least 10 characters."; $("adPwNew").focus(); return; }
+          btn.disabled = true;
+          note.textContent = "Saving…";
+          api("/auth/v1/user", { method: "PUT", body: { password: pw } }).then(function () {
+            $("adPwNew").value = "";
+            note.textContent = "Saved. Next time, sign in with your email and this password.";
+          }, function (err) {
+            if (err && err.message !== "signed out") note.textContent = "Couldn't save that one. Try a longer or different password.";
+          }).then(function () { btn.disabled = false; });
         });
         $("adOut").addEventListener("click", function () {
           // Tell Supabase to end this sign-in too, then forget it here.
@@ -321,6 +386,7 @@
               $("adStatus").textContent = "Approve puts it on the site. Take down hides it again. Delete removes it for good.";
               $("adSignin").hidden = true;
               $("adPanel").hidden = false;
+              try { $("adPwUser").value = JSON.parse(atob(session.access.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).email || ""; } catch (e) {}
               return loadShows();
             });
           }).catch(fail);
