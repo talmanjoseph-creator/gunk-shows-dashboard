@@ -61,6 +61,13 @@ Posts and replies are stored in the owner's Supabase project, not in this repo.
 - `python3 tools/pull_submissions.py` copies approved shows into `shows-data.js` (source `sub`) and runs the cleanup, which gives them a show page, a venue page and a calendar button. Add `--dry-run` to see what it would add. Run it as part of each data update.
 - The contact email can't be read through the public API by anyone; the owner's page gets it through `submitted_show_contacts()`.
 
+## Reviewer (an agent that checks, the owner approves)
+
+- `supabase/review.sql` adds a look-only reviewer role: emails in the `connection_reviewers` table can read what is waiting and leave a verdict, and nothing else. It also adds the verdict columns and stops the public reading them. Run it after the other two SQL files. Tested in Postgres; safe to run again.
+- `tools/review_queue.py` is the reviewer's tool: `list` prints what is waiting, `verdict` saves `ok`, `hold` or `unsure` with a note. It signs in with `SMN_REVIEWER_EMAIL` and `SMN_REVIEWER_PASSWORD` from the environment.
+- `mc-admin.html` shows each verdict on the waiting item ("Checked: Checks out — ...", or "Not checked yet"). A verdict never approves anything.
+- Setting up a reviewer is done by the owner in Supabase, not in this repo: add the user under Authentication, then add its email to `connection_reviewers`.
+
 ## Shareable links
 
 Filters are kept in the URL, so a filtered view can be shared as is, e.g.
