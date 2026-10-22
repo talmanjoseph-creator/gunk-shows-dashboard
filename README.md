@@ -41,7 +41,7 @@ Every show has its own page in `shows/` and every venue in `venues/`. They are g
 
 Posts and replies are stored in the owner's Supabase project, not in this repo.
 
-- `missed-connections.html` has the post box and the list. Visitors give a name and a message, no login. Replies work the same way, one level deep.
+- `missed-connections.html` shows the list first. The post box stays behind a "Post one" button: a message, an optional show, and an optional name. No login. Replies work the same way, one level deep, and a reply still needs a name.
 - **Nothing shows until it is approved.** New posts and replies are saved as not approved, and the public can only read approved rows.
 - `mc-admin.html` is the owner's page. Sign in with email and password, then Approve, Take down or Delete. The password is set on that page ("Set or change your password") after signing in once with the emailed link, which is also the way back in if the password is forgotten. The sign-in is kept on that device and renewed automatically until Sign out is tapped. Only emails listed in the `connection_admins` table can approve anything, whoever signs in.
 - `supabase/setup.sql` creates the table and every rule above. It was tested in Postgres and is safe to run again. The admin email is added in Supabase directly and is never saved here.
