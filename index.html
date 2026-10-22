@@ -430,6 +430,62 @@
         .controls:not(.has-line) .result-row { display: none; }
         .show .acts { font-size: 15.5px; }
         }
+
+      /* Missed connections: a slim tab on the right edge. The drawer is desktop only. */
+      .mc-tab {
+        position: fixed; z-index: 25; right: 0; top: 50%; transform: translateY(-50%);
+        writing-mode: vertical-rl;
+        background: var(--accent); color: var(--accent-ink);
+        font: 900 13px/1 "Archivo", system-ui, sans-serif;
+        letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none;
+        border: 0; padding: 16px 9px; cursor: pointer;
+      }
+      .mc-tab:hover { background: var(--ink); color: var(--bg); }
+      #mcTab { display: none; }
+      @media (max-width: 1240px) and (min-width: 700px) {
+        .wrap { padding-right: 44px; } /* keep the closed tab off the list */
+      }
+      @media (max-width: 699px) {
+        .wrap { padding-right: 36px; }
+      }
+      /* The tab takes a strip on the right, so the name, Add and Filters
+         still share one line on a narrow phone. */
+      @media (max-width: 430px) {
+        .ctl-row > .chip { padding: 0 8px; }
+        .add-show .w-a { display: none; }
+      }
+      @media (min-width: 700px) {
+        body.mc-drawer-on #mcTabLink { display: none; }
+        body.mc-drawer-on #mcTab { display: block; }
+      }
+      .mc-drawer {
+        margin: 0; padding: 0; border: 0;
+        width: 100%; height: 100%; max-width: none; max-height: none;
+        background: transparent;
+      }
+      .mc-drawer::backdrop { background: rgba(17, 17, 17, 0.35); }
+      .mc-panel {
+        position: absolute; top: 0; right: 0; bottom: 0;
+        width: min(380px, 92vw);
+        background: var(--bg); color: var(--ink);
+        border-left: 4px solid var(--accent);
+        box-shadow: -12px 0 28px -18px rgba(0, 0, 0, 0.45);
+        overflow: auto; padding: 18px 18px 32px;
+      }
+      .mc-drawer-bar {
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        border-bottom: 3px solid var(--line); padding-bottom: 8px;
+      }
+      .mc-drawer-bar h2 { margin: 0; font-size: 18px; font-weight: 900; text-transform: uppercase; }
+      .mc-post { padding: 14px 0; border-bottom: 1px solid var(--hair); }
+      .mc-post p { margin: 0; }
+      .mc-where { font: 600 12px var(--mono); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+      .mc-where a { color: inherit; }
+      .mc-msg { font-size: 16px; font-weight: 700; line-height: 1.35; margin-top: 6px; overflow-wrap: anywhere; }
+      .mc-by { font: 500 12px var(--mono); color: var(--muted); margin-top: 6px; }
+      .mc-drawer-foot { margin: 16px 0 0; font: 600 13px var(--mono); }
+      .mc-drawer-foot a { color: var(--accent); }
+      .mc-drawer-note { font: 500 13px var(--mono); color: var(--muted); margin: 14px 0 0; }
     </style>
   </head>
   <body>
@@ -606,6 +662,19 @@
 
       <footer class="colophon" id="colophon"></footer>
     </div>
+
+    <a class="mc-tab" id="mcTabLink" href="missed-connections.html">Missed connections</a>
+    <button class="mc-tab" id="mcTab" type="button" aria-expanded="false" aria-controls="mcDrawer">Missed connections</button>
+    <dialog class="mc-drawer" id="mcDrawer" aria-labelledby="mcDrawerTitle">
+      <div class="mc-panel">
+        <div class="mc-drawer-bar">
+          <h2 id="mcDrawerTitle">Missed connections</h2>
+          <button class="chip" id="mcDrawerClose" type="button">Close</button>
+        </div>
+        <div id="mcDrawerList"></div>
+        <p class="mc-drawer-foot"><a href="missed-connections.html">See all missed connections</a></p>
+      </div>
+    </dialog>
 
     <script src="shows-data.js"></script>
     <script src="connections-data.js"></script>
@@ -1453,6 +1522,119 @@
       // Re-apply on back/forward (bfcache) and once fonts/layout have settled.
       window.addEventListener("pageshow", function (e) { if (e.persisted) goToLanding(); });
       window.addEventListener("load", function () { setTimeout(goToLanding, 100); });
+    </script>
+    <script>
+      /* Desktop: the edge tab opens a drawer of the latest approved posts.
+         The read is the same public query as missed-connections.html.
+         Under 700px the tab is only a link. */
+      (function () {
+        "use strict";
+        var M = typeof CONNECTIONS_META === "undefined" ? {} : CONNECTIONS_META;
+        var LIVE = !!(M.supabaseUrl && M.supabaseKey && window.fetch);
+        var tab = document.getElementById("mcTab");
+        var drawer = document.getElementById("mcDrawer");
+        var list = document.getElementById("mcDrawerList");
+        var closeBtn = document.getElementById("mcDrawerClose");
+        var wide = window.matchMedia("(min-width: 700px)");
+        var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        var DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+        var loaded = false;
+
+        function useDrawer() { return LIVE && wide.matches; }
+        function nice(d) {
+          var p = /^(\d{4})-(\d{2})-(\d{2})/.exec(d || "");
+          if (!p) return "";
+          var t = new Date(Date.UTC(+p[1], +p[2] - 1, +p[3], 12));
+          return DOW[t.getUTCDay()] + " " + MONTHS[t.getUTCMonth()] + " " + t.getUTCDate();
+        }
+        function el(tag, cls, text) {
+          var e = document.createElement(tag);
+          if (cls) e.className = cls;
+          if (text !== undefined) e.textContent = text;
+          return e;
+        }
+        function note(text) {
+          list.textContent = "";
+          list.appendChild(el("p", "mc-drawer-note", text));
+        }
+        function whereLine(c) {
+          var bits = [nice(c.night), c.venue].filter(Boolean);
+          if (!bits.length) {
+            var fromSlug = /^(\d{4}-\d{2}-\d{2})/.exec(c.show_slug || "");
+            if (fromSlug) bits.push(nice(fromSlug[1]));
+          }
+          if (!bits.length) return null;
+          var p = el("p", "mc-where");
+          var where = bits.join(" · ");
+          if (c.show_slug && /^[a-z0-9-]+$/.test(c.show_slug)) {
+            var a = el("a", "", where);
+            a.href = "shows/" + c.show_slug + ".html";
+            p.appendChild(a);
+          } else p.textContent = where;
+          return p;
+        }
+        function draw(posts) {
+          list.textContent = "";
+          if (!posts.length) { note("Nothing here yet."); return; }
+          posts.forEach(function (c) {
+            var art = el("article", "mc-post");
+            var meta = whereLine(c);
+            if (meta) art.appendChild(meta);
+            art.appendChild(el("p", "mc-msg", c.message));
+            art.appendChild(el("p", "mc-by", (c.name ? c.name + " · " : "") + "#" + c.id));
+            list.appendChild(art);
+          });
+        }
+        function load() {
+          if (loaded) return;
+          loaded = true;
+          var since = new Date(Date.now() - (M.expiresDays || 30) * 86400000).toISOString();
+          var url = M.supabaseUrl.replace(/\/+$/, "") + "/rest/v1/connections?select=id,created_at,parent_id,show_slug,night,venue,name,message&approved=is.true&created_at=gte." +
+            encodeURIComponent(since) + "&order=created_at.desc&limit=500";
+          note("Loading…");
+          fetch(url, { headers: { apikey: M.supabaseKey, Authorization: "Bearer " + M.supabaseKey } }).then(function (r) {
+            if (!r.ok) throw new Error("load");
+            return r.json();
+          }).then(function (rows) {
+            var posts = [];
+            (rows || []).forEach(function (c) {
+              if (!c.parent_id && posts.length < 5) posts.push(c);
+            });
+            draw(posts);
+          }).catch(function () {
+            loaded = false;
+            note("Couldn't load the posts just now. Try again in a bit.");
+          });
+        }
+        function closeDrawer() {
+          if (drawer.open) drawer.close();
+        }
+        function openDrawer() {
+          if (!useDrawer() || drawer.open) return;
+          tab.setAttribute("aria-expanded", "true");
+          drawer.showModal();
+          closeBtn.focus();
+          load();
+        }
+        function syncMode() {
+          var on = useDrawer();
+          document.body.classList.toggle("mc-drawer-on", on);
+          if (!on && drawer.open) {
+            drawer.close();
+            tab.setAttribute("aria-expanded", "false");
+          }
+        }
+        tab.addEventListener("click", openDrawer);
+        closeBtn.addEventListener("click", closeDrawer);
+        drawer.addEventListener("click", function (e) { if (e.target === drawer) closeDrawer(); });
+        drawer.addEventListener("close", function () {
+          tab.setAttribute("aria-expanded", "false");
+          if (useDrawer()) tab.focus();
+        });
+        if (wide.addEventListener) wide.addEventListener("change", syncMode);
+        else if (wide.addListener) wide.addListener(syncMode);
+        syncMode();
+      })();
     </script>
   </body>
 </html>
