@@ -422,6 +422,7 @@
         }
       @media (max-width: 560px) {
         .search-wrap { order: 3; flex-basis: 100%; }
+        .mc-bar { order: 2; flex: 1 1 100%; justify-content: center; }
         .strip { margin-left: -16px; margin-right: -16px; padding: 0 16px; }
         .panel { left: -16px; right: -16px; padding-left: 16px; padding-right: 16px; }
         .show { grid-template-columns: 62px 1fr 40px; gap: 0 8px; }
@@ -545,13 +546,13 @@
           </div>
           <a class="chip add-show" href="submit.html" aria-label="Add a show">+ Add<span class="w-a">&nbsp;a</span><span class="w-show">&nbsp;show</span></a>
           <button class="chip" id="filterToggle" aria-expanded="false" aria-controls="filterPanel">Filters</button>
+          <a class="chip mc-bar" href="missed-connections.html">Missed connections</a>
         </div>
 
         <div class="quick" id="quick">
           <button class="chip red" id="tonightBtn" data-when="tonight" aria-pressed="false">Tonight</button>
           <button class="chip" id="weekendBtn" data-when="weekend" aria-pressed="false">This weekend</button>
           <button class="chip" id="savedBtn" aria-pressed="false">★ Saved <span class="n" id="savedCount">0</span></button>
-          <a class="chip" href="missed-connections.html">Missed connections</a>
         </div>
         <nav class="strip" id="strip" aria-label="Jump to a day"></nav>
 
