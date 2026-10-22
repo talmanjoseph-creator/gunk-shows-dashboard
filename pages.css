@@ -153,7 +153,14 @@ footer.colophon a { color: var(--accent); }
   border-bottom: 3px solid var(--line);
 }
 .feed-bar h2 { border-bottom: 0; margin: 0; }
-.feed-bar .more { margin-top: 0; min-height: 40px; padding: 8px 10px; display: inline-flex; align-items: center; }
+/* Same filled style as "Post it". Stays beside the heading on a phone, tall enough to tap. */
+#mcToggle { flex: 0 0 auto; margin: 8px 0; }
+#mcToggle[aria-expanded="true"] {
+  background: none; border-color: var(--line); color: var(--ink);
+}
+#mcToggle[aria-expanded="true"]:hover {
+  background: none; border-color: var(--accent); color: var(--accent);
+}
 .suggest { border: 2px solid var(--line); max-height: 220px; overflow: auto; margin-top: 6px; }
 .suggest button {
   display: block; width: 100%; text-align: left; cursor: pointer;
