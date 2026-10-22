@@ -27,48 +27,45 @@
         <a class="back" href="./">← All shows</a>
       </header>
       <main>
-        <p class="when">Missed connections</p>
-        <h1>You looked. They looked. Nobody said anything.</h1>
-        <p class="where" id="mcIntro">Say it now. Tell us the show and what you remember.</p>
+        <h1 class="when">Missed connections</h1>
+
+        <section class="feed">
+          <div class="feed-bar">
+            <h2 id="mcHead">Recent</h2>
+            <button type="button" class="more as-btn" id="mcToggle" hidden aria-expanded="false" aria-controls="mcForm">Post one</button>
+          </div>
+          <p class="hint" id="mcFilter" hidden></p>
+
+          <!-- Post box (Supabase). Hidden until "Post one". -->
+          <form class="compose" id="mcForm" hidden novalidate>
+            <label>Show <span class="opt">optional</span>
+              <input id="mcShow" type="text" placeholder="Venue, band, or a few words" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="mcMatches" />
+              <ul class="suggest" id="mcMatches" role="listbox" hidden></ul>
+            </label>
+            <label>What do you remember?
+              <textarea id="mcMsg" rows="4" maxlength="600" placeholder="You had the green jacket by the sound booth…" required></textarea>
+            </label>
+            <label>Your name or nickname <span class="opt">optional</span>
+              <input id="mcName" type="text" maxlength="40" placeholder="First name is plenty" autocomplete="nickname" />
+            </label>
+            <label class="hp" aria-hidden="true">Leave this empty
+              <input id="mcHp" type="text" tabindex="-1" autocomplete="off" />
+            </label>
+            <div class="actions">
+              <button class="btn primary" id="mcSend" type="submit">Post it</button>
+            </div>
+            <p class="hint" id="mcStatus" role="status" aria-live="polite"></p>
+          </form>
+
+          <div class="posts" id="mcList"></div>
+          <p class="hint" id="mcEmpty" hidden></p>
+        </section>
 
         <!-- Fallback while Supabase is not set: the older form link -->
         <div class="actions" id="mcFormBox" hidden>
           <a class="btn primary" id="mcPost" href="#" target="_blank" rel="noopener">Post one</a>
         </div>
         <p class="hint" id="mcSoon" hidden>Posting opens soon.</p>
-
-        <!-- Post box (Supabase) -->
-        <form class="compose" id="mcForm" hidden novalidate>
-          <p class="fixed-show" id="mcFixed" hidden></p>
-          <div class="row2" id="mcWhere">
-            <label>Where was it?
-              <input id="mcVenue" type="text" maxlength="80" placeholder="Venue or show" autocomplete="off" />
-            </label>
-            <label>Which night?
-              <input id="mcNight" type="date" />
-            </label>
-          </div>
-          <label>What do you remember?
-            <textarea id="mcMsg" rows="4" maxlength="600" placeholder="You had the green jacket by the sound booth…" required></textarea>
-          </label>
-          <label>Your name or nickname
-            <input id="mcName" type="text" maxlength="40" placeholder="First name is plenty" autocomplete="nickname" required />
-          </label>
-          <label class="hp" aria-hidden="true">Leave this empty
-            <input id="mcHp" type="text" tabindex="-1" autocomplete="off" />
-          </label>
-          <div class="actions">
-            <button class="btn primary" id="mcSend" type="submit">Post it</button>
-          </div>
-          <p class="hint" id="mcStatus" role="status" aria-live="polite"></p>
-        </form>
-
-        <section>
-          <h2 id="mcHead">Recent</h2>
-          <p class="hint" id="mcFilter" hidden></p>
-          <div class="posts" id="mcList"></div>
-          <p class="hint" id="mcEmpty" hidden></p>
-        </section>
 
         <section>
           <h2>House rules</h2>
@@ -85,6 +82,7 @@
       </footer>
     </div>
 
+    <script src="shows-data.js"></script>
     <script src="connections-data.js"></script>
     <script>
       (function () {
@@ -137,8 +135,16 @@
 
         /* ---------- drawing posts ---------- */
         function whereLine(c) {
+          var bits = [nice(c.night, true), c.venue].filter(Boolean);
+          // A listed show's page name starts with its date, so a post can
+          // still show the night when that column was left empty.
+          if (!bits.length) {
+            var fromSlug = DAY_RE.exec(c.show_slug || "");
+            if (fromSlug) bits.push(nice(fromSlug[0], true));
+          }
+          if (!bits.length) return null;
           var meta = el("p", "pm");
-          var where = [nice(c.night, true), c.venue].filter(Boolean).join(" · ") || "Somewhere, some night";
+          var where = bits.join(" · ");
           if (c.show_slug && /^[a-z0-9-]+$/.test(c.show_slug)) {
             var a = el("a", "", where);
             a.href = "shows/" + c.show_slug + ".html";
@@ -151,7 +157,8 @@
           list.textContent = "";
           posts.forEach(function (c) {
             var art = el("article");
-            art.appendChild(whereLine(c));
+            var meta = whereLine(c);
+            if (meta) art.appendChild(meta);
             art.appendChild(el("p", "pt", c.message));
             var foot = el("p", "pf");
             foot.appendChild(el("span", "", (c.name ? c.name + " · " : "") + "#" + c.id + " · posted " + nice(c.created_at || c.posted)));
@@ -177,7 +184,7 @@
           });
           var e = $("mcEmpty");
           e.hidden = posts.length > 0;
-          if (!posts.length) e.textContent = (q.show ? "Nothing from this night yet." : "Nothing here yet.") + (LIVE || M.formUrl ? " Be the first." : "");
+          if (!posts.length) e.textContent = q.show ? "Nothing from this night yet." : "Nothing here yet.";
         }
 
         /* ---------- fallback: the form link ---------- */
@@ -230,7 +237,10 @@
             return r.json().catch(function () { return {}; }).then(function (j) {
               // Our own database messages are written for visitors; anything else gets a plain one.
               var m = j && j.message && /^(You can only|Too many)/.test(j.message) ? j.message : "That didn't go through. Check it over and try again.";
-              throw new Error(m);
+              var err = new Error(m);
+              err.code = j && j.code;
+              err.detail = j && j.message;
+              throw err;
             });
           });
         }
@@ -238,41 +248,200 @@
         function keepName(n) { try { localStorage.setItem("smn-name", n); } catch (e) {} }
         var THANKS = "Got it. It'll be up once we've read it.";
 
-        // The post box.
-        var form = $("mcForm");
-        form.hidden = false;
-        $("mcName").value = savedName();
-        if (q.show) {
-          var fx = $("mcFixed");
-          fx.textContent = [nice(q.night, true), q.venue].filter(Boolean).join(" · ") || "This show";
-          fx.hidden = false;
-          $("mcWhere").hidden = true;
+        /* Listings, so a post can point at a show page. Slugs must match
+           showSlug() in index.html and show_slug() in tools/build_pages.py. */
+        function fold(t) {
+          t = String(t || "").toLowerCase();
+          return t.normalize ? t.normalize("NFD").replace(/[\u0300-\u036f]/g, "") : t;
         }
+        function slugify(t) {
+          return fold(t).replace(/['\u2019]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+        }
+        function slugPart(t, n) {
+          return slugify(t).slice(0, n).replace(/^-+|-+$/g, "") || "x";
+        }
+        function timeKey(t) {
+          var m = /^(\d+):(\d+)\s*(AM|PM)/i.exec(t || "");
+          if (!m) return 99999;
+          var v = (parseInt(m[1], 10) % 12 + (m[3].toUpperCase() === "PM" ? 12 : 0)) * 60 + parseInt(m[2], 10);
+          return v < 300 ? v + 1440 : v;
+        }
+        function pad(n) { return (n < 10 ? "0" : "") + n; }
+        function clip(t, n) { return Array.from(String(t || "").replace(/\s+/g, " ").trim()).slice(0, n).join(""); }
+        function nyParts() {
+          var o = {};
+          try {
+            new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", year: "numeric", month: "numeric", day: "numeric" })
+              .formatToParts(new Date()).forEach(function (p) { if (p.type !== "literal") o[p.type] = parseInt(p.value, 10); });
+          } catch (e) {
+            var n = new Date();
+            o = { year: n.getFullYear(), month: n.getMonth() + 1, day: n.getDate() };
+          }
+          return o;
+        }
+        function listings() {
+          if (typeof SHOWS === "undefined" || typeof SHOW_META === "undefined") return [];
+          var YEAR = SHOW_META.year, MONTH = SHOW_META.month - 1;
+          var rows = SHOWS.map(function (s, i) { return { s: s, i: i }; });
+          rows.sort(function (a, b) { return a.s[0] - b.s[0] || timeKey(a.s[1]) - timeKey(b.s[1]) || a.i - b.i; });
+          var count = {}, out = [];
+          rows.forEach(function (r) {
+            var s = r.s;
+            var m = /^(\d+):(\d+)\s*(AM|PM)/i.exec(s[1] || "");
+            var base = [YEAR + "-" + pad(MONTH + 1) + "-" + pad(s[0]), slugPart(s[2], 30), slugPart((s[3] || "").split(",")[0], 30),
+              m ? parseInt(m[1], 10) + m[2] + m[3].toLowerCase() : "tba"].join("-");
+            count[base] = (count[base] || 0) + 1;
+            var slug = count[base] === 1 ? base : base + "-" + count[base];
+            var night = YEAR + "-" + pad(MONTH + 1) + "-" + pad(s[0]);
+            var head = (s[3] || "").split(",")[0].trim();
+            var label = [nice(night, true), s[1], s[2], head].filter(Boolean).join(" · ");
+            out.push({
+              slug: slug, night: night, day: s[0], time: s[1] || "", venue: s[2] || "",
+              label: label, hay: fold(label + " " + (s[3] || "") + " " + (s[2] || ""))
+            });
+          });
+          return out;
+        }
+        var LIST = listings();
+        var bySlug = {};
+        LIST.forEach(function (s) { bySlug[s.slug] = s; });
+        var ny = nyParts();
+        var inThisMonth = typeof SHOW_META !== "undefined" && ny.year === SHOW_META.year && ny.month === SHOW_META.month;
+        var todayDay = inThisMonth ? ny.day : (typeof SHOW_META !== "undefined" && ny.year * 12 + ny.month > SHOW_META.year * 12 + SHOW_META.month ? 32 : 0);
+        var picked = (q.show && bySlug[q.show]) || (q.show ? {
+          slug: q.show,
+          night: /^\d{4}-\d{2}-\d{2}$/.test(q.night) ? q.night : "",
+          venue: q.venue,
+          label: [nice(q.night, true), q.venue].filter(Boolean).join(" · ") || "This show",
+          hay: "", day: 0, time: ""
+        } : null);
+        var shown = [], active = -1;
+
+        function hideMatches() {
+          var box = $("mcMatches"), input = $("mcShow");
+          box.hidden = true;
+          box.textContent = "";
+          shown = [];
+          active = -1;
+          input.setAttribute("aria-expanded", "false");
+          input.removeAttribute("aria-activedescendant");
+        }
+        function markActive() {
+          var box = $("mcMatches"), input = $("mcShow");
+          Array.prototype.forEach.call(box.querySelectorAll("button"), function (b, i) {
+            b.setAttribute("aria-selected", i === active ? "true" : "false");
+            if (i === active) {
+              input.setAttribute("aria-activedescendant", b.id);
+              if (b.scrollIntoView) b.scrollIntoView({ block: "nearest" });
+            }
+          });
+        }
+        function choose(s) {
+          picked = s;
+          $("mcShow").value = s.label;
+          hideMatches();
+        }
+        function searchShows() {
+          var text = $("mcShow").value;
+          if (picked && text === picked.label) { hideMatches(); return; }
+          picked = null;
+          var qf = fold(text.trim());
+          if (qf.length < 2) { hideMatches(); return; }
+          var words = qf.split(/\s+/);
+          shown = LIST.filter(function (s) {
+            return words.every(function (w) { return s.hay.indexOf(w) !== -1; });
+          }).sort(function (a, b) {
+            return Math.abs(a.day - todayDay) - Math.abs(b.day - todayDay) || a.day - b.day || timeKey(a.time) - timeKey(b.time);
+          }).slice(0, 8);
+          var box = $("mcMatches");
+          box.textContent = "";
+          if (!shown.length) { hideMatches(); return; }
+          shown.forEach(function (s, i) {
+            var li = el("li");
+            var b = el("button", "", s.label);
+            b.type = "button";
+            b.id = "mcOpt" + i;
+            b.setAttribute("role", "option");
+            b.setAttribute("aria-selected", "false");
+            b.addEventListener("mousedown", function (e) { e.preventDefault(); choose(s); });
+            li.appendChild(b);
+            box.appendChild(li);
+          });
+          active = 0;
+          box.hidden = false;
+          $("mcShow").setAttribute("aria-expanded", "true");
+          markActive();
+        }
+        function currentShow() {
+          var text = $("mcShow").value.trim();
+          if (!text) return null;
+          if (picked && picked.label === text && picked.slug && /^[a-z0-9-]{1,120}$/.test(picked.slug)) return picked;
+          var folded = fold(text);
+          var hits = LIST.filter(function (s) { return fold(s.label) === folded; });
+          if (hits.length === 1) return hits[0];
+          return { free: clip(text, 80) };
+        }
+
+        // The post box stays closed until "Post one".
+        var form = $("mcForm");
+        var toggle = $("mcToggle");
+        $("mcName").value = savedName();
+        if (picked) $("mcShow").value = picked.label;
+        toggle.hidden = false;
+        toggle.addEventListener("click", function () {
+          var opening = form.hidden;
+          form.hidden = !opening;
+          toggle.setAttribute("aria-expanded", opening ? "true" : "false");
+          toggle.textContent = opening ? "Close" : "Post one";
+          if (!opening) { hideMatches(); return; }
+          if (form.scrollIntoView) form.scrollIntoView({ block: "nearest" });
+          (picked ? $("mcMsg") : $("mcShow")).focus();
+        });
+        $("mcShow").addEventListener("input", searchShows);
+        $("mcShow").addEventListener("keydown", function (e) {
+          if ($("mcMatches").hidden) return;
+          var n = shown.length;
+          if (!n) return;
+          if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+            e.preventDefault();
+            active = e.key === "ArrowDown" ? (active + 1) % n : (active + n - 1) % n;
+            markActive();
+          } else if (e.key === "Enter" && active >= 0 && shown[active]) {
+            e.preventDefault();
+            choose(shown[active]);
+          } else if (e.key === "Escape") {
+            hideMatches();
+          }
+        });
+        $("mcShow").addEventListener("blur", function () { setTimeout(hideMatches, 150); });
         form.addEventListener("submit", function (e) {
           e.preventDefault();
           var status = $("mcStatus"), btn = $("mcSend");
           var name = $("mcName").value.trim(), msg = $("mcMsg").value.trim();
-          if ($("mcHp").value) { status.textContent = THANKS; form.reset(); return; } // bots fill the hidden field
+          if ($("mcHp").value) { status.textContent = THANKS; form.reset(); picked = null; hideMatches(); return; } // bots fill the hidden field
           if (msg.length < 3) { status.textContent = "Write a little more first."; $("mcMsg").focus(); return; }
-          if (!name) { status.textContent = "Add a name or nickname."; $("mcName").focus(); return; }
-          var row = { name: name, message: msg };
-          if (q.show) {
-            row.show_slug = q.show;
-            if (q.venue) row.venue = q.venue;
-            if (q.night) row.night = q.night;
-          } else {
-            var v = $("mcVenue").value.trim(), n = $("mcNight").value;
-            if (v) row.venue = v;
-            if (/^\d{4}-\d{2}-\d{2}$/.test(n)) row.night = n;
+          // name is optional here. The column is still NOT NULL, so a blank
+          // name is left out and the database refuses it until that changes.
+          var row = { message: msg };
+          if (name) row.name = clip(name, 40);
+          var show = currentShow();
+          if (show && show.slug) {
+            row.show_slug = show.slug;
+            if (show.venue) row.venue = clip(show.venue, 80);
+            if (/^\d{4}-\d{2}-\d{2}$/.test(show.night || "")) row.night = show.night;
+          } else if (show && show.free) {
+            row.venue = show.free;
           }
           btn.disabled = true;
           status.textContent = "Sending…";
           send(row).then(function () {
-            keepName(name);
+            if (name) keepName(name);
             $("mcMsg").value = "";
             status.textContent = THANKS;
           }, function (err) {
-            status.textContent = err.message;
+            var needsName = !name && (err.code === "23502" || /null value in column "name"/i.test(err.detail || ""));
+            status.textContent = needsName ? "Add a name or nickname. A post still needs one to be saved." : err.message;
+            if (needsName) $("mcName").focus();
           }).then(function () { btn.disabled = false; });
         });
 

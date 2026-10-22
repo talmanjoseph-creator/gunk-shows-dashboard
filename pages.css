@@ -57,6 +57,7 @@ main { padding-top: 26px; }
   font: 600 13px var(--mono); text-transform: uppercase; letter-spacing: 0.06em;
   color: var(--accent); margin: 0 0 8px;
 }
+h1.when { font-size: 13px; font-weight: 600; line-height: 1.45; letter-spacing: 0.06em; }
 h1 {
   font-size: clamp(28px, 6.4vw, 46px); font-weight: 900; line-height: 1.02;
   letter-spacing: -0.02em; margin: 0; overflow-wrap: anywhere;
@@ -146,6 +147,21 @@ footer.colophon a { color: var(--accent); }
 }
 
 /* ---------- missed connections ---------- */
+.feed { margin-top: 8px; }
+.feed-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap;
+  border-bottom: 3px solid var(--line);
+}
+.feed-bar h2 { border-bottom: 0; margin: 0; }
+.feed-bar .more { margin-top: 0; min-height: 40px; padding: 8px 10px; display: inline-flex; align-items: center; }
+.suggest { border: 2px solid var(--line); max-height: 220px; overflow: auto; margin-top: 6px; }
+.suggest button {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  font: 500 13.5px/1.35 var(--mono); color: var(--ink); background: var(--bg);
+  border: 0; border-bottom: 1px solid var(--hair); padding: 8px 10px;
+}
+.suggest li:last-child button { border-bottom: 0; }
+.suggest button:hover, .suggest button[aria-selected="true"] { background: var(--chip-bg); }
 .posts article { padding: 16px 0 14px; border-bottom: 1px solid var(--hair); }
 .posts p { margin: 0; }
 .posts .pm { font: 600 12.5px var(--mono); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
