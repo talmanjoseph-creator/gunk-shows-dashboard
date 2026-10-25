@@ -28,7 +28,7 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parent.parent
 INDEX = ROOT / "shows-data.js"
 NY = ZoneInfo("America/New_York")
-UA = "ShowMeNYC-venue-calendar/1.0 (+https://github.com/talmanjoseph-creator/gunk-shows-dashboard)"
+UA = "ShowMeNYC-venue-calendar/1.0 (+https://showmenyc.nyc)"
 DELAY = 0.45
 # Same building as Knockdown Center. Added only when a Basement row is new.
 VENUE_GEO = {

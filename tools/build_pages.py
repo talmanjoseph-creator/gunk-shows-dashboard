@@ -35,7 +35,7 @@ except Exception:  # pragma: no cover
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "shows-data.js"
-SITE = "https://talmanjoseph-creator.github.io/gunk-shows-dashboard/"
+SITE = "https://showmenyc.nyc/"
 
 DAY, TIME, VENUE, ACTS, NOTE, AGE, SRC, URL = range(8)
 MONTHS = ["January", "February", "March", "April", "May", "June", "July",
