@@ -3,8 +3,17 @@
 
     python3 tools/build_pages.py
 
-Writes shows/<slug>.html, venues/<slug>.html and sitemap.xml.
+Writes shows/<slug>.html, venues/<slug>.html, sitemap.xml and the plain
+link block between the static-links markers in index.html.
 tools/clean_shows.py runs this automatically after cleaning the data.
+
+Street addresses and venue websites come from tools/venues.json, keyed by
+the venue name exactly as it appears in the data. A venue missing from that
+file simply gets no address in the structured data.
+
+sitemap.xml carries a <lastmod> per page. tools/lastmod.json remembers a
+hash of each page and the day it last changed, so a rebuild that changes
+nothing leaves every date alone.
 
 Show pages are permanent links. Only the pages for the month in
 shows-data.js are rebuilt (so a cancelled show's page disappears); pages
@@ -19,9 +28,11 @@ order. index.html computes the same slug in the browser to link each row,
 so if you change the rules here, change showSlug() and the slug loop in
 index.html to match.
 """
+import hashlib
 import html
 import json
 import re
+import subprocess
 import sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -35,7 +46,12 @@ except Exception:  # pragma: no cover
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "shows-data.js"
+VENUES = ROOT / "tools" / "venues.json"
+LASTMOD = ROOT / "tools" / "lastmod.json"
+INDEX = ROOT / "index.html"
 SITE = "https://showmenyc.nyc/"
+IMAGE = SITE + "og.png?v=3"
+LINKS_START, LINKS_END = "<!-- static-links:start -->", "<!-- static-links:end -->"
 
 DAY, TIME, VENUE, ACTS, NOTE, AGE, SRC, URL = range(8)
 MONTHS = ["January", "February", "March", "April", "May", "June", "July",
@@ -68,6 +84,22 @@ def load():
     year = int(re.search(r"\byear:\s*(\d+)", src).group(1))
     month = int(re.search(r"\bmonth:\s*(\d+)", src).group(1))
     return shows, geo, area, year, month
+
+
+def load_venues():
+    """Venue name -> {"address": PostalAddress, "url": website or None}."""
+    if not VENUES.exists():
+        return {}
+    out = {}
+    for name, v in json.loads(VENUES.read_text(encoding="utf8")).items():
+        if name.startswith("_"):
+            continue
+        addr = {"@type": "PostalAddress"}
+        for k in ("streetAddress", "addressLocality", "addressRegion", "postalCode", "addressCountry"):
+            if v.get(k):
+                addr[k] = v[k]
+        out[name] = {"address": addr, "url": v.get("url")}
+    return out
 
 
 # ---------- slugs (keep in step with showSlug() / slugify() in index.html) ----------
@@ -177,6 +209,56 @@ def start_iso(d, t):
     return dt.isoformat()
 
 
+def event_description(s, d, ar):
+    where = s[VENUE] + (f" ({AREA_NAME[ar]})" if ar and ar != "out" else "")
+    when = f"{DOW[d.weekday()]}, {MONTHS[d.month - 1]} {d.day}, {d.year}" + (f" at {s[TIME]}" if s[TIME] else "")
+    age = {"AA": " All ages."}.get(s[AGE], f" Ages {s[AGE]}+." if s[AGE] else "")
+    return f"{s[ACTS]} live at {where} on {when}.{age}"
+
+
+def ld_script(data):
+    return ('\n    <script type="application/ld+json">'
+            + json.dumps(data, ensure_ascii=False).replace("</", "<\\/") + "</script>")
+
+
+def today_ny():
+    return datetime.now(NY).date() if NY else date.today()
+
+
+def git_date(path):
+    """Day of the last commit that touched path, if the file on disk matches it."""
+    try:
+        rel = str(path.relative_to(ROOT))
+        if subprocess.run(["git", "diff", "--quiet", "HEAD", "--", rel], cwd=ROOT).returncode != 0:
+            return None
+        out = subprocess.run(["git", "log", "-1", "--format=%cs", "--", rel], cwd=ROOT,
+                             capture_output=True, text=True).stdout.strip()
+        return out or None
+    except Exception:
+        return None
+
+
+def lastmod_dates(paths):
+    """Page path -> YYYY-MM-DD it last changed; the date only moves when the bytes do."""
+    known = json.loads(LASTMOD.read_text(encoding="utf8")) if LASTMOD.exists() else {}
+    today, out, keep = today_ny().isoformat(), {}, {}
+    for p in paths:
+        rel = str(p.relative_to(ROOT))
+        h = hashlib.sha256(p.read_bytes()).hexdigest()[:16]
+        prev = known.get(rel)
+        if prev and prev[0] == h:
+            day = prev[1]
+        elif prev:
+            day = today
+        else:
+            day = git_date(p) or today
+        keep[rel] = [h, day]
+        out[p] = day
+    LASTMOD.write_text("{\n" + ",\n".join(f"  {json.dumps(k)}: {json.dumps(keep[k])}" for k in sorted(keep))
+                       + "\n}\n", encoding="utf8")
+    return out
+
+
 # ---------- page pieces ----------
 HEAD = """<!doctype html>
 <html lang="en">
@@ -256,6 +338,7 @@ def row_li(s, slug, d, with_date=True, with_venue=False):
 
 def build():
     shows, geo, area, year, month = load()
+    venues = load_venues()
     mon = MONTHS[month - 1]
     shows.sort(key=sort_key)
 
@@ -283,6 +366,7 @@ def build():
         old.unlink()
 
     save_key = f"smn-saved-{year}-{month}"
+    today = today_ny()
 
     # ----- show pages -----
     written, redirects = set(), {}
@@ -298,21 +382,31 @@ def build():
         url = f"{SITE}shows/{sl}.html"
         sold = bool(re.search(r"sold-?out", s[URL], re.I))
 
+        vinfo = venues.get(s[VENUE], {})
         ld = {
             "@context": "https://schema.org", "@type": "MusicEvent",
             "name": s[ACTS], "startDate": start_iso(d, s[TIME]),
             "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-            # No street addresses in the data, so "address" is left out rather than guessed.
+            "eventStatus": "https://schema.org/EventScheduled",
+            # A venue missing from tools/venues.json gets no address rather than a guessed one.
             "location": {"@type": "Place", "name": s[VENUE]},
+            "description": event_description(s, d, ar),
+            "image": IMAGE,
             "performer": [{"@type": "MusicGroup", "name": a} for a in act_names(s[ACTS])],
+            "organizer": {"@type": "Organization", "name": s[VENUE]},
             "url": url,
         }
+        if vinfo:
+            ld["location"]["address"] = vinfo["address"]
+            if vinfo["url"]:
+                ld["organizer"]["url"] = vinfo["url"]
         if s[VENUE] in geo:
             ld["location"]["geo"] = {"@type": "GeoCoordinates", "latitude": geo[s[VENUE]][0], "longitude": geo[s[VENUE]][1]}
+        # The data carries no prices, end times or on-sale dates, so price, endDate and validFrom stay out.
         if s[URL]:
             ld["offers"] = {"@type": "Offer", "url": s[URL],
                             "availability": "https://schema.org/" + ("SoldOut" if sold else "InStock")}
-        extra = '\n    <script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False).replace("</", "<\\/") + "</script>"
+        extra = ld_script(ld)
 
         key = f"{s[DAY]}|{s[VENUE]}|{s[TIME]}|{s[ACTS][:40]}"
         m = minutes(s[TIME])
@@ -407,7 +501,27 @@ def build():
         title = f"{v} — shows in {mon} {year}"
         desc = f"{n} show{'s' if n != 1 else ''} at {v} in {mon} {year}" + (f" · {AREA_NAME[ar]}" if ar else "") + ". Times, tickets and what's on each night."
         url = f"{SITE}venues/{vslug[v]}.html"
-        h = HEAD.format(title=esc(title), desc=esc(desc), url=url, site=SITE, extra="")
+        vinfo = venues.get(v, {})
+        ld = {"@context": "https://schema.org", "@type": "MusicVenue", "name": v, "url": url}
+        if vinfo:
+            ld["address"] = vinfo["address"]
+            if vinfo["url"]:
+                ld["sameAs"] = vinfo["url"]
+        if v in geo:
+            ld["geo"] = {"@type": "GeoCoordinates", "latitude": geo[v][0], "longitude": geo[v][1]}
+        upcoming = []
+        for o, osl in items:
+            od = date(year, month, o[DAY])
+            if od < today:
+                continue
+            ev = {"@type": "MusicEvent", "name": o[ACTS], "startDate": start_iso(od, o[TIME]),
+                  "url": f"{SITE}shows/{osl}.html"}
+            if vinfo:
+                ev["location"] = {"@type": "Place", "name": v, "address": vinfo["address"]}
+            upcoming.append(ev)
+        if upcoming:
+            ld["event"] = upcoming
+        h = HEAD.format(title=esc(title), desc=esc(desc), url=url, site=SITE, extra=ld_script(ld))
         h += '  <body data-kind="venue">\n' + TOP.format(back="../", back_label="← All shows") + "      <main>\n"
         if ar:
             h += f'        <p class="when">{AREA_NAME[ar]}</p>\n'
@@ -423,13 +537,42 @@ def build():
         h += "      </main>\n" + END
         (ROOT / "venues" / f"{vslug[v]}.html").write_text(h, encoding="utf8")
 
+    # ----- plain links in index.html, so crawlers reach every venue and this week's shows -----
+    week = [today + timedelta(days=i) for i in range(7)]
+    lk = '      <section class="all-links" aria-label="All venues and this week\'s show pages">\n'
+    lk += f"        <details>\n          <summary>All {len(vslug)} venues, A–Z</summary>\n          <p class=\"az\">"
+    lk += " · ".join(f'<a href="venues/{vslug[v]}.html">{esc(v)}</a>'
+                     for v in sorted(vslug, key=lambda n: slugify(n)))
+    lk += "</p>\n        </details>\n"
+    days = [(wd, by_day.get(wd.day, [])) for wd in week if (wd.year, wd.month) == (year, month)]
+    days = [(wd, rows) for wd, rows in days if rows]
+    if days:
+        lk += "        <details>\n          <summary>Show pages for the next 7 days</summary>\n"
+        for wd, rows in days:
+            lk += f"          <h3>{DOW[wd.weekday()]} {mon[:3]} {wd.day}</h3>\n          <ul>\n"
+            for o, osl in rows:
+                lk += (f'            <li><a href="shows/{osl}.html">{esc(o[ACTS])} at {esc(o[VENUE])}'
+                       f'{(" · " + esc(o[TIME])) if o[TIME] else ""}</a></li>\n')
+            lk += "          </ul>\n"
+        lk += "        </details>\n"
+    lk += "      </section>\n"
+    page = INDEX.read_text(encoding="utf8")
+    a, z = page.index(LINKS_START) + len(LINKS_START), page.index(LINKS_END)
+    page = page[:a] + "\n" + lk + "      " + page[z:]
+    INDEX.write_text(page, encoding="utf8")
+
     # ----- sitemap -----
     all_shows = sorted(f.stem for f in (ROOT / "shows").glob("*.html") if re.match(r"\d{4}-\d{2}-\d{2}-", f.name))
     all_venues = sorted(f.stem for f in (ROOT / "venues").glob("*.html"))
-    urls = [SITE, SITE + "missed-connections.html", SITE + "submit.html"] + [f"{SITE}venues/{s}.html" for s in all_venues] + [f"{SITE}shows/{s}.html" for s in all_shows]
+    pages = ([(SITE, INDEX), (SITE + "missed-connections.html", ROOT / "missed-connections.html"),
+              (SITE + "submit.html", ROOT / "submit.html")]
+             + [(f"{SITE}venues/{s}.html", ROOT / "venues" / f"{s}.html") for s in all_venues]
+             + [(f"{SITE}shows/{s}.html", ROOT / "shows" / f"{s}.html") for s in all_shows])
+    mod = lastmod_dates([p for _, p in pages])
     (ROOT / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-        + "".join(f"  <url><loc>{esc(u)}</loc></url>\n" for u in urls) + "</urlset>\n", encoding="utf8")
+        + "".join(f"  <url><loc>{esc(u)}</loc><lastmod>{mod[p]}</lastmod></url>\n" for u, p in pages)
+        + "</urlset>\n", encoding="utf8")
 
     print(f"pages: {len(written)} shows this month ({len(all_shows)} in all), {len(vslug)} venues, {len(redirects)} redirects")
     return written, vslug

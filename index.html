@@ -18,6 +18,8 @@
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Show Me NYC","url":"https://showmenyc.nyc/"}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Show Me NYC","url":"https://showmenyc.nyc/","logo":"https://showmenyc.nyc/og.png?v=3"}</script>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111'/%3E%3Cpath fill='%23ff4d4d' d='M3 29V17h6v12zM10 29V11l6-3v21zM17 29V13h2V8h1V3h1v5h1v5h2v16zM25 29V19h4v10z'/%3E%3C/svg%3E" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -394,6 +396,18 @@
       .venue-list button:hover, .venue-list button.on { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
       .venue-list .n { font: 500 12px var(--mono); color: var(--muted); }
 
+      /* ---------- plain links to every venue and this week's show pages ---------- */
+      .all-links { margin-top: 40px; font: 500 12.5px var(--mono); color: var(--muted); }
+      .all-links .az { margin: 8px 0 0; line-height: 1.9; }
+      .all-links a { color: var(--ink-soft); text-underline-offset: 3px; }
+      .all-links a:hover { color: var(--accent); }
+      .all-links details + details { margin-top: 10px; }
+      .all-links summary { cursor: pointer; font-weight: 600; width: fit-content; }
+      .all-links summary:hover { color: var(--ink); }
+      .all-links h3 { font: 600 12.5px var(--mono); color: var(--ink); margin: 14px 0 4px; }
+      .all-links ul { list-style: none; margin: 0; padding: 0; }
+      .all-links li { padding: 2px 0; }
+
       .empty {
         border: 2px dashed var(--line); padding: 28px 18px; margin-top: 28px;
         font-family: var(--mono); font-size: 14px; color: var(--muted);
@@ -652,6 +666,263 @@
           <ul class="venue-list" id="venueList"></ul>
         </aside>
       </div>
+      <!-- static-links:start -->
+      <section class="all-links" aria-label="All venues and this week's show pages">
+        <details>
+          <summary>All 153 venues, A–Z</summary>
+          <p class="az"><a href="venues/92ny.html">92NY</a> · <a href="venues/99-scott.html">99 Scott</a> · <a href="venues/alice-tully-hall.html">Alice Tully Hall</a> · <a href="venues/alphaville.html">Alphaville</a> · <a href="venues/amityville-music-hall.html">Amityville Music Hall</a> · <a href="venues/arlenes-grocery.html">Arlene&#x27;s Grocery</a> · <a href="venues/b-scene.html">B Scene</a> · <a href="venues/babys-all-right.html">Baby&#x27;s All Right</a> · <a href="venues/bam-brooklyn-academy-of-music.html">BAM: Brooklyn Academy of Music</a> · <a href="venues/bar-freda.html">Bar Freda</a> · <a href="venues/barclays-center.html">Barclays Center</a> · <a href="venues/basement.html">Basement</a> · <a href="venues/basilica-hudson.html">Basilica Hudson</a> · <a href="venues/beacon-theatre.html">Beacon Theatre</a> · <a href="venues/bearsville-theater.html">Bearsville Theater</a> · <a href="venues/berlin.html">Berlin</a> · <a href="venues/blue-note.html">Blue Note</a> · <a href="venues/bowery-ballroom.html">Bowery Ballroom</a> · <a href="venues/bowery-palace.html">Bowery Palace</a> · <a href="venues/bric-house.html">BRIC House</a> · <a href="venues/bridge-tunnel-brewery.html">Bridge &amp; Tunnel Brewery</a> · <a href="venues/brooklyn-bowl.html">Brooklyn Bowl</a> · <a href="venues/brooklyn-paramount.html">Brooklyn Paramount</a> · <a href="venues/brooklyn-steel.html">Brooklyn Steel</a> · <a href="venues/brooklyn-storehouse.html">Brooklyn Storehouse</a> · <a href="venues/brothers-wash-and-dry.html">Brothers Wash and Dry</a> · <a href="venues/cafe-carlyle.html">Café Carlyle</a> · <a href="venues/cafe-wha.html">Cafe Wha?</a> · <a href="venues/carnegie-hall.html">Carnegie Hall</a> · <a href="venues/cassette.html">Cassette</a> · <a href="venues/city-winery.html">City Winery</a> · <a href="venues/cmon-everybody.html">C&#x27;mon Everybody</a> · <a href="venues/cooper-union.html">Cooper Union</a> · <a href="venues/crossroads.html">Crossroads</a> · <a href="venues/crown-hill-theatre.html">Crown Hill Theatre</a> · <a href="venues/cutelab.html">Cutelab</a> · <a href="venues/dada.html">Dada</a> · <a href="venues/david-rubenstein-atrium-at-lincoln-center.html">David Rubenstein Atrium at Lincoln Center</a> · <a href="venues/dead-letter-no-9.html">Dead Letter No. 9</a> · <a href="venues/drom.html">DROM</a> · <a href="venues/elsewhere.html">Elsewhere</a> · <a href="venues/erf-gallery.html">ERF Gallery</a> · <a href="venues/flushing-meadows-corona-park.html">Flushing Meadows-Corona Park</a> · <a href="venues/for-the-record.html">For the Record</a> · <a href="venues/forest-hills-stadium.html">Forest Hills Stadium</a> · <a href="venues/full-kit-garage.html">Full Kit Garage</a> · <a href="venues/gold-sounds.html">Gold Sounds</a> · <a href="venues/good-room.html">Good Room</a> · <a href="venues/gramercy-theatre.html">Gramercy Theatre</a> · <a href="venues/greenpoint-comedy-club.html">Greenpoint Comedy Club</a> · <a href="venues/guggenheim-museum.html">Guggenheim Museum</a> · <a href="venues/h0l0.html">H0L0</a> · <a href="venues/hammerstein-ballroom.html">Hammerstein Ballroom</a> · <a href="venues/hart-bar.html">Hart Bar</a> · <a href="venues/house-of-yes.html">House of Yes</a> · <a href="venues/industry-city.html">Industry City</a> · <a href="venues/irving-plaza.html">Irving Plaza</a> · <a href="venues/issue-project-room.html">Issue Project Room</a> · <a href="venues/jalopy-theatre.html">Jalopy Theatre</a> · <a href="venues/joes-pub.html">Joe&#x27;s Pub</a> · <a href="venues/kings-theatre.html">Kings Theatre</a> · <a href="venues/knockdown-center.html">Knockdown Center</a> · <a href="venues/le-poisson-rouge.html">(Le) Poisson Rouge</a> · <a href="venues/life-world.html">LIFE WORLD</a> · <a href="venues/light-sound-design.html">Light &amp; Sound Design</a> · <a href="venues/lincoln-center-david-geffen-hall.html">Lincoln Center - David Geffen Hall</a> · <a href="venues/littlefield.html">Littlefield</a> · <a href="venues/los-depressos.html">Los Depressos</a> · <a href="venues/madison-square-garden.html">Madison Square Garden</a> · <a href="venues/main-drag-music.html">Main Drag Music</a> · <a href="venues/maker-park.html">Maker Park</a> · <a href="venues/mama-tried.html">Mama Tried</a> · <a href="venues/maria-hernandez-park.html">Maria Hernandez Park</a> · <a href="venues/market-hotel.html">Market Hotel</a> · <a href="venues/massapequa-vfw-hall.html">Massapequa VFW Hall</a> · <a href="venues/mercury-lounge.html">Mercury Lounge</a> · <a href="venues/moma-ps1.html">MoMA PS1</a> · <a href="venues/music-hall-of-williamsburg.html">Music Hall of Williamsburg</a> · <a href="venues/national-sawdust.html">National Sawdust</a> · <a href="venues/new-jersey-performing-arts-center.html">New Jersey Performing Arts Center</a> · <a href="venues/new-york-society-for-ethical-culture.html">New York Society for Ethical Culture</a> · <a href="venues/night-club-101.html">Night Club 101</a> · <a href="venues/nublu-151.html">Nublu 151</a> · <a href="venues/p-i-t.html">P.I.T.</a> · <a href="venues/pacha-new-york.html">Pacha New York</a> · <a href="venues/paragon.html">Paragon</a> · <a href="venues/parkside-lounge.html">Parkside Lounge</a> · <a href="venues/petes-candy-store.html">Pete&#x27;s Candy Store</a> · <a href="venues/pianos.html">Pianos</a> · <a href="venues/pine-box-rock-shop.html">Pine Box Rock Shop</a> · <a href="venues/pioneer-works.html">Pioneer Works</a> · <a href="venues/property-is-theft.html">Property Is Theft</a> · <a href="venues/public-records.html">Public Records</a> · <a href="venues/purgatory.html">Purgatory</a> · <a href="venues/racket.html">Racket</a> · <a href="venues/radio-city-music-hall.html">Radio City Music Hall</a> · <a href="venues/reforesters-laboratory.html">Reforesters Laboratory</a> · <a href="venues/riverside-church.html">Riverside Church</a> · <a href="venues/robert-f-wagner-jr-park-battery-park-city.html">Robert F. Wagner, Jr. Park (Battery Park City)</a> · <a href="venues/rodrigues-coffee-house.html">Rodrigue&#x27;s Coffee House</a> · <a href="venues/rough-trade-nyc.html">Rough Trade NYC</a> · <a href="venues/roulette.html">Roulette</a> · <a href="venues/rubulad.html">Rubulad</a> · <a href="venues/s-o-b-s.html">S.O.B.&#x27;s</a> · <a href="venues/saint-vitus.html">Saint Vitus</a> · <a href="venues/salon-on-kingston.html">Salon on Kingston</a> · <a href="venues/scholes-street-studio.html">Scholes Street Studio</a> · <a href="venues/silo-brooklyn.html">SILO Brooklyn</a> · <a href="venues/silver-lining-lounge.html">Silver Lining Lounge</a> · <a href="venues/sleepwalk.html">Sleepwalk</a> · <a href="venues/sony-hall.html">Sony Hall</a> · <a href="venues/south-street-seaport.html">South Street Seaport</a> · <a href="venues/starland-ballroom.html">Starland Ballroom</a> · <a href="venues/starr-bar.html">Starr Bar</a> · <a href="venues/stone-circle-theatre.html">Stone Circle Theatre</a> · <a href="venues/strand-bookstore.html">Strand Bookstore</a> · <a href="venues/sugar-mouse.html">Sugar Mouse</a> · <a href="venues/talon-bar.html">Talon Bar</a> · <a href="venues/terminal-5.html">Terminal 5</a> · <a href="venues/the-1896.html">The 1896</a> · <a href="venues/the-bell-house.html">The Bell House</a> · <a href="venues/the-bitter-end.html">The Bitter End</a> · <a href="venues/the-broadway.html">The Broadway</a> · <a href="venues/the-brooklyn-monarch.html">The Brooklyn Monarch</a> · <a href="venues/the-capitol-theatre.html">The Capitol Theatre</a> · <a href="venues/the-chocolate-factory.html">The Chocolate Factory</a> · <a href="venues/the-count-basie-center-for-the-arts.html">The Count Basie Center for the Arts</a> · <a href="venues/the-gutter.html">The Gutter</a> · <a href="venues/the-living-gallery.html">The Living Gallery</a> · <a href="venues/the-meadows.html">The Meadows</a> · <a href="venues/the-paramount.html">The Paramount</a> · <a href="venues/the-record-shop.html">The Record Shop</a> · <a href="venues/the-rooftop-at-pier-17.html">The Rooftop at Pier 17</a> · <a href="venues/the-sheen-center-for-thought-culture.html">The Sheen Center for Thought &amp; Culture</a> · <a href="venues/the-sultan-room.html">The Sultan Room</a> · <a href="venues/the-wellmont-theater.html">The Wellmont Theater</a> · <a href="venues/the-wood-shop.html">The Wood Shop</a> · <a href="venues/tompkins-square-park.html">Tompkins Square Park</a> · <a href="venues/town-hall.html">Town Hall</a> · <a href="venues/trans-pecos.html">Trans-Pecos</a> · <a href="venues/tv-eye.html">TV Eye</a> · <a href="venues/ubs-arena.html">UBS Arena</a> · <a href="venues/under-the-k-bridge-park.html">Under the K Bridge Park</a> · <a href="venues/union-hall.html">Union Hall</a> · <a href="venues/union-pool.html">Union Pool</a> · <a href="venues/unruly-collective.html">Unruly Collective</a> · <a href="venues/venue-tba.html">Venue TBA</a> · <a href="venues/warsaw.html">Warsaw</a> · <a href="venues/webster-hall.html">Webster Hall</a> · <a href="venues/windjammer.html">Windjammer</a> · <a href="venues/wonderville.html">Wonderville</a> · <a href="venues/xanadu.html">Xanadu</a> · <a href="venues/yonkers-brewing-company.html">Yonkers Brewing Company</a></p>
+        </details>
+        <details>
+          <summary>Show pages for the next 7 days</summary>
+          <h3>Saturday Oct 24</h3>
+          <ul>
+            <li><a href="shows/2026-10-24-flushing-meadows-corona-park-diplo-900am.html">Diplo at Flushing Meadows-Corona Park · 9:00 AM</a></li>
+            <li><a href="shows/2026-10-24-pianos-the-veldt-100pm.html">The Veldt, Burnt Sugar, Honeychild Coleman, DEM, Mahogany, Cigarettes For Breakfast, Dead Leaf Echo, and more! at Pianos · 1:00 PM</a></li>
+            <li><a href="shows/2026-10-24-h0l0-honcho-h0l0-takeover-300pm.html">Honcho H0L0 Takeover at H0L0 · 3:00 PM</a></li>
+            <li><a href="shows/2026-10-24-bar-freda-fervence-330pm.html">Fervence, Enthronement at Bar Freda · 3:30 PM</a></li>
+            <li><a href="shows/2026-10-24-the-rooftop-at-pier-17-steve-aoki-500pm.html">Steve Aoki, Nostalgix, Henry Fong, iaco at The Rooftop at Pier 17 · 5:00 PM</a></li>
+            <li><a href="shows/2026-10-24-alphaville-antics-600pm.html">Antics!, Proper, Stay Inside, Rows, Footnote, Ross Newhouse at Alphaville · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-24-hart-bar-balloon-snake-600pm.html">Balloon Snake, Jeerleader, Dog Park, Winnifred at Hart Bar · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-24-elsewhere-el-michels-affair-600pm.html">El Michels Affair at Elsewhere · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-24-irving-plaza-hawthorne-heights-600pm.html">Hawthorne Heights, Letlive, Creeper at Irving Plaza · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-24-mercury-lounge-maris-600pm.html">MARIS at Mercury Lounge · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-24-night-club-101-dead-gowns-630pm.html">Dead Gowns, Helenor at Night Club 101 · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-24-babys-all-right-chinchilla-630pm.html">Chinchilla at Baby&#x27;s All Right · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-24-p-i-t-first-president-of-japan-630pm.html">first president of japan, Qween Kong, AFK, Ultra Deluxe at P.I.T. · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-24-music-hall-of-williamsburg-mac-demarco-700pm.html">Mac DeMarco at Music Hall of Williamsburg · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-24-bowery-ballroom-telescreens-700pm.html">Telescreens at Bowery Ballroom · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-24-elsewhere-be-your-own-pet-700pm.html">Be Your Own Pet, Farmer&#x27;s Wife, Josephine Network at Elsewhere · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-24-stone-circle-theatre-lost-grrrl-found-700pm.html">Lost Grrrl Found at Stone Circle Theatre · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-24-the-broadway-radiator-hospital-700pm.html">Radiator Hospital at The Broadway · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-24-light-sound-design-carl-ashtray-700pm.html">Carl Ashtray at Light &amp; Sound Design · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-24-bowery-palace-neutral-snap-700pm.html">Neutral Snap, Shower Beers, Dana Ives at Bowery Palace · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-24-brooklyn-paramount-tinashe-700pm.html">Tinashe at Brooklyn Paramount · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-24-crown-hill-theatre-claudio-simonettis-goblin-perf-700pm.html">Claudio Simonetti&#x27;s Goblin (performing live score to Tenebre) at Crown Hill Theatre · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-24-knockdown-center-l7-700pm.html">L7 at Knockdown Center · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-24-public-records-mark-guiliana-700pm.html">Mark Guiliana at Public Records · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-24-warsaw-osees-700pm.html">Osees, Traps PS, Brigid Dawson at Warsaw · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-24-cassette-more-eaze-730pm.html">More Eaze, Jadelain, Andrea Schiavelli at Cassette · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-24-gold-sounds-robot-princess-730pm.html">Robot Princess, Painted Zeros, Mt. Ex, Best Pete at Gold Sounds · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-24-hart-bar-argument-730pm.html">Argument, Jeerleader, Pleasure Deat, Balloon Snake at Hart Bar · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-24-main-drag-music-london-plane-730pm.html">London Plane, Fuck You, Tammy!, El Jaguar at Main Drag Music · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-24-national-sawdust-little-barrie-730pm.html">Little Barrie at National Sawdust · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-24-issue-project-room-liturgy-800pm.html">Liturgy at Issue Project Room · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-24-jalopy-theatre-leah-tash-800pm.html">Leah Tash, Pearla at Jalopy Theatre · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-24-brooklyn-bowl-abbie-gamboa-800pm.html">Abbie Gamboa at Brooklyn Bowl · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-24-carnegie-hall-richard-atkins-800pm.html">Richard Atkins at Carnegie Hall · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-24-madison-square-garden-harry-styles-800pm.html">Harry Styles, Jamie xx at Madison Square Garden · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-24-mama-tried-graphic-violets-800pm.html">Graphic Violets, Discreet Charms at Mama Tried · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-24-racket-maddie-zahm-800pm.html">Maddie Zahm at Racket · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-24-the-capitol-theatre-trombone-shorty-orleans-avenue-800pm.html">Trombone Shorty &amp; Orleans Avenue, Abraham Alexander at The Capitol Theatre · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-24-town-hall-bruce-cockburn-800pm.html">Bruce Cockburn, Livingston Taylor at Town Hall · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-24-ubs-arena-katseye-800pm.html">KATSEYE at UBS Arena · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-24-union-pool-slimdan-800pm.html">slimdan at Union Pool · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-24-webster-hall-pixies-800pm.html">Pixies, Amanda Petrusich at Webster Hall · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-24-windjammer-tiers-la-familia-830pm.html">Tiers La Familia, Sinead Youth, Crazy Makers at Windjammer · 8:30 PM</a></li>
+            <li><a href="shows/2026-10-24-terminal-5-r-z-830pm.html">RØZ at Terminal 5 · 8:30 PM</a></li>
+            <li><a href="shows/2026-10-24-mercury-lounge-blonde-otter-900pm.html">Blonde Otter, Already Late at Mercury Lounge · 9:00 PM</a></li>
+            <li><a href="shows/2026-10-24-dead-letter-no-9-mike-servito-900pm.html">Mike Servito, Sister System, Acid Mama, beewack at Dead Letter No. 9 · 9:00 PM</a></li>
+            <li><a href="shows/2026-10-24-babys-all-right-ikeda-1000pm.html">iKeda at Baby&#x27;s All Right · 10:00 PM</a></li>
+            <li><a href="shows/2026-10-24-good-room-mozhgan-1000pm.html">Mozhgan, JDH &amp; Dave P, Universal Cave at Good Room · 10:00 PM</a></li>
+            <li><a href="shows/2026-10-24-house-of-yes-night-cult-madam-x-and-more-1000pm.html">Night Cult: Madam X and More! at House of Yes · 10:00 PM</a></li>
+            <li><a href="shows/2026-10-24-elsewhere-10-years-of-crucast-harriet-ja-1030pm.html">10 Years of CruCast: Harriet Jaxxon, [IVY], SKEPSIS, Voltage, oomfRAVE at Elsewhere · 10:30 PM</a></li>
+            <li><a href="shows/2026-10-24-basement-dustin-zahn-1030pm.html">Dustin Zahn, Kameliia, Ade Kassim, Hercules &amp; Love Affair, Eli Escobar, ANDI at Basement · 10:30 PM</a></li>
+            <li><a href="shows/2026-10-24-public-records-pete-bbe-1100pm.html">Pete BBE, Johnny Reckless, Jeff Higgins, hyanna &amp; Alyssa Stowers at Public Records · 11:00 PM</a></li>
+          </ul>
+          <h3>Sunday Oct 25</h3>
+          <ul>
+            <li><a href="shows/2026-10-25-tompkins-square-park-non-residents-1200pm.html">Non Residents, Skitzopolis, Jones Crusher, Oedipus Triple Rex at Tompkins Square Park · 12:00 PM</a></li>
+            <li><a href="shows/2026-10-25-scholes-street-studio-max-perkins-200pm.html">Max Perkins at Scholes Street Studio · 2:00 PM</a></li>
+            <li><a href="shows/2026-10-25-mama-tried-savak-400pm.html">SAVAK, Thalia Zedek, Dan Friel at Mama Tried · 4:00 PM</a></li>
+            <li><a href="shows/2026-10-25-public-records-paurro-kiernan-laveaux-400pm.html">PAURRO &amp; Kiernan Laveaux, Saia &amp; e-Lite, performance by Willow Pill at Public Records · 4:00 PM</a></li>
+            <li><a href="shows/2026-10-25-webster-hall-conan-obrien-530pm.html">Conan O&#x27;Brien, David Remnick at Webster Hall · 5:30 PM</a></li>
+            <li><a href="shows/2026-10-25-knockdown-center-helado-tropical-helado-negro-600pm.html">Helado Tropical: Helado Negro, Reyna Tropical at Knockdown Center · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-25-alphaville-cash-obrien-600pm.html">Cash O&#x27;Brien, Farrah, Chiche at Alphaville · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-25-terminal-5-the-story-so-far-600pm.html">The Story So Far, The Starting Line, Ultra Q at Terminal 5 · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-25-brooklyn-paramount-cavetown-630pm.html">Cavetown, Chloe Moriondo at Brooklyn Paramount · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-25-tv-eye-flooding-700pm.html">Flooding, Bloodsports, Aeiou at TV Eye · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-25-sleepwalk-wax-brides-700pm.html">Wax Brides, Kabuki Love, Poppyseeds at Sleepwalk · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-25-bowery-ballroom-l-l-700pm.html">LØLØ at Bowery Ballroom · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-25-brooklyn-steel-the-living-tombstone-700pm.html">The Living Tombstone at Brooklyn Steel · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-25-carnegie-hall-mac-demarco-700pm.html">Mac DeMarco at Carnegie Hall · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-25-elsewhere-fury-700pm.html">Fury, Combust, Vanity, Square One at Elsewhere · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-25-gramercy-theatre-sophie-truax-700pm.html">Sophie Truax, Sasha Cee at Gramercy Theatre · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-25-irving-plaza-murda-700pm.html">Murda at Irving Plaza · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-25-night-club-101-mia-wilson-700pm.html">Mia Wilson, Haylie Davis, Donald Beaman at Night Club 101 · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-25-the-broadway-wiring-700pm.html">Wiring, Fib, Paper Lady, Nat Shaheen at The Broadway · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-25-the-wood-shop-fullminator-700pm.html">Fullminator, Coffin Hex, Finix, Exogeny at The Wood Shop · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-25-xanadu-labiahead-700pm.html">Labiahead, Lena Hall, Meg Toohey, Charlene Kaye at Xanadu · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-25-city-winery-los-lobos-730pm.html">Los Lobos at City Winery · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-25-berlin-robert-leslie-800pm.html">Robert Leslie, Pinc Louds, Carter Sessions at Berlin · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-25-mercury-lounge-asava-800pm.html">ASAVA at Mercury Lounge · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-25-petes-candy-store-jess-and-brendan-of-all-night-830pm.html">Jess and Brendan of All Night Boogie Band, Sumu, First Flight at Pete&#x27;s Candy Store · 8:30 PM</a></li>
+            <li><a href="shows/2026-10-25-night-club-101-telehealth-930pm.html">Telehealth, Imperial Motors at Night Club 101 · 9:30 PM</a></li>
+            <li><a href="shows/2026-10-25-babys-all-right-bungalow-collect-930pm.html">Bungalow Collect at Baby&#x27;s All Right · 9:30 PM</a></li>
+          </ul>
+          <h3>Monday Oct 26</h3>
+          <ul>
+            <li><a href="shows/2026-10-26-mercury-lounge-isabel-van-gelder-600pm.html">Isabel van Gelder at Mercury Lounge · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-26-rough-trade-nyc-caroline-rose-600pm.html">Caroline Rose at Rough Trade NYC · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-26-bearsville-theater-jeff-tweedy-630pm.html">Jeff Tweedy, Case Oats at Bearsville Theater · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-26-night-club-101-the-dazies-630pm.html">The Dazies at Night Club 101 · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-26-bowery-ballroom-candlebox-700pm.html">Candlebox, Sponge at Bowery Ballroom · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-26-carnegie-hall-mac-demarco-700pm.html">Mac DeMarco at Carnegie Hall · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-26-gramercy-theatre-jenna-davis-700pm.html">Jenna Davis, Ava Liv Mabry at Gramercy Theatre · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-26-le-poisson-rouge-action-bronson-700pm.html">Action Bronson, Human Growth Hormone at (Le) Poisson Rouge · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-26-sleepwalk-liam-torchia-700pm.html">Liam Torchia, Rain Johannes, Frank at Sleepwalk · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-26-city-winery-los-lobos-730pm.html">Los Lobos at City Winery · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-26-gold-sounds-dead-hollis-730pm.html">Dead Hollis, Ricky Stein, The Platonics, Nathan Xander at Gold Sounds · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-26-the-bell-house-the-moth-storyslam-800pm.html">The Moth StorySLAM at The Bell House · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-26-mercury-lounge-bull-thieves-900pm.html">Bull Thieves, Point Cloud, Kortex at Mercury Lounge · 9:00 PM</a></li>
+          </ul>
+          <h3>Tuesday Oct 27</h3>
+          <ul>
+            <li><a href="shows/2026-10-27-mercury-lounge-bentley-robles-600pm.html">Bentley Robles at Mercury Lounge · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-27-bearsville-theater-jeff-tweedy-630pm.html">Jeff Tweedy, Case Oats at Bearsville Theater · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-27-cafe-carlyle-st-vincent-630pm.html">St. Vincent at Café Carlyle · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-27-terminal-5-kwn-630pm.html">kwn at Terminal 5 · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-27-bowery-ballroom-rodrigo-y-gabriela-700pm.html">Rodrigo y Gabriela at Bowery Ballroom · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-27-full-kit-garage-drook-700pm.html">Drook, Pop Music Fever Dream, Secret Guest at Full Kit Garage · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-27-le-poisson-rouge-lennon-stella-700pm.html">Lennon Stella at (Le) Poisson Rouge · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-27-night-club-101-aidan-puntes-700pm.html">Aidan Puntes, Nikata Lev, Coco Smith at Night Club 101 · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-27-public-records-edan-700pm.html">Edan, The Still Brothers, Charlie Forest, Midnight Cafe, Raining Blue, + more at Public Records · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-27-tv-eye-ryan-peter-murphy-700pm.html">Ryan Peter Murphy at TV Eye · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-27-webster-hall-judah-the-lion-700pm.html">Judah &amp; the Lion at Webster Hall · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-27-berlin-torture-and-the-desert-spiders-800pm.html">Torture and the Desert Spiders at Berlin · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-27-brooklyn-steel-vince-staples-800pm.html">Vince Staples at Brooklyn Steel · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-27-gramercy-theatre-ivri-800pm.html">Ivri at Gramercy Theatre · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-27-music-hall-of-williamsburg-dana-and-alden-800pm.html">Dana and Alden at Music Hall of Williamsburg · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-27-roulette-ka-baird-800pm.html">Ka Baird, Chris Ryan Williams, Leila Bordreuil, Luke Stewart at Roulette · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-27-sony-hall-haley-reinhart-830pm.html">Haley Reinhart at Sony Hall · 8:30 PM</a></li>
+          </ul>
+          <h3>Wednesday Oct 28</h3>
+          <ul>
+            <li><a href="shows/2026-10-28-mercury-lounge-isabel-dumaa-600pm.html">Isabel Dumaa at Mercury Lounge · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-28-saint-vitus-devil-master-600pm.html">Devil Master, Coffin Dust, Diabolous, Satantic Magick at Saint Vitus · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-28-cafe-carlyle-st-vincent-630pm.html">St. Vincent at Café Carlyle · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-28-the-bitter-end-elizabeth-and-the-catapult-630pm.html">Elizabeth and the Catapult at The Bitter End · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-28-the-sultan-room-the-something-specials-630pm.html">The Something Specials, Taylor Olin at The Sultan Room · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-28-knockdown-center-the-blaze-700pm.html">The Blaze at Knockdown Center · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-28-le-poisson-rouge-isabel-larosa-700pm.html">Isabel LaRosa at (Le) Poisson Rouge · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-28-market-hotel-akchamel-700pm.html">Ak&#x27;chamel, Ecology Homestones at Market Hotel · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-28-music-hall-of-williamsburg-lilyisthatyou-700pm.html">lilyisthatyou at Music Hall of Williamsburg · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-28-night-club-101-smidley-700pm.html">Smidley at Night Club 101 · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-28-racket-eiv-r-700pm.html">Eivør at Racket · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-28-sleepwalk-halfway-up-a-jagged-hill-700pm.html">halfway up a jagged hill, Headfooter, Fasting at Sleepwalk · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-28-the-gutter-feedback-700pm.html">Feedback, Ridiculous Bitch, Sunny Delight, The Variantz at The Gutter · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-28-town-hall-jeff-tweedy-solo-700pm.html">Jeff Tweedy (solo), Case Oats at Town Hall · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-28-warsaw-the-army-700pm.html">The Army, The Navy, Ella Woolsey at Warsaw · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-28-webster-hall-dj-meredith-marks-700pm.html">DJ Meredith Marks at Webster Hall · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-28-92ny-so-percussion-steve-reichs-dru-730pm.html">Sō Percussion (Steve Reich&#x27;s Drumming) at 92NY · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-28-bowery-palace-michael-t-730pm.html">Michael T, Liz Lamere, Jaime Pina, Grace Bergere, The Tall Pines, Bob Bert, Steve Krebs, and more! at Bowery Palace · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-28-lincoln-center-david-geffen-ha-new-york-philharmonic-730pm.html">New York Philharmonic at Lincoln Center - David Geffen Hall · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-28-bowery-ballroom-national-park-after-dark-800pm.html">National Park After Dark at Bowery Ballroom · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-28-david-rubenstein-atrium-at-lin-topaz-jones-800pm.html">Topaz Jones at David Rubenstein Atrium at Lincoln Center · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-28-madison-square-garden-harry-styles-800pm.html">Harry Styles, Jamie xx at Madison Square Garden · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-28-cassette-kevin-barnes-of-montreal-900pm.html">Kevin Barnes (Of Montreal), Katy Pinke, Lea Petges at Cassette · 9:00 PM</a></li>
+            <li><a href="shows/2026-10-28-mercury-lounge-griffin-william-sherry-900pm.html">Griffin William Sherry at Mercury Lounge · 9:00 PM</a></li>
+            <li><a href="shows/2026-10-28-house-of-yes-club-joon-halloween-1-year-ann-900pm.html">Club Joon Halloween &amp; 1 Year Anniversary at House of Yes · 9:00 PM</a></li>
+            <li><a href="shows/2026-10-28-babys-all-right-blond-in-car-930pm.html">Blond in Car at Baby&#x27;s All Right · 9:30 PM</a></li>
+            <li><a href="shows/2026-10-28-night-club-101-my-wonderful-boyfriend-1000pm.html">My Wonderful Boyfriend, Or Best Offer, perfectangel420 at Night Club 101 · 10:00 PM</a></li>
+          </ul>
+          <h3>Thursday Oct 29</h3>
+          <ul>
+            <li><a href="shows/2026-10-29-berlin-the-rocky-horror-picture-show-600pm.html">The Rocky Horror Picture Show (Live) at Berlin · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-29-brooklyn-paramount-lawrence-600pm.html">Lawrence at Brooklyn Paramount · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-29-mercury-lounge-paige-fish-600pm.html">Paige Fish at Mercury Lounge · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-29-the-wood-shop-ok-goodnight-600pm.html">OK Goodnight, Lux Terminus, Eve at The Wood Shop · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-29-babys-all-right-chanpan-630pm.html">Chanpan at Baby&#x27;s All Right · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-29-cafe-carlyle-st-vincent-630pm.html">St. Vincent at Café Carlyle · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-29-the-sultan-room-the-blue-dot-630pm.html">The Blue Dot at The Sultan Room · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-29-house-of-yes-hot-fresh-burlesque-630pm.html">Hot &amp; Fresh Burlesque at House of Yes · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-29-alphaville-florry-as-the-florring-stones-700pm.html">Florry (as The Florring Stones) at Alphaville · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-29-brooklyn-bowl-nekrogoblikon-700pm.html">Nekrogoblikon, Aborted, Signs Of The Swarm, Party Cannon at Brooklyn Bowl · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-29-brooklyn-steel-patrick-droney-700pm.html">Patrick Droney at Brooklyn Steel · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-29-elsewhere-pan-arcadia-700pm.html">Pan Arcadia, Cooking Class, No Stupid Questions at Elsewhere · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-29-elsewhere-the-hails-700pm.html">The Hails at Elsewhere · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-29-gramercy-theatre-harbour-700pm.html">Harbour at Gramercy Theatre · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-29-knockdown-center-pc-music-700pm.html">PC Music, A.G. Cook, Sophia Stel, Hudson Mohawke, umru, Grrl, Holly Waxwing at Knockdown Center · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-29-le-poisson-rouge-rasputina-700pm.html">Rasputina, Dust Bowl Faeries at (Le) Poisson Rouge · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-29-los-depressos-jswiss-700pm.html">JSWISS at Los Depressos · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-29-night-club-101-man-woman-chainsaw-700pm.html">Man/Woman/Chainsaw at Night Club 101 · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-29-public-records-jeremiah-chiu-700pm.html">Jeremiah Chiu at Public Records · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-29-the-gutter-mixed-state-as-bikini-kill-700pm.html">Mixed State (as Bikini Kill), Bastards of Young (as The Replacements), Weird Children (as Joy Division/New Order), Things on Fire (as Pixies), Le Big Zero (as The Police), and more! at The Gutter · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-29-the-meadows-l-o-t-i-o-n-700pm.html">L.O.T.I.O.N., Lathe of Heaven, The Mall, Slash Need, Blu Anxxiety, Heretic Bodyhammer at The Meadows · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-29-warsaw-yhwh-nailgun-700pm.html">YHWH Nailgun, Samba Jean-Baptiste, Morgan Garrett at Warsaw · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-29-webster-hall-grateful-shred-700pm.html">Grateful Shred at Webster Hall · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-29-cassette-palehound-730pm.html">Palehound, Samia, Nuria Graham, Marem Ladson at Cassette · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-29-gold-sounds-the-returners-730pm.html">The Returners, They Call Her Heaven, Sunday Saari, Jesse Pike at Gold Sounds · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-29-lincoln-center-david-geffen-ha-new-york-philharmonic-730pm.html">New York Philharmonic at Lincoln Center - David Geffen Hall · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-29-bowery-ballroom-the-barr-brothers-800pm.html">The Barr Brothers, SOAK at Bowery Ballroom · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-29-pioneer-works-leenalchi-800pm.html">LEENALCHI, Femcel at Pioneer Works · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-29-public-records-dent-may-800pm.html">Dent May at Public Records · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-29-terminal-5-horsegiirl-800pm.html">horsegiirL, Dylan Brady, Ren G (DJ) at Terminal 5 · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-29-xanadu-nice-as-fuck-mbrs-of-rilo-kile-800pm.html">Nice As Fuck (mbrs of Rilo Kiley/Au Revoir Simone/The Like), DJ Alix Brown at Xanadu · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-29-berlin-the-rocky-horror-picture-show-900pm.html">The Rocky Horror Picture Show (Live) at Berlin · 9:00 PM</a></li>
+            <li><a href="shows/2026-10-29-mercury-lounge-ray-and-paul-900pm.html">Ray and Paul at Mercury Lounge · 9:00 PM</a></li>
+            <li><a href="shows/2026-10-29-babys-all-right-eristheplanet-930pm.html">ERISTHEPLANET at Baby&#x27;s All Right · 9:30 PM</a></li>
+            <li><a href="shows/2026-10-29-night-club-101-gatekeeper-1000pm.html">Gatekeeper, Gobby, Logan Takahashi , Glasser (DJ) at Night Club 101 · 10:00 PM</a></li>
+            <li><a href="shows/2026-10-29-house-of-yes-gaydar-halloween-1000pm.html">Gaydar Halloween at House of Yes · 10:00 PM</a></li>
+            <li><a href="shows/2026-10-29-alphaville-florry-as-the-florring-stones-1030pm.html">Florry (as The Florring Stones) at Alphaville · 10:30 PM</a></li>
+            <li><a href="shows/2026-10-29-elsewhere-out-abt-halloween-edition-1030pm.html">Out &amp; Abt - Halloween Edition at Elsewhere · 10:30 PM</a></li>
+          </ul>
+          <h3>Friday Oct 30</h3>
+          <ul>
+            <li><a href="shows/2026-10-30-gold-sounds-plague-master-200pm.html">Plague Master, Ventriloquist, Take Care of My Bones, Nature Nvoke, Umiris at Gold Sounds · 2:00 PM</a></li>
+            <li><a href="shows/2026-10-30-brooklyn-paramount-lawrence-600pm.html">Lawrence at Brooklyn Paramount · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-30-mercury-lounge-josie-edwards-600pm.html">Josie Edwards at Mercury Lounge · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-30-saint-vitus-ink-dagger-600pm.html">Ink &amp; Dagger, Saetia at Saint Vitus · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-30-the-meadows-harlan-steed-600pm.html">Harlan Steed at The Meadows · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-30-night-club-101-shearing-630pm.html">Shearing, Warmachine, Chemical, German Suplex at Night Club 101 · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-30-webster-hall-mico-630pm.html">MICO at Webster Hall · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-30-house-of-yes-dirty-circus-halloween-edition-630pm.html">DIRTY CIRCUS: Halloween Edition at House of Yes · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-30-alphaville-huron-hash-700pm.html">Huron Hash, Coco Sachs and the Nuts at Alphaville · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-basilica-hudson-third-eye-blind-700pm.html">Third Eye Blind at Basilica Hudson · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-bearsville-theater-st-vincent-700pm.html">St. Vincent at Bearsville Theater · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-brooklyn-steel-laundry-day-700pm.html">Laundry Day at Brooklyn Steel · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-elsewhere-guerilla-toss-700pm.html">Guerilla Toss, Ben Katzman&#x27;s DeGreaser at Elsewhere · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-elsewhere-dev-lemons-700pm.html">Dev Lemons at Elsewhere · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-gramercy-theatre-god-street-wine-700pm.html">God Street Wine at Gramercy Theatre · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-knockdown-center-the-lemon-twigs-700pm.html">The Lemon Twigs, Swamp Dogg, Sheer Mag, Jacuzzi Boys, The Mystery Lights, Daddy Long Legs, Jonathan Toubin, Tchotchke, Shilpa Ray, Sid Simons, Fast Kids, 95 Bulls, Gnarcissists, Abby Jeanne and the Shadowband, Grace Bergere, Warthog, Lord Fascinator, Genre Is Death, Balaclava, Mala Vista, Mick&#x27;s Jaguar, Frida Kill, The Stones, Mighty Fine, Firstsex, Di Ivories, and more! at Knockdown Center · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-music-hall-of-williamsburg-les-savy-fav-700pm.html">Les Savy Fav, Rye Coalition at Music Hall of Williamsburg · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-racket-sueco-700pm.html">Sueco, Jeris Johnson at Racket · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-stone-circle-theatre-masma-dream-world-700pm.html">Masma Dream World, The Human Dream Project, &#x27;nguento at Stone Circle Theatre · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-the-broadway-strange-neighbors-700pm.html">Strange Neighbors, Teddy Hold On, Atrophy Wife, Justin Pussylake at The Broadway · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-the-gutter-steal-700pm.html">Steal, Cheat and Gamble (as Creed), Cherch (as Kendrick Lamar), Scarys On The Wall (as Alice in Chains), and more! at The Gutter · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-the-wood-shop-authority-zero-700pm.html">Authority Zero, Counterpunch at The Wood Shop · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-tv-eye-ditz-700pm.html">DITZ at TV Eye · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-union-pool-man-woman-chainsaw-700pm.html">Man/Woman/Chainsaw at Union Pool · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-warsaw-neurosis-700pm.html">Neurosis, Uniform at Warsaw · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-30-cassette-dj-silky-smooth-as-the-zombies-730pm.html">DJ Silky Smooth (as The Zombies), Awksymoron (as Avril Lavigne), Dammy (as Modest Mouse), Special Guest (as Arcade Fire) at Cassette · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-30-lincoln-center-david-geffen-ha-new-york-philharmonic-730pm.html">New York Philharmonic at Lincoln Center - David Geffen Hall · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-30-bowery-ballroom-evil-island-800pm.html">Evil Island at Bowery Ballroom · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-30-brooklyn-bowl-too-many-zooz-800pm.html">Too Many Zooz, Thundersmack at Brooklyn Bowl · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-30-cmon-everybody-the-rocky-horror-picture-show-800pm.html">The Rocky Horror Picture Show (Live) at C&#x27;mon Everybody · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-30-irving-plaza-waylon-wyatt-800pm.html">Waylon Wyatt at Irving Plaza · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-30-madison-square-garden-harry-styles-800pm.html">Harry Styles, Jamie xx at Madison Square Garden · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-30-pioneer-works-machine-girl-800pm.html">Machine Girl at Pioneer Works · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-30-terminal-5-horsegiirl-800pm.html">horsegiirL, Dylan Brady, Ren G (DJ) at Terminal 5 · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-30-the-count-basie-center-for-the-toad-the-wet-sprocket-800pm.html">Toad the Wet Sprocket, Willy Porter at The Count Basie Center for the Arts · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-30-the-paramount-she-wants-revenge-800pm.html">She Wants Revenge, Rosegarden Funeral Party at The Paramount · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-30-town-hall-the-rocky-horror-picture-show-800pm.html">The Rocky Horror Picture Show at Town Hall · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-30-windjammer-spooky-ruben-830pm.html">Spooky Ruben, Alice Cohen, Puzzlemonkey at Windjammer · 8:30 PM</a></li>
+            <li><a href="shows/2026-10-30-dead-letter-no-9-ron-like-hell-900pm.html">Ron Like Hell, Sissies of Mercy, Planet B, Kenia, Ronaldo at Dead Letter No. 9 · 9:00 PM</a></li>
+            <li><a href="shows/2026-10-30-mercury-lounge-the-gringos-900pm.html">The Gringos, Talking Points at Mercury Lounge · 9:00 PM</a></li>
+            <li><a href="shows/2026-10-30-the-1896-sistek-900pm.html">Sistek at The 1896 · 9:00 PM</a></li>
+            <li><a href="shows/2026-10-30-industry-city-the-vampire-ball-night-1-misch-900pm.html">The Vampire Ball: Night 1 - Mischief Night at Industry City · 9:00 PM</a></li>
+            <li><a href="shows/2026-10-30-99-scott-the-hellp-1000pm.html">The Hellp at 99 Scott · 10:00 PM</a></li>
+            <li><a href="shows/2026-10-30-brooklyn-storehouse-beltran-1000pm.html">Beltran, Carlita, Mapache, Mochakk, Rampa, Konstantin, Seth Troxler at Brooklyn Storehouse · 10:00 PM</a></li>
+            <li><a href="shows/2026-10-30-good-room-terence-fixmer-1000pm.html">Terence Fixmer, Andi, Justin Aulis Long, Stiffdance at Good Room · 10:00 PM</a></li>
+            <li><a href="shows/2026-10-30-night-club-101-mackeeper-1000pm.html">Mackeeper at Night Club 101 · 10:00 PM</a></li>
+            <li><a href="shows/2026-10-30-pacha-new-york-kaytranada-1000pm.html">Kaytranada at Pacha New York · 10:00 PM</a></li>
+            <li><a href="shows/2026-10-30-house-of-yes-house-of-hallucinations-1000pm.html">House of Hallucinations at House of Yes · 10:00 PM</a></li>
+            <li><a href="shows/2026-10-30-basement-laure-croft-1030pm.html">Laure Croft, SKIN, Katie Rex, SQUISH, Kim Anh, DJ Warning, Likeholywine B2b Nonsuit at Basement · 10:30 PM</a></li>
+            <li><a href="shows/2026-10-30-le-poisson-rouge-bradeazy-1100pm.html">BRADEAZY at (Le) Poisson Rouge · 11:00 PM</a></li>
+            <li><a href="shows/2026-10-30-public-records-mark-broom-1100pm.html">Mark Broom, Julia Govor / Blue Hour, Neel / Yasmeenah at Public Records · 11:00 PM</a></li>
+          </ul>
+        </details>
+      </section>
+      <!-- static-links:end -->
     </div>
 
     <a class="mc-tab" id="mcTabLink" href="missed-connections.html">Missed connections</a>
