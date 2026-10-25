@@ -302,10 +302,10 @@
            of it shares an act with the show sent in. */
         function clash(c) {
           var p = /^(\d{4})-(\d{2})-(\d{2})$/.exec(c.night || "");
-          if (!p || typeof SHOW_META === "undefined" || +p[1] !== SHOW_META.year || +p[2] !== SHOW_META.month) return null;
+          if (!p || typeof SHOW_META === "undefined" || c.night < SHOW_META.from || c.night > SHOW_META.to) return null;
           var mine = actList(c.acts), same = [], near = [];
           LISTED.forEach(function (s) {
-            if (s[0] !== +p[3] || norm(s[2]) !== norm(c.venue)) return;
+            if (s[0] !== c.night || norm(s[2]) !== norm(c.venue)) return;
             var shared = actList(s[3]).some(function (a) { return mine.indexOf(a) !== -1; });
             (shared ? same : near).push((s[1] ? s[1] + " · " : "") + s[3]);
           });

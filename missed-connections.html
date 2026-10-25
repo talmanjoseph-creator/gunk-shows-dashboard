@@ -267,6 +267,8 @@
           return v < 300 ? v + 1440 : v;
         }
         function pad(n) { return (n < 10 ? "0" : "") + n; }
+        /* Days since 1970, so nights in different months still sort by distance from today. */
+        function dayNum(y, m, d) { return Math.round(Date.UTC(y, m - 1, d) / 86400000); }
         function clip(t, n) { return Array.from(String(t || "").replace(/\s+/g, " ").trim()).slice(0, n).join(""); }
         function nyParts() {
           var o = {};
@@ -280,23 +282,24 @@
           return o;
         }
         function listings() {
-          if (typeof SHOWS === "undefined" || typeof SHOW_META === "undefined") return [];
-          var YEAR = SHOW_META.year, MONTH = SHOW_META.month - 1;
+          if (typeof SHOWS === "undefined") return [];
           var rows = SHOWS.map(function (s, i) { return { s: s, i: i }; });
-          rows.sort(function (a, b) { return a.s[0] - b.s[0] || timeKey(a.s[1]) - timeKey(b.s[1]) || a.i - b.i; });
+          rows.sort(function (a, b) {
+            return (a.s[0] < b.s[0] ? -1 : a.s[0] > b.s[0] ? 1 : 0) || timeKey(a.s[1]) - timeKey(b.s[1]) || a.i - b.i;
+          });
           var count = {}, out = [];
           rows.forEach(function (r) {
             var s = r.s;
             var m = /^(\d+):(\d+)\s*(AM|PM)/i.exec(s[1] || "");
-            var base = [YEAR + "-" + pad(MONTH + 1) + "-" + pad(s[0]), slugPart(s[2], 30), slugPart((s[3] || "").split(",")[0], 30),
+            var base = [s[0], slugPart(s[2], 30), slugPart((s[3] || "").split(",")[0], 30),
               m ? parseInt(m[1], 10) + m[2] + m[3].toLowerCase() : "tba"].join("-");
             count[base] = (count[base] || 0) + 1;
             var slug = count[base] === 1 ? base : base + "-" + count[base];
-            var night = YEAR + "-" + pad(MONTH + 1) + "-" + pad(s[0]);
+            var night = s[0];
             var head = (s[3] || "").split(",")[0].trim();
             var label = [nice(night, true), s[1], s[2], head].filter(Boolean).join(" · ");
             out.push({
-              slug: slug, night: night, day: s[0], time: s[1] || "", venue: s[2] || "",
+              slug: slug, night: night, day: dayNum(+night.slice(0, 4), +night.slice(5, 7), +night.slice(8, 10)), time: s[1] || "", venue: s[2] || "",
               label: label, hay: fold(label + " " + (s[3] || "") + " " + (s[2] || ""))
             });
           });
@@ -306,8 +309,7 @@
         var bySlug = {};
         LIST.forEach(function (s) { bySlug[s.slug] = s; });
         var ny = nyParts();
-        var inThisMonth = typeof SHOW_META !== "undefined" && ny.year === SHOW_META.year && ny.month === SHOW_META.month;
-        var todayDay = inThisMonth ? ny.day : (typeof SHOW_META !== "undefined" && ny.year * 12 + ny.month > SHOW_META.year * 12 + SHOW_META.month ? 32 : 0);
+        var todayDay = dayNum(ny.year, ny.month, ny.day);
         var picked = (q.show && bySlug[q.show]) || (q.show ? {
           slug: q.show,
           night: /^\d{4}-\d{2}-\d{2}$/.test(q.night) ? q.night : "",

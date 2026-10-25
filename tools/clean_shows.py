@@ -4,10 +4,11 @@
 Run after pasting in new listings:  python3 tools/clean_shows.py
 
   1. Normalizes venue names (trims whitespace, merges known aliases).
-  2. Merges duplicate listings (same day + venue with a matching bill).
+  2. Merges duplicate listings (same date + venue with a matching bill).
      "both" means GUNK plus another source, and keeps the GUNK wording.
      A club night merged with an "other" row stays "club".
-  3. Sorts each day by start time (after-midnight sets go last).
+  3. Sorts by date, then start time (after-midnight sets go last). Warns
+     about rows whose date is not "YYYY-MM-DD" or falls outside the window.
   4. Regenerates AREA (venue -> area) from the GEO coordinates.
   5. Replaces affiliate-redirect ticket links with the direct ticket page.
 
@@ -272,7 +273,19 @@ def main():
     start = src.index("var SHOWS = [") + len("var SHOWS = ")
     end = src.index("];", start) + 1
     shows = json.loads(re.sub(r",\s*\]$", "]", src[start:end].strip()))
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import build_pages
+    frm, to = build_pages.window(src)
+    bad = [s for s in shows if not (isinstance(s[DAY], str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", s[DAY]))]
+    if bad:
+        print(f"Rows need a \"YYYY-MM-DD\" date first; fix these and run again: {bad[:3]}")
+        return 1
     cleaned, merged = clean(shows)
+    outside = [s for s in cleaned if not frm.isoformat() <= s[DAY] <= to.isoformat()]
+    if outside:
+        print(f"WARNING: {len(outside)} rows are outside {frm} to {to} (SHOW_META), so they stay off the list:")
+        for s in outside[:10]:
+            print(f"  {s[DAY]} {s[VENUE]}: {s[ACTS][:50]!r}")
     rows = ",\n".join("  " + json.dumps(s, ensure_ascii=False, separators=(",", ":")) for s in cleaned)
     src = src[:start] + "[\n" + rows + "\n]" + src[end:]
 
@@ -305,7 +318,7 @@ def main():
     wrapped = sum(1 for s in cleaned if urlsplit(s[URL]).netloc.endswith(REDIRECT_HOSTS))
     print(f"{len(shows)} rows in, {len(cleaned)} out, {len(merged)} merged, {wrapped} affiliate links left")
     for a, b in merged:
-        print(f"  Oct {a[DAY]:>2} {a[VENUE]}: [{a[SRC]} {a[TIME]}] {a[ACTS][:45]!r} + [{b[SRC]} {b[TIME]}] {b[ACTS][:45]!r}")
+        print(f"  {a[DAY]} {a[VENUE]}: [{a[SRC]} {a[TIME]}] {a[ACTS][:45]!r} + [{b[SRC]} {b[TIME]}] {b[ACTS][:45]!r}")
     venues = {s[VENUE] for s in cleaned}
     missing = sorted(venues - seen)
     if missing:
@@ -317,8 +330,6 @@ def main():
         print(f"  {code:>4}: {', '.join(sorted(by_area[code]))}")
 
     # Rebuild the show and venue pages so they match the cleaned data.
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
-    import build_pages
     build_pages.build()
 
 

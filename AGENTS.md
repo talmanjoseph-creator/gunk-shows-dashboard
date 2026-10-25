@@ -10,18 +10,18 @@ More than one person and more than one AI agent push to this repo. Read this bef
 
 ## How the site is laid out
 
-- `index.html` — markup, styles and script. It contains **no listings and nothing month-specific**.
-- `shows-data.js` — all listings data: `SHOW_META`, `SHOWS`, `GEO`, `AREA`. Listings go here, not in `index.html`.
-- `tools/clean_shows.py` — run it after changing `shows-data.js`. It merges venue spellings, removes duplicates, sorts by start time, regenerates `AREA`, and unwraps affiliate ticket links.
-- `shows/` and `venues/` — one generated page per show and per venue. **Never edit these by hand**; `tools/build_pages.py` rewrites both folders from `shows-data.js`, and `tools/clean_shows.py` runs it automatically. If you change the data, the pages must be regenerated in the same pull request.
+- `index.html` — markup, styles and script. It contains **no listings and nothing date-specific**.
+- `shows-data.js` — all listings data: `SHOW_META` (`from` / `to` as `"YYYY-MM-DD"`), `SHOWS` (each row starts with the night as `"YYYY-MM-DD"`), `GEO`, `AREA`. Listings go here, not in `index.html`.
+- `tools/clean_shows.py` — run it after changing `shows-data.js`. It merges venue spellings, removes duplicates, sorts by date and start time, regenerates `AREA`, and unwraps affiliate ticket links.
+- `shows/` and `venues/` — one generated page per show and per venue. **Never edit these by hand**; `tools/build_pages.py` rewrites show pages dated inside the window and every venue page from `shows-data.js`, and `tools/clean_shows.py` runs it automatically. Pages dated outside the window stay. If you change the data, the pages must be regenerated in the same pull request.
 - `pages.css`, `pages.js`, `404.html` — shared styles, behavior and not-found page for the generated pages.
 - The show page name is computed in two places that must match: `show_slug()` in `tools/build_pages.py` and `showSlug()` in `index.html`.
 - `og.png` — share preview image.
-- `README.md` — how to update for a new month.
+- `README.md` — how to keep the listings window rolling (extend `to`, add the next month's rows; drop a finished month's rows, leave its pages).
 
 ## How things stand (check with the owner before undoing any of these)
 
-- **Sources are credited in the footer only.** The footer's Sources line names and links GUNK New York and Oh My Rockness. The masthead and the filters do not name Oh My Rockness.
+- **Sources stay out of the masthead and filters.** GUNK New York and Oh My Rockness are named in `SHOW_META` only. The masthead and the filters do not name Oh My Rockness.
 - **Ticket links are direct**, never affiliate redirects (`evyy.net`, `pxf.io`). The cleanup script enforces this. Do not strip `afflky` from Eventim links (`wl.eventim.us/...?afflky=TVEye`): it is the venue's own storefront key, and the ticket page shows an error without it.
 - **Resident Advisor is not a source.** Their terms of use forbid automated collection without written permission, so do not scrape it.
 - **Copy is short.** Masthead: tagline, the "shows tonight" button, one line of totals. No stats grid, no source paragraph.

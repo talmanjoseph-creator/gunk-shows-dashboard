@@ -230,6 +230,7 @@
       a.day:hover { border-color: var(--accent); color: var(--accent); }
       a.day.past { border-color: var(--hair); color: var(--muted); }
       a.day.none { opacity: 0.4; }
+      a.day.month-start { margin-left: 10px; }
       a.day.today { border-color: var(--accent); color: var(--accent); }
       a.day[aria-current="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
       a.day.today[aria-current="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
@@ -296,6 +297,10 @@
       .past-toggle:hover { border-color: var(--accent); color: var(--accent); }
       section.day { padding: 26px 0 6px; scroll-margin-top: var(--sticky-h); }
       section.day.past { background: var(--past-bg); }
+      .month-mark {
+        margin: 0 0 18px; padding-top: 8px; border-top: 6px solid var(--line);
+        font: 700 12px var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted);
+      }
       .day-head {
         display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px;
         border-bottom: 3px solid var(--line);
@@ -674,61 +679,6 @@
         </details>
         <details>
           <summary>Show pages for the next 7 days</summary>
-          <h3>Saturday Oct 24</h3>
-          <ul>
-            <li><a href="shows/2026-10-24-flushing-meadows-corona-park-diplo-900am.html">Diplo at Flushing Meadows-Corona Park · 9:00 AM</a></li>
-            <li><a href="shows/2026-10-24-pianos-the-veldt-100pm.html">The Veldt, Burnt Sugar, Honeychild Coleman, DEM, Mahogany, Cigarettes For Breakfast, Dead Leaf Echo, and more! at Pianos · 1:00 PM</a></li>
-            <li><a href="shows/2026-10-24-h0l0-honcho-h0l0-takeover-300pm.html">Honcho H0L0 Takeover at H0L0 · 3:00 PM</a></li>
-            <li><a href="shows/2026-10-24-bar-freda-fervence-330pm.html">Fervence, Enthronement at Bar Freda · 3:30 PM</a></li>
-            <li><a href="shows/2026-10-24-the-rooftop-at-pier-17-steve-aoki-500pm.html">Steve Aoki, Nostalgix, Henry Fong, iaco at The Rooftop at Pier 17 · 5:00 PM</a></li>
-            <li><a href="shows/2026-10-24-alphaville-antics-600pm.html">Antics!, Proper, Stay Inside, Rows, Footnote, Ross Newhouse at Alphaville · 6:00 PM</a></li>
-            <li><a href="shows/2026-10-24-hart-bar-balloon-snake-600pm.html">Balloon Snake, Jeerleader, Dog Park, Winnifred at Hart Bar · 6:00 PM</a></li>
-            <li><a href="shows/2026-10-24-elsewhere-el-michels-affair-600pm.html">El Michels Affair at Elsewhere · 6:00 PM</a></li>
-            <li><a href="shows/2026-10-24-irving-plaza-hawthorne-heights-600pm.html">Hawthorne Heights, Letlive, Creeper at Irving Plaza · 6:00 PM</a></li>
-            <li><a href="shows/2026-10-24-mercury-lounge-maris-600pm.html">MARIS at Mercury Lounge · 6:00 PM</a></li>
-            <li><a href="shows/2026-10-24-night-club-101-dead-gowns-630pm.html">Dead Gowns, Helenor at Night Club 101 · 6:30 PM</a></li>
-            <li><a href="shows/2026-10-24-babys-all-right-chinchilla-630pm.html">Chinchilla at Baby&#x27;s All Right · 6:30 PM</a></li>
-            <li><a href="shows/2026-10-24-p-i-t-first-president-of-japan-630pm.html">first president of japan, Qween Kong, AFK, Ultra Deluxe at P.I.T. · 6:30 PM</a></li>
-            <li><a href="shows/2026-10-24-music-hall-of-williamsburg-mac-demarco-700pm.html">Mac DeMarco at Music Hall of Williamsburg · 7:00 PM</a></li>
-            <li><a href="shows/2026-10-24-bowery-ballroom-telescreens-700pm.html">Telescreens at Bowery Ballroom · 7:00 PM</a></li>
-            <li><a href="shows/2026-10-24-elsewhere-be-your-own-pet-700pm.html">Be Your Own Pet, Farmer&#x27;s Wife, Josephine Network at Elsewhere · 7:00 PM</a></li>
-            <li><a href="shows/2026-10-24-stone-circle-theatre-lost-grrrl-found-700pm.html">Lost Grrrl Found at Stone Circle Theatre · 7:00 PM</a></li>
-            <li><a href="shows/2026-10-24-the-broadway-radiator-hospital-700pm.html">Radiator Hospital at The Broadway · 7:00 PM</a></li>
-            <li><a href="shows/2026-10-24-light-sound-design-carl-ashtray-700pm.html">Carl Ashtray at Light &amp; Sound Design · 7:00 PM</a></li>
-            <li><a href="shows/2026-10-24-bowery-palace-neutral-snap-700pm.html">Neutral Snap, Shower Beers, Dana Ives at Bowery Palace · 7:00 PM</a></li>
-            <li><a href="shows/2026-10-24-brooklyn-paramount-tinashe-700pm.html">Tinashe at Brooklyn Paramount · 7:00 PM</a></li>
-            <li><a href="shows/2026-10-24-crown-hill-theatre-claudio-simonettis-goblin-perf-700pm.html">Claudio Simonetti&#x27;s Goblin (performing live score to Tenebre) at Crown Hill Theatre · 7:00 PM</a></li>
-            <li><a href="shows/2026-10-24-knockdown-center-l7-700pm.html">L7 at Knockdown Center · 7:00 PM</a></li>
-            <li><a href="shows/2026-10-24-public-records-mark-guiliana-700pm.html">Mark Guiliana at Public Records · 7:00 PM</a></li>
-            <li><a href="shows/2026-10-24-warsaw-osees-700pm.html">Osees, Traps PS, Brigid Dawson at Warsaw · 7:00 PM</a></li>
-            <li><a href="shows/2026-10-24-cassette-more-eaze-730pm.html">More Eaze, Jadelain, Andrea Schiavelli at Cassette · 7:30 PM</a></li>
-            <li><a href="shows/2026-10-24-gold-sounds-robot-princess-730pm.html">Robot Princess, Painted Zeros, Mt. Ex, Best Pete at Gold Sounds · 7:30 PM</a></li>
-            <li><a href="shows/2026-10-24-hart-bar-argument-730pm.html">Argument, Jeerleader, Pleasure Deat, Balloon Snake at Hart Bar · 7:30 PM</a></li>
-            <li><a href="shows/2026-10-24-main-drag-music-london-plane-730pm.html">London Plane, Fuck You, Tammy!, El Jaguar at Main Drag Music · 7:30 PM</a></li>
-            <li><a href="shows/2026-10-24-national-sawdust-little-barrie-730pm.html">Little Barrie at National Sawdust · 7:30 PM</a></li>
-            <li><a href="shows/2026-10-24-issue-project-room-liturgy-800pm.html">Liturgy at Issue Project Room · 8:00 PM</a></li>
-            <li><a href="shows/2026-10-24-jalopy-theatre-leah-tash-800pm.html">Leah Tash, Pearla at Jalopy Theatre · 8:00 PM</a></li>
-            <li><a href="shows/2026-10-24-brooklyn-bowl-abbie-gamboa-800pm.html">Abbie Gamboa at Brooklyn Bowl · 8:00 PM</a></li>
-            <li><a href="shows/2026-10-24-carnegie-hall-richard-atkins-800pm.html">Richard Atkins at Carnegie Hall · 8:00 PM</a></li>
-            <li><a href="shows/2026-10-24-madison-square-garden-harry-styles-800pm.html">Harry Styles, Jamie xx at Madison Square Garden · 8:00 PM</a></li>
-            <li><a href="shows/2026-10-24-mama-tried-graphic-violets-800pm.html">Graphic Violets, Discreet Charms at Mama Tried · 8:00 PM</a></li>
-            <li><a href="shows/2026-10-24-racket-maddie-zahm-800pm.html">Maddie Zahm at Racket · 8:00 PM</a></li>
-            <li><a href="shows/2026-10-24-the-capitol-theatre-trombone-shorty-orleans-avenue-800pm.html">Trombone Shorty &amp; Orleans Avenue, Abraham Alexander at The Capitol Theatre · 8:00 PM</a></li>
-            <li><a href="shows/2026-10-24-town-hall-bruce-cockburn-800pm.html">Bruce Cockburn, Livingston Taylor at Town Hall · 8:00 PM</a></li>
-            <li><a href="shows/2026-10-24-ubs-arena-katseye-800pm.html">KATSEYE at UBS Arena · 8:00 PM</a></li>
-            <li><a href="shows/2026-10-24-union-pool-slimdan-800pm.html">slimdan at Union Pool · 8:00 PM</a></li>
-            <li><a href="shows/2026-10-24-webster-hall-pixies-800pm.html">Pixies, Amanda Petrusich at Webster Hall · 8:00 PM</a></li>
-            <li><a href="shows/2026-10-24-windjammer-tiers-la-familia-830pm.html">Tiers La Familia, Sinead Youth, Crazy Makers at Windjammer · 8:30 PM</a></li>
-            <li><a href="shows/2026-10-24-terminal-5-r-z-830pm.html">RØZ at Terminal 5 · 8:30 PM</a></li>
-            <li><a href="shows/2026-10-24-mercury-lounge-blonde-otter-900pm.html">Blonde Otter, Already Late at Mercury Lounge · 9:00 PM</a></li>
-            <li><a href="shows/2026-10-24-dead-letter-no-9-mike-servito-900pm.html">Mike Servito, Sister System, Acid Mama, beewack at Dead Letter No. 9 · 9:00 PM</a></li>
-            <li><a href="shows/2026-10-24-babys-all-right-ikeda-1000pm.html">iKeda at Baby&#x27;s All Right · 10:00 PM</a></li>
-            <li><a href="shows/2026-10-24-good-room-mozhgan-1000pm.html">Mozhgan, JDH &amp; Dave P, Universal Cave at Good Room · 10:00 PM</a></li>
-            <li><a href="shows/2026-10-24-house-of-yes-night-cult-madam-x-and-more-1000pm.html">Night Cult: Madam X and More! at House of Yes · 10:00 PM</a></li>
-            <li><a href="shows/2026-10-24-elsewhere-10-years-of-crucast-harriet-ja-1030pm.html">10 Years of CruCast: Harriet Jaxxon, [IVY], SKEPSIS, Voltage, oomfRAVE at Elsewhere · 10:30 PM</a></li>
-            <li><a href="shows/2026-10-24-basement-dustin-zahn-1030pm.html">Dustin Zahn, Kameliia, Ade Kassim, Hercules &amp; Love Affair, Eli Escobar, ANDI at Basement · 10:30 PM</a></li>
-            <li><a href="shows/2026-10-24-public-records-pete-bbe-1100pm.html">Pete BBE, Johnny Reckless, Jeff Higgins, hyanna &amp; Alyssa Stowers at Public Records · 11:00 PM</a></li>
-          </ul>
           <h3>Sunday Oct 25</h3>
           <ul>
             <li><a href="shows/2026-10-25-tompkins-square-park-non-residents-1200pm.html">Non Residents, Skitzopolis, Jones Crusher, Oedipus Triple Rex at Tompkins Square Park · 12:00 PM</a></li>
@@ -920,6 +870,51 @@
             <li><a href="shows/2026-10-30-le-poisson-rouge-bradeazy-1100pm.html">BRADEAZY at (Le) Poisson Rouge · 11:00 PM</a></li>
             <li><a href="shows/2026-10-30-public-records-mark-broom-1100pm.html">Mark Broom, Julia Govor / Blue Hour, Neel / Yasmeenah at Public Records · 11:00 PM</a></li>
           </ul>
+          <h3>Saturday Oct 31</h3>
+          <ul>
+            <li><a href="shows/2026-10-31-terminal-5-halloween-at-9am-900am.html">Halloween at 9AM at Terminal 5 · 9:00 AM</a></li>
+            <li><a href="shows/2026-10-31-yonkers-brewing-company-downtown-boys-100pm.html">Downtown Boys, ¡Fuakata!, Muelas, Hauasipongo, Rauli V, Los Gueys, Maintenance, We Are Not Our Bodies, L punk, No Weapons at Yonkers Brewing Company · 1:00 PM</a></li>
+            <li><a href="shows/2026-10-31-tv-eye-swamp-dogg-200pm.html">Swamp Dogg, Alana Amram (Muppet Cover Band) at TV Eye · 2:00 PM</a></li>
+            <li><a href="shows/2026-10-31-brooklyn-paramount-lawrence-500pm.html">Lawrence at Brooklyn Paramount · 5:00 PM</a></li>
+            <li><a href="shows/2026-10-31-mercury-lounge-silly-goose-500pm.html">Silly Goose, Cheem, Muttlee at Mercury Lounge · 5:00 PM</a></li>
+            <li><a href="shows/2026-10-31-knockdown-center-bassvictim-600pm.html">Bassvictim, Dead Butterflies, Thoom at Knockdown Center · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-31-market-hotel-wince-black-sabbath-600pm.html">Wince (Black Sabbath), Venus Twins (Modern Baseball), Weathergirl (Paramore), Screwbawl (Weezer), Prairie Princess (Gwen Stefani) at Market Hotel · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-31-saint-vitus-high-on-fire-600pm.html">High on Fire at Saint Vitus · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-31-the-wood-shop-mephiskapheles-600pm.html">Mephiskapheles, Butterbrain, Stop The Presses, Giftshop at The Wood Shop · 6:00 PM</a></li>
+            <li><a href="shows/2026-10-31-bar-freda-brook-pridemore-630pm.html">Brook Pridemore, Telomeres, Tail Light Rebellion, Burnt Tapes, Working Class Stiffs, Bag Lady at Bar Freda · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-31-irving-plaza-cypress-hill-630pm.html">Cypress Hill, Immortal Technique, Lord Sko at Irving Plaza · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-31-music-hall-of-williamsburg-mico-630pm.html">MICO at Music Hall of Williamsburg · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-31-house-of-yes-dirty-circus-halloween-edition-630pm.html">DIRTY CIRCUS: Halloween Edition at House of Yes · 6:30 PM</a></li>
+            <li><a href="shows/2026-10-31-bowery-ballroom-heavens-to-betsy-700pm.html">Heavens to Betsy at Bowery Ballroom · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-31-bowery-palace-the-nth-power-700pm.html">The Nth Power at Bowery Palace · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-31-elsewhere-cannelle-700pm.html">Cannelle, EQ, Tommy Fleece, Corridos Ketamina, Isla Den, Ali Rq, Petal Supply, Rico Rica at Elsewhere · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-31-night-club-101-nabihah-iqbal-700pm.html">Nabihah Iqbal, Tempers at Night Club 101 · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-31-pine-box-rock-shop-mike-nowotarski-700pm.html">Mike Nowotarski, Rosalie Avery at Pine Box Rock Shop · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-31-racket-paul-oakenfold-700pm.html">Paul Oakenfold, The Crystal Method at Racket · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-31-the-broadway-sana-sana-as-deftones-700pm.html">Sana Sana (as Deftones), Bad Timing (as Joyce Manor), Fear Not Ourselves Alone (as Modest Mouse), Bellcave (as Siouxsie and the Banshees) at The Broadway · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-31-the-gutter-sammi-lanzetta-as-amy-winehous-700pm.html">Sammi Lanzetta (as Amy Winehouse), Pete Mancini (as Oasis), Pink Phony Club (as Chappell Roan), Mel And The Tall Boys (as Madonna), Nite Music (as Tom Petty), It&#x27;s Britney Bitch (as Britney Spears), and more! at The Gutter · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-31-warsaw-neurosis-700pm.html">Neurosis, Primitive Man at Warsaw · 7:00 PM</a></li>
+            <li><a href="shows/2026-10-31-lincoln-center-david-geffen-ha-new-york-philharmonic-730pm.html">New York Philharmonic at Lincoln Center - David Geffen Hall · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-31-main-drag-music-scarys-on-the-wall-alice-in-ch-730pm.html">Scarys On The Wall (Alice in Chains), Onesie (Stone Temple Pilots), Power Pose (Hole), Leathered (PJ Harvey), Phantom Wave (My Bloody Valentine) at Main Drag Music · 7:30 PM</a></li>
+            <li><a href="shows/2026-10-31-cmon-everybody-the-rocky-horror-picture-show-800pm.html">The Rocky Horror Picture Show (Live) at C&#x27;mon Everybody · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-31-madison-square-garden-harry-styles-800pm.html">Harry Styles, Jamie xx at Madison Square Garden · 8:00 PM</a></li>
+            <li><a href="shows/2026-10-31-dead-letter-no-9-sterling-juan-diaz-900pm.html">Sterling Juan Diaz, Haruka, Boyyyish, KNDYFRK at Dead Letter No. 9 · 9:00 PM</a></li>
+            <li><a href="shows/2026-10-31-mercury-lounge-the-rocky-horror-halloween-sho-900pm.html">The Rocky Horror Halloween Show at Mercury Lounge · 9:00 PM</a></li>
+            <li><a href="shows/2026-10-31-industry-city-the-vampire-ball-night-2-900pm.html">The Vampire Ball: Night 2 at Industry City · 9:00 PM</a></li>
+            <li><a href="shows/2026-10-31-paragon-boris-dj-930pm.html">Boris (DJ), Juana, VILE, DJ Swisha, Nextdimensional at Paragon · 9:30 PM</a></li>
+            <li><a href="shows/2026-10-31-talon-bar-vick-vapors-930pm.html">Vick Vapors, Holy Water at Talon Bar · 9:30 PM</a></li>
+            <li><a href="shows/2026-10-31-brooklyn-storehouse-aline-umber-1000pm.html">Aline Umber, ANOTR, Dixon, Jamback, Jimi Jules, Krol, Rossi at Brooklyn Storehouse · 10:00 PM</a></li>
+            <li><a href="shows/2026-10-31-pacha-new-york-purple-disco-machine-1000pm.html">Purple Disco Machine at Pacha New York · 10:00 PM</a></li>
+            <li><a href="shows/2026-10-31-h0l0-resolute-presents-why-so-serio-1000pm.html">ReSolute presents: Why So Serious! at H0L0 · 10:00 PM</a></li>
+            <li><a href="shows/2026-10-31-house-of-yes-house-of-hallucinations-1000pm.html">House of Hallucinations at House of Yes · 10:00 PM</a></li>
+            <li><a href="shows/2026-10-31-babys-all-right-beach-fossils-1030pm.html">Beach Fossils, Winter at Baby&#x27;s All Right · 10:30 PM</a></li>
+            <li><a href="shows/2026-10-31-elsewhere-major-league-djz-1030pm.html">Major League DJz, SAIDAH, D Stone, Ariel Lights, Sissy Elliott at Elsewhere · 10:30 PM</a></li>
+            <li><a href="shows/2026-10-31-basement-mcmlxxxv-1030pm.html">Mcmlxxxv, SALOME, Lord Asa, CEM, Dee Diggs, Sevyn Love at Basement · 10:30 PM</a></li>
+            <li><a href="shows/2026-10-31-knockdown-center-horse-meat-disco-1100pm.html">Horse Meat Disco at Knockdown Center · 11:00 PM</a></li>
+            <li><a href="shows/2026-10-31-le-poisson-rouge-lost-kings-1100pm.html">Lost Kings at (Le) Poisson Rouge · 11:00 PM</a></li>
+            <li><a href="shows/2026-10-31-the-wood-shop-dr-apollo-1100pm.html">Dr. Apollo, LMNOP at The Wood Shop · 11:00 PM</a></li>
+            <li><a href="shows/2026-10-31-public-records-dope-jams-halloween-ball-1100pm.html">Dope Jams Halloween Ball at Public Records · 11:00 PM</a></li>
+          </ul>
         </details>
       </section>
       <!-- static-links:end -->
@@ -944,14 +939,35 @@
       "use strict";
       /* Listings live in shows-data.js: SHOW_META, SHOWS, GEO, AREA. */
 
-      /* ---------- month + "today" ---------- */
-      var YEAR = SHOW_META.year, MONTH = SHOW_META.month - 1;
+      /* ---------- the window of dates + "today" ---------- */
+      /* Days are "YYYY-MM-DD" strings, so they compare and sort as text. */
       var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-      var MON = MONTHS[MONTH].slice(0, 3);
       var DOW = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
       var DOW3 = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-      var FIRST_DAY = 1, LAST_DAY = new Date(YEAR, MONTH + 1, 0).getDate();
-      function dow(d) { return new Date(YEAR, MONTH, d).getDay(); }
+      function pad(n) { return (n < 10 ? "0" : "") + n; }
+      function dateOf(k) { return new Date(Date.UTC(+k.slice(0, 4), +k.slice(5, 7) - 1, +k.slice(8, 10))); }
+      function keyOf(dt) { return dt.getUTCFullYear() + "-" + pad(dt.getUTCMonth() + 1) + "-" + pad(dt.getUTCDate()); }
+      function dow(k) { return dateOf(k).getUTCDay(); }
+      function mon3(k) { return MONTHS[+k.slice(5, 7) - 1].slice(0, 3); }
+      function dnum(k) { return +k.slice(8, 10); }
+      var FROM = SHOW_META.from, TO = SHOW_META.to;
+      var DAYS = [];
+      for (var wk = dateOf(FROM); keyOf(wk) <= TO; wk.setUTCDate(wk.getUTCDate() + 1)) DAYS.push(keyOf(wk));
+      var MULTI = FROM.slice(0, 7) !== TO.slice(0, 7);
+      /* "Sun 25" for a one-month window, "Sun Oct 25" once it spans months. */
+      function shortDay(k) { return DOW3[dow(k)] + " " + (MULTI ? mon3(k) + " " : "") + dnum(k); }
+      /* "October 2026", "Oct–Nov 2026" or "Dec 2026–Jan 2027". */
+      function monthsLabel() {
+        var y0 = FROM.slice(0, 4), y1 = TO.slice(0, 4);
+        if (!MULTI) return MONTHS[+FROM.slice(5, 7) - 1] + " " + y0;
+        return y0 === y1 ? mon3(FROM) + "–" + mon3(TO) + " " + y1 : mon3(FROM) + " " + y0 + "–" + mon3(TO) + " " + y1;
+      }
+      /* "Oct 1–31, 2026", "Oct 1 – Nov 30, 2026" or "Dec 1, 2026 – Jan 31, 2027". */
+      function rangeLabel() {
+        var y0 = FROM.slice(0, 4), y1 = TO.slice(0, 4);
+        if (!MULTI) return mon3(FROM) + " " + dnum(FROM) + "–" + dnum(TO) + ", " + y1;
+        return mon3(FROM) + " " + dnum(FROM) + (y0 === y1 ? "" : ", " + y0) + " – " + mon3(TO) + " " + dnum(TO) + ", " + y1;
+      }
 
       /* "Today" is the date in New York, and the night runs until 4 AM, so a
          late set still counts as tonight at 1 AM. */
@@ -969,20 +985,22 @@
           d = new Date(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate(), n.getHours()));
         }
         d.setUTCHours(d.getUTCHours() - 4);
-        return { y: d.getUTCFullYear(), m: d.getUTCMonth(), d: d.getUTCDate() };
+        return keyOf(d);
       }
-      /* todayKey: the day of the month while the month is running, -1 before
-         it starts, LAST_DAY + 1 once it is over (so every day reads as past). */
+      /* todayKey: today's date while the window is running, "" before it
+         starts, and past the last date once it is over (so every day reads
+         as past). */
       var today = nyToday();
-      var nowYM = today.y * 12 + today.m, dataYM = YEAR * 12 + MONTH;
-      var inMonth = nowYM === dataYM;
-      var todayKey = inMonth ? today.d : (nowYM > dataYM ? LAST_DAY + 1 : -1);
-      /* The coming Fri–Sun (or what is left of it if it has started). */
+      var live = today >= FROM && today <= TO;
+      var todayKey = live ? today : (today > TO ? "9999-12-31" : "");
+      function isPast(k) { return todayKey !== "" && k < todayKey; }
+      /* The coming Fri–Sun (or what is left of it if it has started); it can
+         run into the next month. */
       var weekend = [];
-      if (inMonth) {
-        for (var wd = todayKey; wd <= LAST_DAY; wd++) {
-          var w = dow(wd);
-          if (w === 5 || w === 6 || w === 0) { weekend.push(wd); if (w === 0) break; }
+      if (live) {
+        for (var wi = DAYS.indexOf(todayKey); wi < DAYS.length; wi++) {
+          var w = dow(DAYS[wi]);
+          if (w === 5 || w === 6 || w === 0) { weekend.push(DAYS[wi]); if (w === 0) break; }
         }
       }
 
@@ -1031,8 +1049,7 @@
       }
       function showSlug(s) {
         var m = /^(\d+):(\d+)\s*(AM|PM)/i.exec(s[1] || "");
-        var mm = MONTH + 1;
-        return [YEAR + "-" + (mm < 10 ? "0" : "") + mm + "-" + (s[0] < 10 ? "0" : "") + s[0], slugPart(s[2], 30), slugPart(s[3].split(",")[0], 30),
+        return [s[0], slugPart(s[2], 30), slugPart(s[3].split(",")[0], 30),
           m ? parseInt(m[1], 10) + m[2] + m[3].toLowerCase() : "tba"].join("-");
       }
       function ageLabel(a) { return a === "AA" ? "All Ages" : (a ? a + "+" : ""); }
@@ -1055,8 +1072,11 @@
       function $(id) { return document.getElementById(id); }
 
       /* ---------- data prep ---------- */
+      function byDate(a, b) {
+        return (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0) || timeKey(a[1]) - timeKey(b[1]) || a.i - b.i;
+      }
       SHOWS.forEach(function (s, i) { s.i = i; });
-      SHOWS.sort(function (a, b) { return a[0] - b[0] || timeKey(a[1]) - timeKey(b[1]) || a.i - b.i; });
+      SHOWS.sort(byDate);
       // Page names, for the rows in shows-data.js only (those have a page).
       // A row that would repeat an earlier name gets -2, -3 ...
       var slugCount = {};
@@ -1069,7 +1089,7 @@
          (see "shows sent in by bands" near the end). */
       var VENUE_SET = {}, NYC_TOTAL = 0;
       function prep() {
-        SHOWS.sort(function (a, b) { return a[0] - b[0] || timeKey(a[1]) - timeKey(b[1]) || a.i - b.i; });
+        SHOWS.sort(byDate);
         VENUE_SET = {};
         SHOWS.forEach(function (s, i) {
           s.i = i;
@@ -1084,10 +1104,30 @@
       prep();
 
       /* ---------- saved shows (this browser only) ---------- */
-      var SAVE_KEY = "smn-saved-" + YEAR + "-" + (MONTH + 1);
+      /* Keys are date|venue|time|first 40 characters of the bill; the show
+         pages (tools/build_pages.py, pages.js) use the same key and storage. */
+      var SAVE_KEY = "smn-saved";
       var saved = {};
       try {
         (JSON.parse(localStorage.getItem(SAVE_KEY)) || []).forEach(function (k) { saved[k] = 1; });
+        /* Saves from before the rolling window lived under one key per month
+           ("smn-saved-2026-10") with the day number first; move them over. */
+        var oldKeys = [];
+        for (var li = 0; li < localStorage.length; li++) {
+          var lk = localStorage.key(li), lm = /^smn-saved-(\d{4})-(\d{1,2})$/.exec(lk || "");
+          if (!lm) continue;
+          oldKeys.push(lk);
+          (JSON.parse(localStorage.getItem(lk)) || []).forEach(function (v) {
+            var p = String(v).split("|"), d = parseInt(p[0], 10);
+            if (!(d >= 1 && d <= 31)) return;
+            p[0] = lm[1] + "-" + pad(+lm[2]) + "-" + pad(d);
+            saved[p.join("|")] = 1;
+          });
+        }
+        if (oldKeys.length) {
+          localStorage.setItem(SAVE_KEY, JSON.stringify(Object.keys(saved)));
+          oldKeys.forEach(function (k) { localStorage.removeItem(k); });
+        }
       } catch (e) {}
       function persistSaved() {
         try { localStorage.setItem(SAVE_KEY, JSON.stringify(Object.keys(saved))); } catch (e) {}
@@ -1102,7 +1142,7 @@
         return { q: "", open: "any", area: "nyc", venue: "", when: "all", release: false, saved: false, near: false, club: false };
       }
       var state = defaults();
-      var showPast = !inMonth; // earlier dates stay folded while the month is running
+      var showPast = !live; // earlier dates stay folded while the window is running
       function isFiltering() {
         var d = defaults();
         for (var k in d) if (state[k] !== d[k]) return true;
@@ -1116,7 +1156,7 @@
         if (OPEN_TO[(v = p.get("open"))]) state.open = v;
         if (AREA_NAME[(v = p.get("area"))]) state.area = v;
         if (VENUE_SET[(v = p.get("venue"))]) state.venue = v;
-        if (inMonth && ((v = p.get("when")) === "tonight" || (v === "weekend" && weekend.length))) state.when = v;
+        if (live && ((v = p.get("when")) === "tonight" || (v === "weekend" && weekend.length))) state.when = v;
         if (p.get("release") === "1") state.release = true;
         if (p.get("saved") === "1") state.saved = true;
         if (p.get("club") === "1") state.club = true;
@@ -1193,36 +1233,42 @@
         var html = '<button class="past-toggle" id="pastToggle" hidden></button>';
         var byDay = {};
         SHOWS.forEach(function (s) { (byDay[s[0]] = byDay[s[0]] || []).push(s); });
-        for (var d = FIRST_DAY; d <= LAST_DAY; d++) {
+        DAYS.forEach(function (d, n) {
           var list = byDay[d] || [];
-          var past = todayKey > 0 && d < todayKey;
-          html += '<section class="day' + (d === todayKey ? " tonight" : "") + (past ? " past" : "") + '" id="day-' + d + '">';
-          html += '<div class="day-head"><h2>' + DOW[dow(d)] + " " + MON + " " + d + "</h2>";
-          html += '<span class="dnum">' + DOW3[dow(d)] + " · " + (MONTH + 1) + "/" + d + "/" + YEAR + "</span>";
+          var past = isPast(d);
+          // A new month inside the window gets a marker above its first day.
+          var newMonth = n > 0 && dnum(d) === 1;
+          html += '<section class="day' + (d === todayKey ? " tonight" : "") + (past ? " past" : "") + (newMonth ? " month-start" : "") + '" id="d-' + d + '">';
+          if (newMonth) html += '<p class="month-mark">' + MONTHS[+d.slice(5, 7) - 1] + " " + d.slice(0, 4) + "</p>";
+          html += '<div class="day-head"><h2>' + DOW[dow(d)] + " " + mon3(d) + " " + dnum(d) + "</h2>";
+          html += '<span class="dnum">' + DOW3[dow(d)] + " · " + (+d.slice(5, 7)) + "/" + dnum(d) + "/" + d.slice(0, 4) + "</span>";
           if (d === todayKey) html += '<span class="tonight-tag">Tonight</span>';
           else if (past) html += '<span class="past-tag">Already happened</span>';
           html += '<span class="count"></span></div><p class="no-shows" hidden></p>';
           html += list.map(showHtml).join("") + "</section>";
-        }
+        });
         html += '<div class="empty" id="emptyMsg" hidden>No shows match. Try clearing the filters.</div>';
         var main = $("days");
         main.innerHTML = html;
         rows = main.querySelectorAll("article.show");
         nearEls = main.querySelectorAll(".badge.near");
-        for (d = FIRST_DAY; d <= LAST_DAY; d++) {
-          var el = $("day-" + d);
+        secs = {};
+        DAYS.forEach(function (d) {
+          var el = $("d-" + d);
           secs[d] = {
-            el: el, total: (byDay[d] || []).length, past: todayKey > 0 && d < todayKey,
+            el: el, total: (byDay[d] || []).length, past: isPast(d),
             count: el.querySelector(".count"), none: el.querySelector(".no-shows")
           };
-        }
+        });
 
         // Day links: the strip (narrow screens) and the sidebar (wide screens).
+        // When the window spans months, each month's first link names the month.
         var links = "";
-        for (d = FIRST_DAY; d <= LAST_DAY; d++) {
-          links += '<a class="day' + (d === todayKey ? " today" : "") + (secs[d].past ? " past" : "") +
-            '" href="#day-' + d + '" data-day="' + d + '">' + DOW3[dow(d)] + " " + d + "</a>";
-        }
+        DAYS.forEach(function (d, n) {
+          var newMonth = MULTI && (n === 0 || dnum(d) === 1);
+          links += '<a class="day' + (d === todayKey ? " today" : "") + (secs[d].past ? " past" : "") + (newMonth && n > 0 ? " month-start" : "") +
+            '" href="#d-' + d + '" data-day="' + d + '">' + DOW3[dow(d)] + " " + (newMonth ? mon3(d) + " " : "") + dnum(d) + "</a>";
+        });
         $("strip").innerHTML = links;
         $("dayJump").innerHTML = links;
         dayLinks = document.querySelectorAll("a.day");
@@ -1237,13 +1283,13 @@
 
         // Masthead: one hook (tonight's count, linking to tonight) and one line of totals.
         var tonightInTown = SHOWS.filter(function (s) { return s[0] === todayKey && s.area !== "out"; }).length;
-        if (inMonth && tonightInTown) {
+        if (live && tonightInTown) {
           var hook = $("hook");
-          hook.href = "#day-" + todayKey;
+          hook.href = "#d-" + todayKey;
           hook.innerHTML = "<b>" + tonightInTown + "</b> " + (tonightInTown === 1 ? "show" : "shows") + ' tonight <span aria-hidden="true">↓</span>';
           hook.hidden = false;
         }
-        $("mastMeta").textContent = SHOWS.length + " shows · " + Object.keys(VENUE_SET).length + " venues · " + MONTHS[MONTH] + " " + YEAR;
+        $("mastMeta").textContent = SHOWS.length + " shows · " + Object.keys(VENUE_SET).length + " venues · " + monthsLabel();
 
         // Busiest venues (in town).
         var counts = {};
@@ -1254,7 +1300,7 @@
           return '<li><button class="venue-btn-side" data-venue="' + esc(v) + '">' + esc(v) + '</button><span class="n">' + counts[v] + "</span></li>";
         }).join("");
 
-        if (!inMonth) { $("tonightBtn").hidden = true; }
+        if (!live) { $("tonightBtn").hidden = true; }
         // On a Sunday "this weekend" is just tonight, so one chip is enough.
         if (!weekend.length || (weekend.length === 1 && weekend[0] === todayKey)) { $("weekendBtn").hidden = true; }
       }
@@ -1279,10 +1325,10 @@
         }
 
         var shown = 0, foldedShows = 0, foldedDays = 0, anyPast = false, visibleDays = 0;
-        for (var d = FIRST_DAY; d <= LAST_DAY; d++) {
-          var sec = secs[d], n = perDay[d] || 0;
+        for (var di = 0; di < DAYS.length; di++) {
+          var sec = secs[DAYS[di]], n = perDay[DAYS[di]] || 0;
           var visible = filtering ? n > 0 : true;
-          if (sec.past && inMonth) {
+          if (sec.past && live) {
             if (visible) anyPast = true;
             if (visible && !showPast) { foldedShows += n; foldedDays++; visible = false; }
           }
@@ -1317,7 +1363,7 @@
           if (state.near && userLoc) line += " · within " + NEAR_MILES + " mile of you";
           if (outMatches) line += " · " + outMatches + " more out of town";
         } else {
-          line = plural(NYC_TOTAL, "show", "shows") + " in NYC · " + MON + " " + FIRST_DAY + "–" + LAST_DAY + ", " + YEAR;
+          line = plural(NYC_TOTAL, "show", "shows") + " in NYC · " + rangeLabel();
           if (SHOWS.length > NYC_TOTAL) line += " · " + (SHOWS.length - NYC_TOTAL) + " out of town";
         }
         $("resultLine").textContent = line;
@@ -1329,8 +1375,7 @@
         $("icsInline").hidden = !(state.saved && shown > 0);
 
         for (i = 0; i < dayLinks.length; i++) {
-          var dd = parseInt(dayLinks[i].getAttribute("data-day"), 10);
-          dayLinks[i].classList.toggle("none", !secs[dd].n);
+          dayLinks[i].classList.toggle("none", !secs[dayLinks[i].getAttribute("data-day")].n);
         }
         updateCurrent();
       }
@@ -1359,7 +1404,7 @@
         $("savedEmpty").hidden = list.length > 0;
         $("icsBtn").hidden = !list.length;
         $("savedList").innerHTML = list.map(function (s) {
-          return '<li><a href="#day-' + s[0] + '">' + DOW3[dow(s[0])] + " " + s[0] + (s[1] ? " · " + esc(s[1]) : "") + "</a><span>" +
+          return '<li><a href="#d-' + s[0] + '">' + shortDay(s[0]) + (s[1] ? " · " + esc(s[1]) : "") + "</a><span>" +
             esc(s[3]) + " — " + esc(s[2]) + "</span></li>";
         }).join("");
       }
@@ -1384,25 +1429,25 @@
       function revealDay(d) {
         var sec = secs[d], changed = false;
         if (!sec) return;
-        if (sec.past && inMonth && !showPast) { showPast = true; changed = true; }
+        if (sec.past && live && !showPast) { showPast = true; changed = true; }
         var inWhen = state.when === "all" || (state.when === "tonight" ? d === todayKey : weekend.indexOf(d) !== -1);
         if (!inWhen) { state.when = "all"; changed = true; }
         if (changed) { syncControls(); apply(); writeUrl(); syncStickyHeight(); }
       }
       /* Highlight the day being read in the strip and the sidebar. */
-      var curDay = -1, ticking = false;
+      var curDay = null, ticking = false;
       function updateCurrent() {
-        var found = 0;
-        for (var d = FIRST_DAY; d <= LAST_DAY; d++) {
-          var el = secs[d].el;
+        var found = "";
+        for (var di = 0; di < DAYS.length; di++) {
+          var el = secs[DAYS[di]].el;
           if (el.hidden) continue;
-          if (el.getBoundingClientRect().top <= stickyH + 60) found = d; else break;
+          if (el.getBoundingClientRect().top <= stickyH + 60) found = DAYS[di]; else break;
         }
         if (found === curDay) return;
         curDay = found;
         var strip = $("strip");
         for (var i = 0; i < dayLinks.length; i++) {
-          var a = dayLinks[i], on = parseInt(a.getAttribute("data-day"), 10) === found;
+          var a = dayLinks[i], on = a.getAttribute("data-day") === found;
           if (on) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current");
           if (on && a.parentNode === strip && a.offsetWidth) {
             strip.scrollLeft = a.offsetLeft - (strip.clientWidth - a.offsetWidth) / 2;
@@ -1443,7 +1488,7 @@
         var left = {}, all = {};
         SHOWS.forEach(function (s) {
           all[s[2]] = (all[s[2]] || 0) + 1;
-          if (!inMonth || s[0] >= todayKey) left[s[2]] = (left[s[2]] || 0) + 1;
+          if (!live || s[0] >= todayKey) left[s[2]] = (left[s[2]] || 0) + 1;
         });
         var names = Object.keys(all).filter(function (v) {
           return typed ? fold(v).indexOf(typed) !== -1 : left[v];
@@ -1618,12 +1663,11 @@
 
       // Day links: unfold or unfilter the day first, then let the link jump.
       document.addEventListener("click", function (e) {
-        var a = e.target.closest('a[href^="#day-"]');
-        if (a) revealDay(parseInt(a.getAttribute("href").slice(5), 10));
+        var a = e.target.closest('a[href^="#d-"], a[href^="#day-"]');
+        if (a) revealDay(hashDay(a.getAttribute("href")));
       });
 
       /* ---------- calendar export ---------- */
-      function pad(n) { return (n < 10 ? "0" : "") + n; }
       function ymd(dt) { return dt.getFullYear() + pad(dt.getMonth() + 1) + pad(dt.getDate()); }
       function icsText(t) {
         return String(t).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
@@ -1638,10 +1682,11 @@
         var stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
         var L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Show Me NYC//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH"];
         list.forEach(function (s) {
-          var tk = timeKey(s[1]), dt = new Date(YEAR, MONTH, s[0]);
-          L.push("BEGIN:VEVENT", "UID:smn-" + YEAR + pad(MONTH + 1) + pad(s[0]) + "-" + s.i + "@show-me-nyc", "DTSTAMP:" + stamp);
+          var y = +s[0].slice(0, 4), mo = +s[0].slice(5, 7) - 1, dy = dnum(s[0]);
+          var tk = timeKey(s[1]), dt = new Date(y, mo, dy);
+          L.push("BEGIN:VEVENT", "UID:smn-" + s[0].replace(/-/g, "") + "-" + s.i + "@show-me-nyc", "DTSTAMP:" + stamp);
           if (tk === 99999) {
-            var next = new Date(YEAR, MONTH, s[0] + 1);
+            var next = new Date(y, mo, dy + 1);
             L.push("DTSTART;VALUE=DATE:" + ymd(dt), "DTEND;VALUE=DATE:" + ymd(next));
           } else {
             if (tk >= 1440) { dt.setDate(dt.getDate() + 1); tk -= 1440; } // after-midnight set
@@ -1665,7 +1710,7 @@
         var url = URL.createObjectURL(new Blob([buildIcs(list)], { type: "text/calendar;charset=utf-8" }));
         var a = document.createElement("a");
         a.href = url;
-        a.download = "show-me-nyc-" + MONTHS[MONTH].toLowerCase() + "-" + YEAR + ".ics";
+        a.download = "show-me-nyc-" + slugify(monthsLabel()) + ".ics";
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -1673,27 +1718,36 @@
       });
 
       /* ---------- start ---------- */
-      /* Where to land: a #day-N link wins (so shared links work); with no
+      /* A day link's date: #d-YYYY-MM-DD, or an old #day-N (from when the
+         list held October 2026 only), which means October N, 2026. */
+      function hashDay(h) {
+        var m = /^#d-(\d{4}-\d{2}-\d{2})$/.exec(h || "");
+        if (m) return m[1];
+        m = /^#day-(\d{1,2})$/.exec(h || "");
+        return m ? "2026-10-" + pad(parseInt(m[1], 10)) : "";
+      }
+      /* Where to land: a day link wins (so shared links work); with no
          link, go to today. The hash is never rewritten. */
       function landingDay() {
-        var m = /^#day-(\d+)$/.exec(location.hash);
-        var d = m ? parseInt(m[1], 10) : 0;
-        if (d >= FIRST_DAY && d <= LAST_DAY) return d;
-        return inMonth ? todayKey : 0;
+        var d = hashDay(location.hash);
+        if (secs[d]) return d;
+        return live ? todayKey : "";
       }
       function goToLanding() {
         syncStickyHeight();
         var d = landingDay();
         if (!d) return;
-        if (/^#day-/.test(location.hash)) revealDay(d);
+        if (hashDay(location.hash)) revealDay(d);
         if (!secs[d].el.hidden) jumpTo(secs[d].el);
       }
 
       build();
       readUrl();
       if (state.saved) showPast = true;
-      if (!inMonth && todayKey > 0) {
-        $("staleNote").textContent = "These are the " + MONTHS[MONTH] + " " + YEAR + " listings — that month is over, so every show below has already happened.";
+      if (!live && todayKey !== "") {
+        $("staleNote").textContent = MULTI
+          ? "These are the " + monthsLabel() + " listings — those dates are over, so every show below has already happened."
+          : "These are the " + monthsLabel() + " listings — that month is over, so every show below has already happened.";
         $("staleNote").hidden = false;
       }
       syncControls();
@@ -1720,12 +1774,11 @@
           have[firstActKey(s[0], s[2], s[3])] = 1;
           byLower[s[2].toLowerCase()] = s[2];
         });
-        var mm = YEAR + "-" + pad(MONTH + 1) + "-";
         (list || []).forEach(function (r) {
-          if (!r || typeof r.night !== "string" || r.night.slice(0, 8) !== mm) return;
-          var day = parseInt(r.night.slice(8, 10), 10);
+          if (!r || typeof r.night !== "string") return;
+          var day = r.night.slice(0, 10);
           var venue = String(r.venue || "").trim(), acts = String(r.acts || "").trim();
-          if (!(day >= FIRST_DAY && day <= LAST_DAY) || !venue || !acts) return;
+          if (!secs[day] || !venue || !acts) return;
           venue = byLower[venue.toLowerCase()] || venue;
           var k = firstActKey(day, venue, acts);
           if (have[k]) return;
@@ -1762,15 +1815,14 @@
             }
           }
         }
-        curDay = -1; // the day links were redrawn
+        curDay = null; // the day links were redrawn
         updateCurrent();
       }
       (function () {
         var C = typeof CONNECTIONS_META === "undefined" ? null : CONNECTIONS_META;
         if (!C || !C.supabaseUrl || !C.supabaseKey || !window.fetch) return;
-        var mm = YEAR + "-" + pad(MONTH + 1) + "-";
         fetch(C.supabaseUrl.replace(/\/+$/, "") + "/rest/v1/submitted_shows?select=id,night,start_time,venue,acts,note,age,ticket_url" +
-          "&approved=is.true&night=gte." + mm + "01&night=lte." + mm + pad(LAST_DAY) + "&order=night.asc,id.asc&limit=300",
+          "&approved=is.true&night=gte." + FROM + "&night=lte." + TO + "&order=night.asc,id.asc&limit=300",
           { headers: { apikey: C.supabaseKey, Authorization: "Bearer " + C.supabaseKey } })
           .then(function (r) { return r.ok ? r.json() : []; })
           .then(addSubmitted)

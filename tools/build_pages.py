@@ -15,12 +15,12 @@ sitemap.xml carries a <lastmod> per page. tools/lastmod.json remembers a
 hash of each page and the day it last changed, so a rebuild that changes
 nothing leaves every date alone.
 
-Show pages are permanent links. Only the pages for the month in
-shows-data.js are rebuilt (so a cancelled show's page disappears); pages
-from earlier months are left exactly where they are, and their "already
+Show pages are permanent links. Only the pages dated inside the window
+(SHOW_META.from to SHOW_META.to) are rebuilt, so a cancelled show's page
+disappears; pages dated outside it are never touched, and their "already
 happened" note is switched on by pages.js from the date on the page.
 Venue pages are rewritten for every venue in the current data; a venue page
-with no shows this month is left in place so older show pages still link.
+with no shows in the window is left in place so older show pages still link.
 
 The show slug is built from the row alone (full date, venue, first act,
 time), with -2, -3 ... added when two rows would share a name, in list
@@ -81,9 +81,35 @@ def load():
     shows = json.loads(re.sub(r",\s*\]$", "]", js_block(src, "SHOWS", "[", "]").strip()))
     geo = json.loads(js_block(src, "GEO", "{", "}"))
     area = json.loads(js_block(src, "AREA", "{", "}"))
-    year = int(re.search(r"\byear:\s*(\d+)", src).group(1))
-    month = int(re.search(r"\bmonth:\s*(\d+)", src).group(1))
-    return shows, geo, area, year, month
+    return shows, geo, area, *window(src)
+
+
+def window(src=None):
+    """(from, to) dates of the listings, from SHOW_META in shows-data.js."""
+    src = src if src is not None else DATA.read_text(encoding="utf8")
+    meta = src[src.index("var SHOW_META"):]
+    frm = re.search(r'\bfrom:\s*"(\d{4}-\d{2}-\d{2})"', meta).group(1)
+    to = re.search(r'\bto:\s*"(\d{4}-\d{2}-\d{2})"', meta).group(1)
+    return date.fromisoformat(frm), date.fromisoformat(to)
+
+
+def window_months(frm, to):
+    """Every (year, month) the window touches, in order."""
+    out, y, m = [], frm.year, frm.month
+    while (y, m) <= (to.year, to.month):
+        out.append((y, m))
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    return out
+
+
+def window_label(frm, to, with_year=True):
+    """'October 2026' for one month, 'Oct–Nov 2026' (or 'Dec 2026–Jan 2027') for more."""
+    if (frm.year, frm.month) == (to.year, to.month):
+        return MONTHS[frm.month - 1] + (f" {frm.year}" if with_year else "")
+    a, b = MONTHS[frm.month - 1][:3], MONTHS[to.month - 1][:3]
+    if not with_year:
+        return f"{a}–{b}"
+    return f"{a}–{b} {to.year}" if frm.year == to.year else f"{a} {frm.year}–{b} {to.year}"
 
 
 def load_venues():
@@ -119,27 +145,26 @@ def time_slug(t):
     return f"{int(m[1])}{m[2]}{m[3].lower()}" if m else "tba"
 
 
-def show_slug(s, year, month):
+def show_slug(s):
     return "-".join([
-        f"{year}-{month:02d}-{s[DAY]:02d}",
-        part(s[VENUE], 30), part(s[ACTS].split(",")[0], 30), time_slug(s[TIME]),
+        s[DAY], part(s[VENUE], 30), part(s[ACTS].split(",")[0], 30), time_slug(s[TIME]),
     ])
 
 
-def unique_slugs(shows, year, month):
+def unique_slugs(shows):
     """One slug per row, in list order; repeats get -2, -3, ... (same rule as index.html)."""
     count, out = {}, []
     for s in shows:
-        base = show_slug(s, year, month)
+        base = show_slug(s)
         count[base] = count.get(base, 0) + 1
         out.append(base if count[base] == 1 else f"{base}-{count[base]}")
     return out
 
 
-def legacy_slug(s, month):
+def legacy_slug(s, d):
     """The first scheme, live for part of Oct 4, 2026: no year, month by name."""
     return "-".join([
-        MONTHS[month - 1][:3].lower(), f"{s[DAY]:02d}",
+        MONTHS[d.month - 1][:3].lower(), f"{d.day:02d}",
         part(s[VENUE], 30), part(s[ACTS].split(",")[0], 30), time_slug(s[TIME]),
     ])
 
@@ -328,8 +353,9 @@ END = """    </div>
 """
 
 
-def row_li(s, slug, d, with_date=True, with_venue=False):
-    when = (f"{DOW[d.weekday()][:3]} {s[DAY]} · " if with_date else "") + (s[TIME] or "Time TBA")
+def row_li(s, slug, d, with_date=True, with_venue=False, with_month=False):
+    day = f"{MONTHS[d.month - 1][:3]} {d.day}" if with_month else str(d.day)
+    when = (f"{DOW[d.weekday()][:3]} {day} · " if with_date else "") + (s[TIME] or "Time TBA")
     extra = f'<span class="v">{esc(s[VENUE])}</span>' if with_venue else ""
     age = f'<span class="badge">{esc(age_label(s[AGE]))}</span>' if s[AGE] else ""
     return (f'          <li data-date="{d.isoformat()}"><a href="../shows/{slug}.html">'
@@ -337,12 +363,18 @@ def row_li(s, slug, d, with_date=True, with_venue=False):
 
 
 def build():
-    shows, geo, area, year, month = load()
+    shows, geo, area, frm, to = load()
     venues = load_venues()
-    mon = MONTHS[month - 1]
+    label = window_label(frm, to)
+    multi = len(window_months(frm, to)) > 1
+    outside = [s for s in shows if not frm.isoformat() <= s[DAY] <= to.isoformat()]
+    if outside:
+        print(f"WARNING: {len(outside)} rows fall outside {frm}–{to} and get no page "
+              f"(first: {outside[0][DAY]} {outside[0][VENUE]})", file=sys.stderr)
+        shows = [s for s in shows if s not in outside]
     shows.sort(key=sort_key)
 
-    slugs = unique_slugs(shows, year, month)
+    slugs = unique_slugs(shows)
     astral = [s[ACTS] for s in shows if any(ord(c) > 0xFFFF for c in s[ACTS][:40])]
     if astral:
         print(f"WARNING: {len(astral)} bills start with emoji-range characters; saved-show keys may not match", file=sys.stderr)
@@ -360,22 +392,25 @@ def build():
 
     (ROOT / "shows").mkdir(exist_ok=True)
     (ROOT / "venues").mkdir(exist_ok=True)
-    # Clear only this month's show pages; earlier months are permanent.
-    prefix = f"{year}-{month:02d}-"
-    for old in (ROOT / "shows").glob(prefix + "*.html"):
-        old.unlink()
+    # Clear only show pages dated inside the window; every other page is permanent.
+    for y, m in window_months(frm, to):
+        for old in (ROOT / "shows").glob(f"{y}-{m:02d}-*.html"):
+            if frm.isoformat() <= old.name[:10] <= to.isoformat():
+                old.unlink()
 
-    save_key = f"smn-saved-{year}-{month}"
+    # Same storage key and show key as index.html, so saving is shared.
+    save_key = "smn-saved"
     today = today_ny()
 
     # ----- show pages -----
     written, redirects = set(), {}
     for s, sl in zip(shows, slugs):
         written.add(sl)
-        d = date(year, month, s[DAY])
+        d = date.fromisoformat(s[DAY])
+        mon = MONTHS[d.month - 1]
         ar = area.get(s[VENUE], "")
-        when = f"{DOW[d.weekday()]} {mon[:3]} {s[DAY]}" + (f" · {s[TIME]}" if s[TIME] else "")
-        when_short = f"{DOW[d.weekday()][:3]} {mon[:3]} {s[DAY]}" + (f", {s[TIME]}" if s[TIME] else "")
+        when = f"{DOW[d.weekday()]} {mon[:3]} {d.day}" + (f" · {s[TIME]}" if s[TIME] else "")
+        when_short = f"{DOW[d.weekday()][:3]} {mon[:3]} {d.day}" + (f", {s[TIME]}" if s[TIME] else "")
         title = f"{short_bill(s[ACTS])} at {s[VENUE]} — {when_short}"
         bits = [b for b in (age_label(s[AGE]), AREA_NAME.get(ar, ""), s[NOTE]) if b]
         desc = " · ".join(bits + ["Tickets, map and what else is on that night."])
@@ -420,7 +455,7 @@ def build():
               f'data-save-key="{save_key}" data-show-key="{esc(key)}" data-cal-start="{cal_start}" '
               f'data-cal-title="{esc(s[ACTS] + " at " + s[VENUE])}" data-cal-venue="{esc(s[VENUE])}" '
               f'data-cal-desc="{esc(cal_desc)}" data-cal-file="{sl}.ics">\n')
-        h += TOP.format(back=f"../#day-{s[DAY]}", back_label="← All shows")
+        h += TOP.format(back=f"../#d-{s[DAY]}", back_label="← All shows")
         h += "      <main>\n"
         h += f'        <p class="when">{esc(when)}</p>\n        <h1>{esc(s[ACTS])}</h1>\n'
         where = f'<a class="venue" href="../venues/{vslug[s[VENUE]]}.html">{esc(s[VENUE])}</a>'
@@ -467,7 +502,7 @@ def build():
         if later:
             h += f'        <section>\n          <h2>Next at {esc(s[VENUE])}</h2>\n          <ul class="rows">\n'
             for o, osl in later:
-                h += row_li(o, osl, date(year, month, o[DAY])).replace("          <li", "            <li")
+                h += row_li(o, osl, date.fromisoformat(o[DAY]), with_month=multi).replace("          <li", "            <li")
             h += f'          </ul>\n          <a class="more" href="../venues/{vslug[s[VENUE]]}.html">All shows at {esc(s[VENUE])} →</a>\n        </section>\n'
         else:
             h += (f'        <section>\n          <a class="more" href="../venues/{vslug[s[VENUE]]}.html">'
@@ -485,9 +520,9 @@ def build():
               'Were you there? Read or leave a missed connection →</a>\n')
         h += "      </main>\n" + END
         (ROOT / "shows" / f"{sl}.html").write_text(h, encoding="utf8")
-        if (year, month) in LEGACY_MONTHS:
+        if (d.year, d.month) in LEGACY_MONTHS:
             # First row wins if two rows shared an old address, as it did then.
-            redirects.setdefault(legacy_slug(s, month), (sl, title, desc))
+            redirects.setdefault(legacy_slug(s, d), (sl, title, desc))
 
     # ----- redirect pages for addresses shared under the first scheme -----
     for old, (new, title, desc) in redirects.items():
@@ -498,8 +533,8 @@ def build():
     for v, items in by_venue.items():
         ar = area.get(v, "")
         n = len(items)
-        title = f"{v} — shows in {mon} {year}"
-        desc = f"{n} show{'s' if n != 1 else ''} at {v} in {mon} {year}" + (f" · {AREA_NAME[ar]}" if ar else "") + ". Times, tickets and what's on each night."
+        title = f"{v} — shows in {label}"
+        desc = f"{n} show{'s' if n != 1 else ''} at {v} in {label}" + (f" · {AREA_NAME[ar]}" if ar else "") + ". Times, tickets and what's on each night."
         url = f"{SITE}venues/{vslug[v]}.html"
         vinfo = venues.get(v, {})
         ld = {"@context": "https://schema.org", "@type": "MusicVenue", "name": v, "url": url}
@@ -511,7 +546,7 @@ def build():
             ld["geo"] = {"@type": "GeoCoordinates", "latitude": geo[v][0], "longitude": geo[v][1]}
         upcoming = []
         for o, osl in items:
-            od = date(year, month, o[DAY])
+            od = date.fromisoformat(o[DAY])
             if od < today:
                 continue
             ev = {"@type": "MusicEvent", "name": o[ACTS], "startDate": start_iso(od, o[TIME]),
@@ -526,13 +561,13 @@ def build():
         if ar:
             h += f'        <p class="when">{AREA_NAME[ar]}</p>\n'
         h += f"        <h1>{esc(v)}</h1>\n"
-        where = f'<span id="venueCount">{n} show{"s" if n != 1 else ""} in {mon}</span>'
+        where = f'<span id="venueCount">{n} show{"s" if n != 1 else ""} in {window_label(frm, to, with_year=False)}</span>'
         if v in geo and ar:
             where = f'<a class="map" href="{esc(map_url(v, ar))}" target="_blank" rel="noopener">Map</a> ' + where
         h += f'        <p class="where">{where}</p>\n'
         h += '        <section>\n          <h2 id="venueHead">Shows</h2>\n          <ul class="rows" id="venueRows">\n'
         for o, osl in items:
-            h += row_li(o, osl, date(year, month, o[DAY])).replace("          <li", "            <li")
+            h += row_li(o, osl, date.fromisoformat(o[DAY]), with_month=multi).replace("          <li", "            <li")
         h += '          </ul>\n          <button class="more as-btn" id="earlierBtn" hidden></button>\n        </section>\n'
         h += "      </main>\n" + END
         (ROOT / "venues" / f"{vslug[v]}.html").write_text(h, encoding="utf8")
@@ -544,12 +579,12 @@ def build():
     lk += " · ".join(f'<a href="venues/{vslug[v]}.html">{esc(v)}</a>'
                      for v in sorted(vslug, key=lambda n: slugify(n)))
     lk += "</p>\n        </details>\n"
-    days = [(wd, by_day.get(wd.day, [])) for wd in week if (wd.year, wd.month) == (year, month)]
+    days = [(wd, by_day.get(wd.isoformat(), [])) for wd in week if frm <= wd <= to]
     days = [(wd, rows) for wd, rows in days if rows]
     if days:
         lk += "        <details>\n          <summary>Show pages for the next 7 days</summary>\n"
         for wd, rows in days:
-            lk += f"          <h3>{DOW[wd.weekday()]} {mon[:3]} {wd.day}</h3>\n          <ul>\n"
+            lk += f"          <h3>{DOW[wd.weekday()]} {MONTHS[wd.month - 1][:3]} {wd.day}</h3>\n          <ul>\n"
             for o, osl in rows:
                 lk += (f'            <li><a href="shows/{osl}.html">{esc(o[ACTS])} at {esc(o[VENUE])}'
                        f'{(" · " + esc(o[TIME])) if o[TIME] else ""}</a></li>\n')
@@ -574,7 +609,7 @@ def build():
         + "".join(f"  <url><loc>{esc(u)}</loc><lastmod>{mod[p]}</lastmod></url>\n" for u, p in pages)
         + "</urlset>\n", encoding="utf8")
 
-    print(f"pages: {len(written)} shows this month ({len(all_shows)} in all), {len(vslug)} venues, {len(redirects)} redirects")
+    print(f"pages: {len(written)} shows {frm}–{to} ({len(all_shows)} in all), {len(vslug)} venues, {len(redirects)} redirects")
     return written, vslug
 
 
