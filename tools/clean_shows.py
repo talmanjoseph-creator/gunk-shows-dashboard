@@ -34,6 +34,7 @@ VENUE_ALIASES = {
     "Gutter Bar": "The Gutter",
     "Rough Trade": "Rough Trade NYC",
     "Footlight Underground at The Windjammer": "Windjammer",
+    "99 Scott - Dedro, Shankz, Matty Chiuch": "99 Scott",
 }
 # Note to add when an alias carried information the canonical name drops.
 ALIAS_NOTES = {"Footlight Underground at The Windjammer": "Footlight Underground presents"}
@@ -50,6 +51,7 @@ AREA_OVERRIDES = {
     "UBS Arena": "out",  # Elmont, just over the Nassau line
     "Sleepwalk": "bush",  # Bushwick Ave, a block inside the Williamsburg box
     "Venue TBA": "",  # placeholder coordinates, not a real location
+    "Brothers Wash and Dry": "qns",  # Maspeth, just over the Queens line
 }
 
 
