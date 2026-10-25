@@ -400,13 +400,6 @@
         text-align: center;
       }
 
-      /* ---------- footer ---------- */
-      footer.colophon {
-        margin-top: 34px; border-top: 2px solid var(--line); padding-top: 14px;
-        font-family: var(--mono); font-size: 12px; color: var(--muted);
-      }
-      footer.colophon a { color: var(--accent); }
-
       @media (max-width: 560px) {
         .brand-mini { flex: 1 1 auto; }
         .ctl-row > .chip { padding: 0 11px; }
@@ -659,8 +652,6 @@
           <ul class="venue-list" id="venueList"></ul>
         </aside>
       </div>
-
-      <footer class="colophon" id="colophon"></footer>
     </div>
 
     <a class="mc-tab" id="mcTabLink" href="missed-connections.html">Missed connections</a>
@@ -973,8 +964,6 @@
             return '<button class="chip" data-area="' + a[0] + '" aria-pressed="false">' + a[1] + "</button>";
           }).join("");
 
-        // Masthead and footer.
-        var G = SHOW_META.gunk, O = SHOW_META.other;
         // Masthead: one hook (tonight's count, linking to tonight) and one line of totals.
         var tonightInTown = SHOWS.filter(function (s) { return s[0] === todayKey && s.area !== "out"; }).length;
         if (inMonth && tonightInTown) {
@@ -984,8 +973,6 @@
           hook.hidden = false;
         }
         $("mastMeta").textContent = SHOWS.length + " shows · " + Object.keys(VENUE_SET).length + " venues · " + MONTHS[MONTH] + " " + YEAR;
-        $("colophon").innerHTML = 'Sources: <a href="' + esc(G.url) + '" target="_blank" rel="noopener">GUNK New York</a>, <a href="' + esc(O.url) +
-          '" target="_blank" rel="noopener">' + esc(O.name) + "</a>, venue calendars and <a href=\"submit.html\">shows sent in by bands</a>. Listings can change — check the venue before you head out. <a href=\"missed-connections.html\">Missed connections</a>.";
 
         // Busiest venues (in town).
         var counts = {};

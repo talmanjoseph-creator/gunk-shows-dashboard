@@ -67,11 +67,7 @@ def load():
     area = json.loads(js_block(src, "AREA", "{", "}"))
     year = int(re.search(r"\byear:\s*(\d+)", src).group(1))
     month = int(re.search(r"\bmonth:\s*(\d+)", src).group(1))
-    gunk_url = re.search(r"gunk:\s*\{.*?url:\s*\"([^\"]+)\"", src, re.S).group(1)
-    other = re.search(r"other:\s*\{(.*?)\}", src, re.S).group(1)
-    other_name = re.search(r"name:\s*\"([^\"]+)\"", other).group(1)
-    other_url = re.search(r"url:\s*\"([^\"]+)\"", other).group(1)
-    return shows, geo, area, year, month, gunk_url, other_name, other_url
+    return shows, geo, area, year, month
 
 
 # ---------- slugs (keep in step with showSlug() / slugify() in index.html) ----------
@@ -243,11 +239,7 @@ TOP = """    <div class="wrap">
 """
 
 
-def footer(gunk_url, other_name, other_url):
-    return f"""      <footer class="colophon">
-        Sources: <a href="{esc(gunk_url)}" target="_blank" rel="noopener">GUNK New York</a>, <a href="{esc(other_url)}" target="_blank" rel="noopener">{esc(other_name)}</a> and venue calendars. Listings can change — check the venue before you head out.
-      </footer>
-    </div>
+END = """    </div>
     <script src="../pages.js"></script>
   </body>
 </html>
@@ -263,7 +255,7 @@ def row_li(s, slug, d, with_date=True, with_venue=False):
 
 
 def build():
-    shows, geo, area, year, month, gunk_url, other_name, other_url = load()
+    shows, geo, area, year, month = load()
     mon = MONTHS[month - 1]
     shows.sort(key=sort_key)
 
@@ -290,7 +282,6 @@ def build():
     for old in (ROOT / "shows").glob(prefix + "*.html"):
         old.unlink()
 
-    foot = footer(gunk_url, other_name, other_url)
     save_key = f"smn-saved-{year}-{month}"
 
     # ----- show pages -----
@@ -398,7 +389,7 @@ def build():
         mc_q = f"show={sl}&venue={quote(s[VENUE])}&night={d.isoformat()}"
         h += (f'        <a class="mc-link" id="mcLink" href="../missed-connections.html?{esc(mc_q)}" hidden>'
               'Were you there? Read or leave a missed connection →</a>\n')
-        h += "      </main>\n" + foot
+        h += "      </main>\n" + END
         (ROOT / "shows" / f"{sl}.html").write_text(h, encoding="utf8")
         if (year, month) in LEGACY_MONTHS:
             # First row wins if two rows shared an old address, as it did then.
@@ -429,7 +420,7 @@ def build():
         for o, osl in items:
             h += row_li(o, osl, date(year, month, o[DAY])).replace("          <li", "            <li")
         h += '          </ul>\n          <button class="more as-btn" id="earlierBtn" hidden></button>\n        </section>\n'
-        h += "      </main>\n" + foot
+        h += "      </main>\n" + END
         (ROOT / "venues" / f"{vslug[v]}.html").write_text(h, encoding="utf8")
 
     # ----- sitemap -----
