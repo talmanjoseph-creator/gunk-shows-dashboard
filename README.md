@@ -31,7 +31,8 @@ Live at https://showmenyc.nyc/
 
 Every show has its own page in `shows/` and every venue in `venues/`. They are generated files: do not edit them by hand.
 
-- `tools/build_pages.py` writes them (plus `sitemap.xml`) from `shows-data.js`. `tools/clean_shows.py` runs it for you at the end, so one command keeps data and pages in step.
+- `tools/build_pages.py` writes them (plus `sitemap.xml` and the plain venue and this-week links between the `static-links` markers in `index.html`) from `shows-data.js`. `tools/clean_shows.py` runs it for you at the end, so one command keeps data and pages in step.
+- `tools/venues.json` holds each venue's street address and website, keyed by the venue name exactly as it appears in the data. When a new venue shows up, add it there once its address is confirmed on the venue's own site or Google Maps; until then its pages simply carry no address. `tools/lastmod.json` is written by the build to keep sitemap dates steady; commit it with the pages.
 - `pages.css` and `pages.js` are the shared styles and behavior for those pages. `404.html` is shown for a show link that no longer exists.
 - The main list links each show to `shows/<slug>.html`. The slug starts with the full date (`2026-10-09-babys-all-right-cardinal-bloom-630pm`) and is computed twice: `show_slug()` and `unique_slugs()` in `tools/build_pages.py`, and `showSlug()` plus the slug loop in `index.html`. Two rows that would share a name get `-2`, `-3` in list order. Change one side and you must change the other.
 - **Show links are permanent.** The generator only rebuilds the pages for the month in `shows-data.js`; pages from earlier months stay where they are so shared links keep working.
