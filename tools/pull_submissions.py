@@ -11,20 +11,21 @@ button once they are rows in shows-data.js. This script copies them over.
 
 It reads with the public key from connections-data.js, so it can only see
 approved rows and never sees a contact email. It does not change anything in
-the database. Rows are added with source "sub". A show that is already in the
-list (same day, venue and first act) is skipped.
+the database. It pulls every approved night from SHOW_META.from to
+SHOW_META.to. Rows are added with source "sub". A show that is already in the
+list (same date, venue and first act) is skipped.
 """
 import json
 import re
 import sys
 import urllib.request
-from calendar import monthrange
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "shows-data.js"
 SETTINGS = ROOT / "connections-data.js"
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import build_pages  # noqa: E402
 import clean_shows  # noqa: E402
 
 TIME_RE = re.compile(r"^(1[0-2]|[1-9]):[0-5][0-9] (AM|PM)$")
@@ -38,11 +39,10 @@ def key(day, venue, acts):
     return (day, norm(clean_shows.canon_venue(venue)), norm(acts.split(",")[0]))
 
 
-def fetch(base, api_key, year, month):
-    last = monthrange(year, month)[1]
+def fetch(base, api_key, frm, to):
     query = (
         "select=id,night,start_time,venue,acts,note,age,ticket_url"
-        f"&approved=is.true&night=gte.{year}-{month:02d}-01&night=lte.{year}-{month:02d}-{last:02d}"
+        f"&approved=is.true&night=gte.{frm.isoformat()}&night=lte.{to.isoformat()}"
         "&order=night.asc,id.asc&limit=1000"
     )
     req = urllib.request.Request(
@@ -55,9 +55,8 @@ def fetch(base, api_key, year, month):
 
 def to_row(r):
     """A database row as a shows-data.js row, or None if it is not usable."""
-    try:
-        day = int(str(r["night"])[8:10])
-    except (KeyError, ValueError):
+    day = str(r.get("night") or "")[:10]
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", day):
         return None
     venue = clean_shows.canon_venue(" ".join(str(r.get("venue") or "").split()))
     acts = " ".join(str(r.get("acts") or "").split())
@@ -87,8 +86,7 @@ def main():
         print("Supabase is not set in connections-data.js; nothing to pull.")
         return 0
     src = DATA.read_text(encoding="utf8")
-    year = int(re.search(r"\byear:\s*(\d+)", src).group(1))
-    month = int(re.search(r"\bmonth:\s*(\d+)", src).group(1))
+    frm, to = build_pages.window(src)
     start = src.index("var SHOWS = [") + len("var SHOWS = ")
     end = src.index("\n];", start) + 2
     shows = json.loads(re.sub(r",\s*\]$", "]", src[start:end].strip()))
@@ -96,7 +94,7 @@ def main():
 
     added = []
     try:
-        found = fetch(base, api_key, year, month)
+        found = fetch(base, api_key, frm, to)
     except OSError as e:  # includes HTTP and network errors
         print(f"Couldn't read the sent-in shows ({e}). Nothing changed.")
         return 1
@@ -110,7 +108,7 @@ def main():
             continue
         have.add(k)
         added.append(row)
-        print(f"  + {month}/{row[0]} {row[1] or 'no time'} · {row[2]} · {row[3][:60]}")
+        print(f"  + {row[0]} {row[1] or 'no time'} · {row[2]} · {row[3][:60]}")
     if not added:
         print("No new approved shows to add.")
         return 0

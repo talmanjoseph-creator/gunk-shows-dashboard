@@ -53,13 +53,34 @@
   if (body.getAttribute("data-date") <= today && $("mcLink")) $("mcLink").hidden = false;
   if (body.getAttribute("data-date") < today) {
     $("pastNote").hidden = false;
-    // The list may have moved on to another month; don't jump to a day there.
+    // The list may have dropped that date by now; don't jump to a day there.
     var back = document.querySelector(".back");
     if (back) back.setAttribute("href", "../");
   }
 
   // Save: shares its list with the main page (same browser storage key).
   var saveKey = body.getAttribute("data-save-key"), showKey = body.getAttribute("data-show-key");
+  /* Saves from before the rolling window lived under one key per month
+     ("smn-saved-2026-10") with the day number first; move them over. */
+  (function migrateSaved() {
+    try {
+      var have = JSON.parse(localStorage.getItem(saveKey)) || [], old = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i), m = /^smn-saved-(\d{4})-(\d{1,2})$/.exec(k || "");
+        if (!m) continue;
+        old.push(k);
+        (JSON.parse(localStorage.getItem(k)) || []).forEach(function (v) {
+          var p = String(v).split("|"), d = parseInt(p[0], 10);
+          if (!(d >= 1 && d <= 31)) return;
+          p[0] = m[1] + "-" + ("0" + m[2]).slice(-2) + "-" + ("0" + d).slice(-2);
+          if (have.indexOf(p.join("|")) === -1) have.push(p.join("|"));
+        });
+      }
+      if (!old.length) return;
+      localStorage.setItem(saveKey, JSON.stringify(have));
+      old.forEach(function (k) { localStorage.removeItem(k); });
+    } catch (e) {}
+  })();
   function readSaved() {
     try { return JSON.parse(localStorage.getItem(saveKey)) || []; } catch (e) { return []; }
   }

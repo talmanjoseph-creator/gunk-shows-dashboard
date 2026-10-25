@@ -5,9 +5,10 @@ Reads plain HTML or a public JSON feed the venue's site already serves.
 Checks robots.txt first. If a site answers 403/429, or with a bot challenge,
 that venue is skipped. This does not fetch Resident Advisor.
 
-    python3 tools/fetch_venues.py                 # print rows, using SHOW_META
-    python3 tools/fetch_venues.py --from-day 4    # Oct 4 onward, for example
-    python3 tools/fetch_venues.py --merge         # append rows to shows-data.js
+    python3 tools/fetch_venues.py                         # every month in SHOW_META's window
+    python3 tools/fetch_venues.py --month 2026-11         # one month only
+    python3 tools/fetch_venues.py --from-date 2026-10-04  # skip nights before Oct 4
+    python3 tools/fetch_venues.py --merge                 # append rows to shows-data.js
 
 Then run python3 tools/clean_shows.py.
 """
@@ -17,7 +18,7 @@ import re
 import ssl
 import sys
 import time
-from datetime import datetime
+from datetime import date, datetime
 from html import unescape
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -309,7 +310,7 @@ def fetch_elsewhere(ctx):
             if not name_m or not when_m:
                 continue
             dt = datetime.fromisoformat(when_m.group(1)).astimezone(NY)
-            if (dt.year, dt.month) > (ctx["year"], ctx["month"]):
+            if (dt.year, dt.month) > ctx["months"][-1]:
                 saw_later = True
                 continue
             day = ctx["day"](dt)
@@ -370,7 +371,9 @@ def fetch_public_records(ctx):
         if not date_m:
             continue
         month, day = int(date_m.group(1)), int(date_m.group(2))
-        if month != ctx["month"]:
+        # The cell has no year; take it from the wanted month.
+        years = [y for y, m in ctx["months"] if m == month]
+        if not years:
             continue
         rooms = [text(r) for r in re.findall(r'class="location">([^<]+)', block)]
         party, acts = bill(title_m.group(1))
@@ -381,10 +384,11 @@ def fetch_public_records(ctx):
         ticket = direct_ticket(text(href))
         # The ticket slug names the night. The calendar cell can be a week off
         # (Hearts & Diamonds is Thu 10.15 on the page and Oct 8 on the ticket).
-        named = dice_slug_day(ticket, ctx["month"])
+        named = dice_slug_day(ticket, month)
         if named:
             day = named
-        if day < ctx["from_day"]:
+        night = ctx["on"](years[0], month, day)
+        if night is None:
             continue
         when = ""
         if time_m:
@@ -393,7 +397,7 @@ def fetch_public_records(ctx):
             # strptime %p with 12-hour: hour is 0-23 already? %I is 1-12 and %p sets AM/PM.
             # datetime.strptime("3:00PM", "%I:%M%p").hour == 15. Use that.
             when = clock(parsed)
-        made = row(day, when, "Public Records", acts, ", ".join(note_parts), "", ticket)
+        made = row(night, when, "Public Records", acts, ", ".join(note_parts), "", ticket)
         if made:
             rows.append(made)
     return rows
@@ -564,15 +568,13 @@ def fetch_house_of_yes(ctx):
 
 def fetch_nowadays(ctx):
     _, _, body, _ = get("https://nowadays.nyc/wp-sitemap-posts-post-1.xml", accept="application/xml,text/xml,*/*")
-    prefix = f"https://nowadays.nyc/{ctx['year']}/{ctx['month']:02d}/"
-    locs = [loc for loc in re.findall(r"<loc>([^<]+)</loc>", body) if loc.startswith(prefix)]
     rows = []
-    for loc in locs:
-        day_m = re.match(rf"https://nowadays\.nyc/{ctx['year']}/{ctx['month']:02d}/(\d{{2}})/", loc)
+    for loc in re.findall(r"<loc>([^<]+)</loc>", body):
+        day_m = re.match(r"https://nowadays\.nyc/(\d{4})/(\d{2})/(\d{2})/", loc)
         if not day_m:
             continue
-        day = int(day_m.group(1))
-        if day < ctx["from_day"]:
+        day = ctx["on"](int(day_m.group(1)), int(day_m.group(2)), int(day_m.group(3)))
+        if day is None:
             continue
         _, _, page, _ = get(loc)
         title_m = re.search(r"<title>([^<]+)</title>", page)
@@ -677,10 +679,10 @@ STATIC_SKIPS = [
 
 
 def show_meta():
-    src = INDEX.read_text(encoding="utf-8")
-    year = int(re.search(r"year:\s*(\d+)", src).group(1))
-    month = int(re.search(r"month:\s*(\d+)", src).group(1))
-    return year, month
+    """(from, to) dates of the window in shows-data.js."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import build_pages
+    return build_pages.window(INDEX.read_text(encoding="utf-8"))
 
 
 def merge_rows(rows):
@@ -715,20 +717,35 @@ def merge_rows(rows):
 
 
 def main():
-    year0, month0 = show_meta()
+    frm, to = show_meta()
+    import build_pages
     parser = argparse.ArgumentParser(description="Fetch club nights from venue calendars.")
-    parser.add_argument("--year", type=int, default=year0)
-    parser.add_argument("--month", type=int, default=month0)
-    parser.add_argument("--from-day", type=int, default=1)
+    parser.add_argument("--month", metavar="YYYY-MM",
+                        help="only this month (default: every month from SHOW_META.from to SHOW_META.to)")
+    parser.add_argument("--from-date", metavar="YYYY-MM-DD", type=date.fromisoformat,
+                        help="skip nights before this date")
     parser.add_argument("--merge", action="store_true", help="append rows to shows-data.js")
     args = parser.parse_args()
+    if args.month:
+        if not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", args.month):
+            parser.error("--month must look like 2026-11")
+        months = [(int(args.month[:4]), int(args.month[5:]))]
+    else:
+        months = build_pages.window_months(frm, to)
 
-    def day_of(dt):
-        if dt.year != args.year or dt.month != args.month or dt.day < args.from_day:
+    def on(y, m, d):
+        """The row date for a night, or None if it is not wanted."""
+        try:
+            night = date(y, m, d)
+        except ValueError:
             return None
-        return dt.day
+        if (y, m) not in months or (args.from_date and night < args.from_date):
+            return None
+        return night.isoformat()
 
-    ctx = {"year": args.year, "month": args.month, "from_day": args.from_day, "day": day_of}
+    ctx = {"months": months, "on": on, "day": lambda dt: on(dt.year, dt.month, dt.day)}
+    print("months: " + ", ".join(f"{y}-{m:02d}" for y, m in months)
+          + (f" from {args.from_date}" if args.from_date else ""), file=sys.stderr)
     found, skipped = [], []
     for name, fn in VENUES:
         try:

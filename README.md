@@ -1,31 +1,28 @@
 # Show Me NYC
 
-Every NYC show for the month in one list: DIY/indie listings from GUNK New York and around the city.
+Every NYC show in the current window in one list: DIY/indie listings from GUNK New York and around the city.
 Live at https://showmenyc.nyc/
 
 ## Files
 
-- `index.html` — the page (markup, styles, script). Nothing month-specific lives here.
-- `shows-data.js` — one month of listings: issue details, shows, venue coordinates, venue areas.
+- `index.html` — the page (markup, styles, script). Nothing date-specific lives here.
+- `shows-data.js` — the listings window: `SHOW_META.from` / `SHOW_META.to`, then `SHOWS` (each row starts with `"YYYY-MM-DD"`), venue coordinates, venue areas.
 - `tools/clean_shows.py` — cleans `shows-data.js` in place.
 - `tools/fetch_venues.py` — pulls club nights from venues' own public calendars.
 - `og.png` — the preview image used when the link is shared.
 
-## Updating for a new month
+## Keeping the list rolling
 
-1. In `shows-data.js`, update `SHOW_META` (year, month, source details) and replace the rows in `SHOWS`.
+The list is a window, not one calendar month. `SHOW_META.from` and `SHOW_META.to` are the first and last nights on the page.
+
+1. Near the end of the month, move `to` to the last day of next month and add that month's rows to `SHOWS`. Leave the current month's rows where they are.
 2. Pull club nights from the venues' own calendars:
    `python3 tools/fetch_venues.py --merge`
-   It reads the year and month from `SHOW_META`. Add `--from-day 4` to start partway
-   through the month. It prints which venues it read and which it skipped.
-   New venues it knows about are added to `GEO`.
+   It reads the window from `SHOW_META` and fetches every month in it. Use `--month 2026-11` for one month only, or `--from-date 2026-11-01` to skip nights before that date. It prints which venues it read and which it skipped. New venues it knows about are added to `GEO`.
 3. Add coordinates to `GEO` for any venue that is still new.
-4. Run `python3 tools/clean_shows.py`. It merges venue spellings, removes duplicate listings,
-   sorts each day by start time, regenerates `AREA`, and replaces affiliate-redirect ticket links
-   with the direct ticket page. It prints what it merged and which
-   venues have no coordinates, so check that output.
-5. If it puts a venue in the wrong area, add it to `AREA_OVERRIDES` in the script and run it again.
-   New venue spellings go in `VENUE_ALIASES`.
+4. Run `python3 tools/clean_shows.py`. It merges venue spellings, removes duplicate listings, sorts by date and start time, regenerates `AREA`, and replaces affiliate-redirect ticket links with the direct ticket page. It prints what it merged and which venues have no coordinates, so check that output.
+5. If it puts a venue in the wrong area, add it to `AREA_OVERRIDES` in the script and run it again. New venue spellings go in `VENUE_ALIASES`.
+6. Once a month is over, move `from` past it and drop that month's rows from `SHOWS`. The generated pages in `shows/` stay up; the build never deletes pages dated outside the window.
 
 ## Show and venue pages
 
@@ -35,7 +32,7 @@ Every show has its own page in `shows/` and every venue in `venues/`. They are g
 - `tools/venues.json` holds each venue's street address and website, keyed by the venue name exactly as it appears in the data. When a new venue shows up, add it there once its address is confirmed on the venue's own site or Google Maps; until then its pages simply carry no address. `tools/lastmod.json` is written by the build to keep sitemap dates steady; commit it with the pages.
 - `pages.css` and `pages.js` are the shared styles and behavior for those pages. `404.html` is shown for a show link that no longer exists.
 - The main list links each show to `shows/<slug>.html`. The slug starts with the full date (`2026-10-09-babys-all-right-cardinal-bloom-630pm`) and is computed twice: `show_slug()` and `unique_slugs()` in `tools/build_pages.py`, and `showSlug()` plus the slug loop in `index.html`. Two rows that would share a name get `-2`, `-3` in list order. Change one side and you must change the other.
-- **Show links are permanent.** The generator only rebuilds the pages for the month in `shows-data.js`; pages from earlier months stay where they are so shared links keep working.
+- **Show links are permanent.** The generator only rebuilds pages dated inside `SHOW_META.from`–`SHOW_META.to`; pages from months outside the window stay where they are so shared links keep working.
 - The October 2026 pages were first published without the year (`oct-09-...`). Those addresses are small redirect pages now; leave them in place.
 
 ## Missed connections
@@ -72,6 +69,7 @@ Posts and replies are stored in the owner's Supabase project, not in this repo.
 ## Shareable links
 
 Filters are kept in the URL, so a filtered view can be shared as is, e.g.
-`?area=bush&open=AA` (all-ages shows in Bushwick / Ridgewood), `?src=gunk#day-17`,
+`?area=bush&open=AA` (all-ages shows in Bushwick / Ridgewood), `?src=gunk#d-2026-10-17`
+(old `#day-17` links still mean October 17, 2026),
 or `?club=1` (club nights only). Club nights are in the list until `CLUB_BY_DEFAULT`
 in `index.html` is set to false, which hides them unless that chip is on.
