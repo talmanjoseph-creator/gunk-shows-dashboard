@@ -57,6 +57,16 @@ More than one person and more than one AI agent push to this repo. Read this bef
 - Do not repeat a waiting post's text, or anyone's name, anywhere except your message to the owner.
 - `supabase/review.sql` sets this up. Do not loosen it without the owner's say-so and a test.
 
+## Claude Code guardrails (`.claude/`)
+
+Claude Code sessions in this repo load `.claude/settings.json`, which runs:
+
+- **On session start:** `.claude/hooks/session_start.py` warns when the branch is behind `origin/main`. It never changes files.
+- **Before an edit:** `.claude/hooks/guard_edits.py` blocks hand edits to `shows/` and `venues/`, affiliate ticket links (`evyy.net`, `pxf.io`), and Supabase secrets (a service_role key, an `sb_secret_` key, a database URL with a password).
+- **After editing `shows-data.js`:** `.claude/hooks/after_data_edit.py` runs `tools/clean_shows.py`, which also rebuilds the pages.
+
+The check below is the `pre-push-check` skill: `node .claude/skills/pre-push-check/check.cjs` (add `--date YYYY-MM-DD` when today is outside the window). Do not weaken these to get past them; if one is wrong, fix it in its own pull request.
+
 ## Check before pushing
 
 Open `index.html` in a browser at phone width and desktop width. The page should land on today, the day heading should sit below the sticky bar, and the browser console should show no errors.
