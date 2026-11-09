@@ -529,6 +529,20 @@ def build():
         (ROOT / "shows" / f"{old}.html").write_text(REDIRECT.format(
             title=esc(title), desc=esc(desc), site=SITE, new=new), encoding="utf8")
 
+    # A redirect page outlives its show when the show is taken down (cancelled
+    # or replaced). Remove a redirect page only when the page it forwards to no
+    # longer exists, so redirects for months outside the window keep working.
+    stale = []
+    for p in sorted((ROOT / "shows").glob("*.html")):
+        if p.stem in redirects or re.match(r"\d{4}-", p.stem):
+            continue
+        m = re.search(r'http-equiv="refresh" content="0; url=([^"]+)"', p.read_text(encoding="utf8"))
+        if m and not (ROOT / "shows" / m.group(1)).exists():
+            p.unlink()
+            stale.append(p.name)
+    if stale:
+        print(f"removed {len(stale)} redirect pages whose show is gone: {', '.join(stale)}")
+
     # ----- venue pages -----
     for v, items in by_venue.items():
         ar = area.get(v, "")
