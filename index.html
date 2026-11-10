@@ -1000,6 +1000,7 @@
 
     <script src="shows-data.js"></script>
     <script src="connections-data.js"></script>
+    <script src="venue-maps.js"></script>
     <script>
       "use strict";
       /* Listings live in shows-data.js: SHOW_META, SHOWS, GEO, AREA. */
@@ -1127,6 +1128,8 @@
                 Math.sin(dLon / 2) * Math.sin(dLon / 2);
         return 2 * R * Math.asin(Math.sqrt(a));
       }
+      /* What each venue's Map link searches for (venue-maps.js, written by the build). */
+      var MAPS = typeof VENUE_MAPS === "undefined" ? {} : VENUE_MAPS;
       var NEAR_MILES = 1; // Close-to-home radius
       var userLoc = null; // [lat, lng], set once the user grants location access
       function venueDistMi(venue) {
@@ -1280,7 +1283,7 @@
         else if (s.area) h += '<span class="area-tag">' + AREA_NAME[s.area] + "</span>";
         if (GEO[s[2]] && s.area) {
           h += '<a class="map-link" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&amp;query=' +
-            encodeURIComponent(s[2] + (s.area === "out" ? "" : ", New York, NY")) + '" aria-label="Map of ' + esc(s[2]) + '">Map</a>';
+            encodeURIComponent(MAPS[s[2]] || s[2] + (s.area === "out" ? "" : ", New York, NY")) + '" aria-label="Map of ' + esc(s[2]) + '">Map</a>';
         }
         if (s[7]) {
           h += '<a class="badge tix' + (s.sold ? " sold" : "") + '" href="' + esc(s[7]) + '" target="_blank" rel="noopener">' + (s.sold ? "Sold out" : "Tickets") + "</a>";
@@ -1683,13 +1686,21 @@
           var w = b.getAttribute("data-when");
           state.when = state.when === w ? "all" : w;
         } else if (b.id === "savedBtn") {
-          state.saved = !state.saved;
-          if (state.saved) showPast = true; // a saved show from last week should still be listed
+          setSaved(!state.saved);
         } else return;
         changed();
       });
 
+      /* Saved shows include ones from last week, so earlier dates open while
+         the Saved list is on and go back the way they were when it is off. */
+      var pastBeforeSaved = !live;
+      function setSaved(on) {
+        if (on === state.saved) return;
+        if (on) { pastBeforeSaved = showPast; showPast = true; } else showPast = pastBeforeSaved;
+        state.saved = on;
+      }
       function clearAll() {
+        setSaved(false);
         state = defaults();
         $("q").value = "";
         changed();
